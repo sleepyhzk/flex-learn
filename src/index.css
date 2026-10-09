@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Phiên âm IPA cần font có đủ ký tự /ʃ θ ð ʌ/ ; Inter đã hỗ trợ, thêm dự phòng cho máy cũ. */
+  .font-ipa {
+    font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Arial Unicode MS', system-ui, sans-serif;
+    letter-spacing: 0.01em;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-gray-300 dark:bg-gray-700;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+}
