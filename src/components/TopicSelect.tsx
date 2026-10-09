@@ -23,7 +23,7 @@ export function TopicSelect({
   total: number;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+    <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
       <span className="font-medium">Chủ đề:</span>
       <select
         value={value}
@@ -31,7 +31,7 @@ export function TopicSelect({
           onChange(e.target.value as TopicFilter);
           e.currentTarget.blur(); // trả phím tắt (Space, ←, →) về cho flashcard
         }}
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
       >
         <option value="all">Tất cả chủ đề ({total})</option>
         {GROUP_ORDER.map((g) => {

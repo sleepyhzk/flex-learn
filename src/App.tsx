@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { AuthModal } from '@/components/AuthModal';
 import type { ViewKey } from '@/components/Sidebar';
@@ -9,28 +9,23 @@ import { LessonsView } from '@/views/LessonsView';
 import { SpellingView } from '@/views/SpellingView';
 import { ConversationView } from '@/views/ConversationView';
 import { useTheme } from '@/hooks/useTheme';
-import { useSrsProgress } from '@/hooks/useSrsProgress';
-import { INITIAL_VOCAB } from '@/data/vocabData';
 
 export default function App() {
   const { theme, toggle } = useTheme();
-  const { progressMap } = useSrsProgress();
   const [view, setView] = useState<ViewKey>('home');
 
-  const learnedCount = useMemo(() => Object.keys(progressMap).length, [progressMap]);
-  const hardCount = useMemo(
-    () => Object.values(progressMap).filter((s) => s.lastQuality === 'hard').length,
-    [progressMap]
-  );
+  const go = (v: ViewKey) => {
+    setView(v);
+    window.scrollTo({ top: 0 });
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
-      <Sidebar current={view} onNavigate={setView} theme={theme} onToggleTheme={toggle} />
-      <main className="lg:pl-64">
-        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-          {view === 'home' && (
-            <HomeView onNavigate={setView} totalWords={INITIAL_VOCAB.length} learnedCount={learnedCount} hardCount={hardCount} />
-          )}
+    <div className="min-h-screen bg-paper dark:bg-paper-dark">
+      <Sidebar current={view} onNavigate={go} theme={theme} onToggleTheme={toggle} />
+      {/* Chừa chỗ cho thanh trên (14) và thanh tab dưới (điện thoại), hoặc thanh bên (máy tính) */}
+      <main className="pb-24 pt-14 lg:pb-0 lg:pl-60 lg:pt-0">
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+          {view === 'home' && <HomeView onNavigate={go} />}
           {view === 'flashcards' && <FlashcardView />}
           {view === 'lessons' && <LessonsView />}
           {view === 'conversation' && <ConversationView />}

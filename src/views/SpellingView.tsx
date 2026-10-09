@@ -127,7 +127,7 @@ export function SpellingView() {
 
   const filterBar = (
     <div className="space-y-3">
-      <div className="flex w-fit flex-wrap gap-1.5 rounded-xl border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex w-fit flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
         {([
           { key: 'all' as const, label: 'Tất cả' },
           ...LEVEL_ORDER.map((l) => ({ key: l as LevelFilter, label: LEVEL_LABEL[l] })),
@@ -139,7 +139,7 @@ export function SpellingView() {
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               levelFilter === tab.key
                 ? 'bg-primary-600 text-white'
-                : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
             }`}
           >
             {tab.label}
@@ -154,9 +154,9 @@ export function SpellingView() {
     return (
       <div className="space-y-6">
         {filterBar}
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-gray-200 bg-white py-16 dark:border-gray-800 dark:bg-gray-900">
-          <Keyboard className="mb-4 h-12 w-12 text-gray-300" />
-          <p className="text-gray-500 dark:text-gray-400">Không có từ nào trong bộ lọc này.</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 dark:border-slate-800 dark:bg-slate-900">
+          <Keyboard className="mb-4 h-12 w-12 text-slate-300" />
+          <p className="text-slate-500 dark:text-slate-400">Không có từ nào trong bộ lọc này.</p>
         </div>
       </div>
     );
@@ -165,11 +165,11 @@ export function SpellingView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
           <Keyboard className="h-6 w-6 text-primary-600" />
           Luyện chính tả
         </h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Xem nghĩa tiếng Việt và gõ lại từ tiếng Anh. Không phân biệt chữ hoa, chữ thường.
         </p>
       </div>
@@ -177,31 +177,31 @@ export function SpellingView() {
       {filterBar}
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs text-gray-400">Điểm</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{score}</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-xs text-slate-400">Điểm</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{score}</p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs text-gray-400">Chuỗi đúng</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-xs text-slate-400">Chuỗi đúng</p>
           <p className="flex items-center justify-center gap-1 text-2xl font-bold text-accent-600 dark:text-accent-400">
             {streak} {streak >= 3 && <Trophy className="h-5 w-5" />}
           </p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs text-gray-400">Kỷ lục</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-xs text-slate-400">Kỷ lục</p>
           <p className="text-2xl font-bold text-success-600 dark:text-success-400">{bestStreak}</p>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col items-center gap-5">
           <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-950/50 dark:text-primary-300">
             {POS_LABEL[current.pos]}
           </span>
-          <p className="text-center text-3xl font-bold text-gray-900 dark:text-gray-100 sm:text-4xl">{current.meaning}</p>
+          <p className="text-center text-3xl font-bold text-slate-900 dark:text-slate-100 sm:text-4xl">{current.meaning}</p>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <p className="font-mono text-lg tracking-widest text-gray-400">{maskWord(current.word)}</p>
+            <p className="font-mono text-lg tracking-widest text-slate-400">{maskWord(current.word)}</p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
@@ -217,7 +217,7 @@ export function SpellingView() {
             <button
               onClick={() => setHintUsed(true)}
               disabled={hintUsed || answerState !== 'idle'}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <Lightbulb className="h-4 w-4" />
               Gợi ý phiên âm
@@ -232,7 +232,7 @@ export function SpellingView() {
                   ? 'border-success-400 bg-success-50 dark:border-success-600 dark:bg-success-950/30'
                   : answerState === 'wrong'
                   ? 'border-error-400 bg-error-50 dark:border-error-600 dark:bg-error-950/30'
-                  : 'border-gray-200 bg-gray-50 focus-within:border-primary-400 dark:border-gray-700 dark:bg-gray-800'
+                  : 'border-slate-200 bg-slate-50 focus-within:border-primary-400 dark:border-slate-700 dark:bg-slate-800'
               }`}
             >
               <input
@@ -247,19 +247,19 @@ export function SpellingView() {
                 autoCapitalize="off"
                 autoCorrect="off"
                 spellCheck={false}
-                className="w-full rounded-xl bg-transparent px-5 py-4 text-lg text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100"
+                className="w-full rounded-xl bg-transparent px-5 py-4 text-lg text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
               />
               {answerState === 'correct' && <Check className="absolute right-4 top-1/2 h-6 w-6 -translate-y-1/2 text-success-600" />}
               {answerState === 'wrong' && <X className="absolute right-4 top-1/2 h-6 w-6 -translate-y-1/2 text-error-600" />}
             </div>
 
             {answerState === 'wrong' && (
-              <div className="mt-3 rounded-xl bg-gray-100 px-4 py-3 dark:bg-gray-800">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Đáp án đúng:</p>
+              <div className="mt-3 rounded-xl bg-slate-100 px-4 py-3 dark:bg-slate-800">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Đáp án đúng:</p>
                 <p className="text-lg font-semibold text-primary-600 dark:text-primary-400">
-                  {current.word} <span className="font-ipa text-sm font-normal text-gray-500">{current.ipa}</span>
+                  {current.word} <span className="font-ipa text-sm font-normal text-slate-500">{current.ipa}</span>
                 </p>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{current.example}</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{current.example}</p>
               </div>
             )}
 
@@ -275,7 +275,7 @@ export function SpellingView() {
                 </button>
                 <button
                   onClick={skip}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                 >
                   Bỏ qua
                   <ArrowRight className="h-4 w-4" />
@@ -285,7 +285,7 @@ export function SpellingView() {
               <div className="mt-4 flex gap-3">
                 <button
                   onClick={next}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
                 >
                   Từ tiếp theo
                   <ArrowRight className="h-4 w-4" />
@@ -293,7 +293,7 @@ export function SpellingView() {
                 {answerState === 'wrong' && (
                   <button
                     onClick={retry}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                   >
                     <RotateCcw className="h-4 w-4" />
                     Gõ lại
@@ -303,7 +303,7 @@ export function SpellingView() {
             )}
           </div>
 
-          <p className="text-xs text-gray-400">Đã làm: {completed} — Nhấn Enter để kiểm tra/tiếp tục</p>
+          <p className="text-xs text-slate-400">Đã làm: {completed} — Nhấn Enter để kiểm tra/tiếp tục</p>
         </div>
       </div>
     </div>

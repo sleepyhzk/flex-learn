@@ -5,10 +5,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Fraunces', 'Georgia', '"Times New Roman"', 'serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
+        paper: { DEFAULT: '#f6f8fc', dark: '#0b1220' },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

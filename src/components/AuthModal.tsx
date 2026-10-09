@@ -6,7 +6,7 @@ import type { AuthResult } from '@/hooks/useAuth';
 type Mode = 'signin' | 'signup' | 'forgot' | 'recover';
 
 const inputCls =
-  'w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100';
+  'w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100';
 
 function GoogleIcon() {
   return (
@@ -98,27 +98,27 @@ export function AuthModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={close}>
       <div
-        className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900"
+        className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label={title}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100">
             <Cloud className="h-5 w-5 text-primary-600" />
             {title}
           </h2>
           {!auth.recovering && (
             <button
               onClick={close}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
               aria-label="Đóng"
             >
               <X className="h-5 w-5" />
             </button>
           )}
         </div>
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
           {mode === 'recover'
             ? 'Nhập mật khẩu mới cho tài khoản của bạn.'
             : 'Đăng nhập để tiến độ học và dấu sao được lưu lại, dùng được trên mọi thiết bị.'}
@@ -130,15 +130,15 @@ export function AuthModal() {
               type="button"
               disabled={busy}
               onClick={() => void run(auth.signInWithGoogle)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               <GoogleIcon />
               Tiếp tục với Google
             </button>
-            <div className="my-4 flex items-center gap-3 text-xs text-gray-400">
-              <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+            <div className="my-4 flex items-center gap-3 text-xs text-slate-400">
+              <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               hoặc dùng email
-              <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
             </div>
           </>
         )}
@@ -146,7 +146,7 @@ export function AuthModal() {
         <form onSubmit={submit} className="space-y-3">
           {showEmail && (
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="email"
                 required
@@ -160,7 +160,7 @@ export function AuthModal() {
           )}
           {showPassword && (
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="password"
                 required
@@ -196,7 +196,7 @@ export function AuthModal() {
         <div className="mt-4 flex items-center justify-between text-sm">
           {mode === 'signin' && (
             <>
-              <button onClick={() => switchMode('forgot')} className="text-gray-500 hover:underline dark:text-gray-400">
+              <button onClick={() => switchMode('forgot')} className="text-slate-500 hover:underline dark:text-slate-400">
                 Quên mật khẩu?
               </button>
               <button onClick={() => switchMode('signup')} className="font-medium text-primary-600 hover:underline">

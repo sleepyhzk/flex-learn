@@ -4,13 +4,33 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-paper text-slate-900 antialiased dark:bg-paper-dark dark:text-slate-100;
+    font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Viền focus rõ ràng cho người dùng bàn phím */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-paper dark:ring-offset-paper-dark;
+  }
+  select:focus-visible,
+  input:focus-visible {
+    @apply ring-offset-0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer utilities {
-  /* Phiên âm IPA cần font có đủ ký tự /ʃ θ ð ʌ/ ; Inter đã hỗ trợ, thêm dự phòng cho máy cũ. */
+  /* IPA cần font có đủ ký tự /ʃ θ ð ʌ/ ; trình duyệt tự dùng font dự phòng cho ký tự thiếu. */
   .font-ipa {
     font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Arial Unicode MS', system-ui, sans-serif;
     letter-spacing: 0.01em;
@@ -23,9 +43,15 @@
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-gray-300 dark:bg-gray-700;
+    @apply rounded-full bg-slate-300 dark:bg-slate-700;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     @apply bg-transparent;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

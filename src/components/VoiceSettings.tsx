@@ -61,19 +61,19 @@ export function VoiceSettings({ open, onClose }: VoiceSettingsProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900"
+        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Giọng đọc"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100">
             <Volume2 className="h-5 w-5 text-primary-600" />
             Giọng đọc
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             aria-label="Đóng"
           >
             <X className="h-5 w-5" />
@@ -87,7 +87,7 @@ export function VoiceSettings({ open, onClose }: VoiceSettingsProps) {
           </p>
         )}
 
-        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
           Giọng của trình duyệt
         </label>
         {voices.length === 0 ? (
@@ -99,7 +99,7 @@ export function VoiceSettings({ open, onClose }: VoiceSettingsProps) {
           <select
             value={selectedURI}
             onChange={(e) => update({ voiceURI: e.target.value || null })}
-            className="mb-2 w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+            className="mb-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           >
             <option value="">
               Tự động{best ? ` — ${best.voice.name}` : ''}
@@ -112,16 +112,16 @@ export function VoiceSettings({ open, onClose }: VoiceSettingsProps) {
           </select>
         )}
         {activeVoice && activeVoice.quality !== 'natural' && (
-          <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
             Mẹo: trên Microsoft Edge có giọng “Natural” (như Aria, Jenny, Guy) nghe giống người thật
             hơn nhiều so với giọng mặc định của Chrome. Trên iPhone/Mac, bạn có thể tải giọng chất
             lượng cao trong phần cài đặt Trợ năng (Nội dung được đọc).
           </p>
         )}
 
-        <label className="mb-1 mt-2 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1 mt-2 flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300">
           <span>Tốc độ đọc</span>
-          <span className="tabular-nums text-gray-500 dark:text-gray-400">
+          <span className="tabular-nums text-slate-500 dark:text-slate-400">
             {settings.rate.toFixed(2)}x
           </span>
         </label>

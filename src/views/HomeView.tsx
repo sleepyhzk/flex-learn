@@ -1,128 +1,119 @@
-import { Layers, BookOpen, GraduationCap, ArrowRight, Sparkles, TrendingUp, Keyboard, MessageCircle } from 'lucide-react';
-import { INITIAL_VOCAB } from '@/data/vocabData';
+import { useMemo } from 'react';
+import { Layers, BookOpen, GraduationCap, Keyboard, MessageCircle, ChevronRight } from 'lucide-react';
+import { INITIAL_VOCAB, LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
+import { useSrsProgress } from '@/hooks/useSrsProgress';
+import { vocabKey } from '@/lib/vocabKey';
+import { isDue } from '@/lib/srs';
 import type { ViewKey } from '@/components/Sidebar';
 
-interface HomeViewProps {
-  onNavigate: (view: ViewKey) => void;
-  totalWords: number;
-  learnedCount: number;
-  hardCount: number;
-}
-
-const featureCards: {
-  key: ViewKey;
-  title: string;
-  desc: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-}[] = [
-  {
-    key: 'flashcards',
-    title: 'Flashcard SRS',
-    desc: 'Học từ vựng theo cấp độ A1, A2, B1 với thuật toán lặp lại ngắt quãng. Mỗi thẻ có phiên âm, nghĩa và câu ví dụ.',
-    icon: Layers,
-    color: 'from-primary-500 to-primary-700',
-  },
-  {
-    key: 'lessons',
-    title: 'Bài học & Bài tập',
-    desc: `Toàn bộ ${INITIAL_VOCAB.length} từ vựng theo cấp độ và chủ đề (giao tiếp, TOEIC, an ninh mạng), kèm bài tập trắc nghiệm.`,
-    icon: GraduationCap,
-    color: 'from-sky-500 to-sky-700',
-  },
-  {
-    key: 'conversation',
-    title: 'Giao tiếp thường dùng',
-    desc: 'Các câu giao tiếp cơ bản theo chủ đề (chào hỏi, mua sắm, ăn uống, hỏi đường...), chia theo cấp độ.',
-    icon: MessageCircle,
-    color: 'from-teal-500 to-teal-700',
-  },
-  {
-    key: 'spelling',
-    title: 'Luyện chính tả',
-    desc: 'Trò chơi nhỏ: xem nghĩa tiếng Việt, gõ đúng từ tiếng Anh để ghi điểm. Có nghe phát âm và gợi ý phiên âm.',
-    icon: Keyboard,
-    color: 'from-indigo-500 to-indigo-700',
-  },
-  {
-    key: 'dictionary',
-    title: 'Tra cứu từ',
-    desc: 'Tìm theo từ tiếng Anh hoặc nghĩa tiếng Việt, xem phiên âm, loại từ và câu ví dụ.',
-    icon: BookOpen,
-    color: 'from-cyan-500 to-cyan-700',
-  },
+const practice: { key: ViewKey; title: string; desc: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: 'lessons', title: 'Bài học và bài tập', desc: 'Xem từ theo cấp và chủ đề, làm trắc nghiệm', icon: GraduationCap },
+  { key: 'conversation', title: 'Giao tiếp thường dùng', desc: 'Câu mẫu theo tình huống, có phát âm', icon: MessageCircle },
+  { key: 'spelling', title: 'Luyện chính tả', desc: 'Đọc nghĩa tiếng Việt, gõ lại từ tiếng Anh', icon: Keyboard },
+  { key: 'dictionary', title: 'Tra cứu từ', desc: 'Tìm theo từ tiếng Anh hoặc nghĩa tiếng Việt', icon: BookOpen },
 ];
 
-export function HomeView({ onNavigate, totalWords, learnedCount, hardCount }: HomeViewProps) {
+export function HomeView({ onNavigate }: { onNavigate: (view: ViewKey) => void }) {
+  const { progressMap } = useSrsProgress();
+
+  const stats = useMemo(() => {
+    let due = 0;
+    let learned = 0;
+    for (const w of INITIAL_VOCAB) {
+      const s = progressMap[vocabKey(w)];
+      if (!s) continue;
+      learned += 1;
+      if (isDue(s.nextReview)) due += 1;
+    }
+    const levels = LEVEL_ORDER.map((level) => {
+      const words = INITIAL_VOCAB.filter((w) => w.level === level);
+      const done = words.filter((w) => progressMap[vocabKey(w)]).length;
+      return { level, total: words.length, done };
+    }).filter((l) => l.total > 0);
+    return { due, learned, fresh: INITIAL_VOCAB.length - learned, levels };
+  }, [progressMap]);
+
+  const headline =
+    stats.learned === 0
+      ? 'Bắt đầu với những từ đầu tiên'
+      : stats.due > 0
+      ? `${stats.due} thẻ cần ôn hôm nay`
+      : 'Bạn đã ôn xong các thẻ đến hạn';
+  const sub =
+    stats.learned === 0
+      ? `${INITIAL_VOCAB.length} từ đang chờ, học từng thẻ một.`
+      : stats.due > 0
+      ? `Ôn xong rồi học tiếp ${stats.fresh} từ mới.`
+      : `Còn ${stats.fresh} từ mới nếu bạn muốn học thêm.`;
+  const cta = stats.due > 0 || stats.learned === 0 ? 'Bắt đầu ôn' : 'Học từ mới';
+
   return (
-    <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-800 p-8 text-white sm:p-12">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-white/10" />
-        <div className="absolute bottom-0 right-8 -mb-12 h-32 w-32 rounded-full bg-white/5" />
-        <div className="relative">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
-            <Sparkles className="h-4 w-4" />
-            Tự học tiếng Anh mỗi ngày
-          </div>
-          <h1 className="mb-3 text-3xl font-bold sm:text-4xl">Flex Learn</h1>
-          <p className="max-w-xl text-white/85">
-            {INITIAL_VOCAB.length} từ vựng cho giao tiếp hằng ngày, TOEIC và an ninh mạng. Flashcard thông minh, luyện chính tả, giao tiếp thực tế và tra cứu từ.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              onClick={() => onNavigate('flashcards')}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-primary-700 transition-transform hover:scale-105"
-            >
-              Bắt đầu học
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            {hardCount > 0 && (
-              <div className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-3 text-sm font-medium backdrop-blur-sm">
-                <TrendingUp className="h-4 w-4" />
-                {hardCount} từ cần ôn lại
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="mx-auto max-w-2xl space-y-10">
+      <section aria-labelledby="today">
+        <p className="text-sm text-slate-500 dark:text-slate-400">Hôm nay</p>
+        <h1 id="today" className="mt-1 font-display text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">
+          {headline}
+        </h1>
+        <p className="mt-3 text-slate-600 dark:text-slate-400">{sub}</p>
+        <button
+          onClick={() => onNavigate('flashcards')}
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)] transition-colors hover:bg-primary-700"
+        >
+          <Layers className="h-5 w-5" />
+          {cta}
+        </button>
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Tổng từ vựng</p>
-          <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-gray-100">{totalWords}</p>
-          <p className="mt-1 text-xs text-gray-400">sẵn sàng học</p>
-        </div>
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Đã học</p>
-          <p className="mt-1 text-3xl font-bold text-success-600 dark:text-success-400">{learnedCount}</p>
-          <p className="mt-1 text-xs text-gray-400">từ đã ghi nhận tiến độ</p>
-        </div>
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Cần ôn lại</p>
-          <p className="mt-1 text-3xl font-bold text-accent-600 dark:text-accent-400">{hardCount}</p>
-          <p className="mt-1 text-xs text-gray-400">từ đánh dấu khó</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {featureCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <button
-              key={card.key}
-              onClick={() => onNavigate(card.key)}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-left transition-all hover:border-gray-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
-            >
-              <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${card.color} text-white`}>
-                <Icon className="h-6 w-6" />
+      <section aria-labelledby="progress">
+        <h2 id="progress" className="text-base font-semibold text-slate-900 dark:text-slate-100">
+          Tiến độ theo cấp
+        </h2>
+        <ul className="mt-4 space-y-3">
+          {stats.levels.map(({ level, total, done }) => (
+            <li key={level} className="grid grid-cols-[4.5rem_1fr_auto] items-center gap-3 text-sm">
+              <span className="font-medium text-slate-700 dark:text-slate-300">{LEVEL_LABEL[level]}</span>
+              <div
+                className="h-2 overflow-hidden rounded-full bg-primary-100 dark:bg-slate-800"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-valuenow={done}
+                aria-label={`Đã học ${done} trên ${total} từ cấp ${LEVEL_LABEL[level]}`}
+              >
+                <div className="h-full rounded-full bg-primary-600 transition-[width] duration-500" style={{ width: `${(done / total) * 100}%` }} />
               </div>
-              <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">{card.title}</h3>
-              <p className="pr-8 text-sm text-gray-500 dark:text-gray-400">{card.desc}</p>
-              <ArrowRight className="absolute right-5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-300 transition-all group-hover:translate-x-1 group-hover:text-gray-400 dark:text-gray-700 dark:group-hover:text-gray-500" />
-            </button>
-          );
-        })}
-      </div>
+              <span className="tabular-nums text-slate-500 dark:text-slate-400">
+                {done}/{total}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="practice">
+        <h2 id="practice" className="text-base font-semibold text-slate-900 dark:text-slate-100">
+          Luyện thêm
+        </h2>
+        <ul className="mt-3 divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
+          {practice.map(({ key, title, desc, icon: Icon }) => (
+            <li key={key}>
+              <button
+                onClick={() => onNavigate(key)}
+                className="flex w-full items-center gap-4 px-4 py-3.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
+              >
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-950/60 dark:text-primary-300">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</span>
+                  <span className="block truncate text-sm text-slate-500 dark:text-slate-400">{desc}</span>
+                </span>
+                <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-400" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

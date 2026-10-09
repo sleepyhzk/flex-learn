@@ -60,17 +60,17 @@ export function ConversationView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
           <MessageCircle className="h-6 w-6 text-primary-600" />
           Giao tiếp thường dùng
         </h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {CONVERSATION_SENTENCES.length} câu giao tiếp cơ bản theo {CONVERSATION_CATEGORIES.length} chủ đề (chào hỏi, mua sắm, ăn uống, hỏi đường, sức khoẻ...), lọc theo cấp độ A1, A2, B1.
         </p>
       </div>
 
       {/* Level filter */}
-      <div className="flex flex-wrap gap-1.5 rounded-xl border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-900 w-fit">
+      <div className="flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900 w-fit">
         {levelTabs.map((tab) => (
           <button
             key={tab.key}
@@ -78,7 +78,7 @@ export function ConversationView() {
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               level === tab.key
                 ? 'bg-primary-600 text-white'
-                : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
             }`}
           >
             {tab.label}
@@ -92,39 +92,39 @@ export function ConversationView() {
           const isOpen = expandedCategory === cat || level !== 'all';
           const catKey = cat;
           return (
-            <div key={cat} className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+            <div key={cat} className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
               <button
                 onClick={() => setExpandedCategory(isOpen && level === 'all' ? null : cat)}
-                className="flex w-full items-center justify-between px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="flex w-full items-center justify-between px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
                 <div className="flex items-center gap-3">
                   <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${CATEGORY_COLORS[catKey]}`}>
                     {CATEGORY_LABELS[catKey]}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{sentences.length} câu</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">{sentences.length} câu</span>
                 </div>
                 {level === 'all' && (
-                  isOpen ? <ChevronDown className="h-5 w-5 text-gray-400" /> : <ChevronRight className="h-5 w-5 text-gray-400" />
+                  isOpen ? <ChevronDown className="h-5 w-5 text-slate-400" /> : <ChevronRight className="h-5 w-5 text-slate-400" />
                 )}
               </button>
               {isOpen && (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {sentences.map((s) => (
-                    <div key={s.id} className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                    <div key={s.id} className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">{s.english}</span>
-                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                          <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">{s.english}</span>
+                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                             {s.level}
                           </span>
                         </div>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{s.vietnamese}</p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{s.vietnamese}</p>
                       </div>
                       {isSpeechSupported() && (
                         <button
                           onClick={() => speakEnglish(s.english)}
                           aria-label="Phát âm câu"
-                          className="flex-shrink-0 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800 dark:hover:text-primary-400"
+                          className="flex-shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800 dark:hover:text-primary-400"
                         >
                           <Volume2 className="h-4 w-4" />
                         </button>

@@ -5,7 +5,7 @@ import { topicOf } from '@/data/vocabTopics';
 import { TopicSelect, countByTopic } from '@/components/TopicSelect';
 import type { TopicFilter } from '@/components/TopicSelect';
 import { speakEnglish, isSpeechSupported } from '@/lib/speech';
-import { POS_LABEL } from '@/lib/pos';
+import { POS_SHORT } from '@/lib/pos';
 import { useSrsProgress } from '@/hooks/useSrsProgress';
 import { useStarred } from '@/hooks/useStarred';
 import { vocabKey, speechText } from '@/lib/vocabKey';
@@ -180,36 +180,37 @@ export function FlashcardView() {
     { key: 'good', label: 'Đã thuộc', count: goodCount },
   ];
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Flashcard & SRS</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Học từ vựng với thuật toán lặp lại ngắt quãng. Thẻ đến hạn được xếp lên đầu, tiếp theo là thẻ mới. Mặt sau có nghĩa và câu ví dụ.
-        </p>
-        <p className="mt-1 text-sm font-medium text-primary-600 dark:text-primary-400">
-          Đến hạn ôn hôm nay: {dueCount} từ
-        </p>
-      </div>
+  const chip = (active: boolean) =>
+    `flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+      active
+        ? 'border-primary-600 bg-primary-600 text-white'
+        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+    }`;
 
-      {/* Filter tabs */}
-      <div className="flex flex-wrap gap-1.5 rounded-xl border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-900 w-fit">
-        {filterTabs.map((tab) => (
-          <button
-            key={String(tab.key)}
-            onClick={() => setFilter(tab.key)}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              filter === tab.key
-                ? 'bg-primary-600 text-white'
-                : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-            }`}
-          >
-            {tab.label}
-            <span className={`rounded px-1.5 py-0.5 text-xs ${filter === tab.key ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
-              {tab.count}
-            </span>
-          </button>
-        ))}
+  return (
+    <div className="mx-auto max-w-xl space-y-5">
+      <header>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Ôn từ vựng</h2>
+        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+          {dueCount > 0 ? `${dueCount} thẻ đến hạn hôm nay` : 'Chưa có thẻ nào đến hạn'}
+        </p>
+      </header>
+
+      <div className="-mx-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
+        <div role="tablist" aria-label="Bộ thẻ" className="flex w-max gap-1.5">
+          {filterTabs.map((tab) => (
+            <button
+              key={String(tab.key)}
+              role="tab"
+              aria-selected={filter === tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={chip(filter === tab.key)}
+            >
+              {tab.label}
+              <span className={`text-xs tabular-nums ${filter === tab.key ? 'text-white/75' : 'text-slate-400'}`}>{tab.count}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <TopicSelect value={topic} onChange={setTopic} counts={topicCounts} total={baseList.length} />
@@ -220,116 +221,164 @@ export function FlashcardView() {
         <EmptyState onShowAll={() => { setFilter('all'); setTopic('all'); }} />
       ) : (
         <>
-          <div className="flex items-center gap-3">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
-              <div className="h-full rounded-full bg-primary-600 transition-all duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
+          <section
+            aria-label="Thẻ từ vựng"
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(37,99,235,0.25)] dark:border-slate-800 dark:bg-slate-900"
+          >
+            <div
+              className="h-1 bg-primary-100 dark:bg-slate-800"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={cards.length}
+              aria-valuenow={index + 1}
+              aria-label="Tiến độ phiên học"
+            >
+              <div className="h-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
             </div>
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{index + 1} / {cards.length}</span>
-          </div>
 
-          <div className="flex justify-center">
-            <div className="relative w-full max-w-lg">
-              <div
-                className="cursor-pointer select-none rounded-3xl border border-gray-200 bg-white px-8 pb-20 pt-14 shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
-                onClick={toggleMeaning}
-              >
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleCurrentStar(); }}
-                  className={`absolute left-5 top-5 rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${isStarredCard ? 'text-accent-500' : 'text-gray-400 hover:text-gray-600'}`}
-                  title={isStarredCard ? 'Bỏ đánh dấu sao (↓)' : 'Đánh dấu sao (↓)'}
-                  aria-pressed={isStarredCard}
-                >
-                  <Star className={`h-5 w-5 ${isStarredCard ? 'fill-current' : ''}`} />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowIpa(!showIpa); }}
-                  className="absolute right-5 top-5 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
-                  title={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
-                >
-                  {showIpa ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                </button>
-
-                <div className="flex flex-col items-center justify-center gap-3 py-6">
-                  <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-950/50 dark:text-primary-300">
-                    {POS_LABEL[currentCard.pos]}
-                  </span>
-                  <div className="break-words text-center text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-6xl">{currentCard.word}</div>
-                  {showIpa && <div className="font-ipa text-xl text-primary-600 dark:text-primary-400">{currentCard.ipa}</div>}
-                  {showMeaning ? (
-                    <div className="mt-2 w-full space-y-3">
-                      <div className="rounded-xl bg-gray-50 px-6 py-3 text-center text-lg font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-200">{currentCard.meaning}</div>
-                      <div className="rounded-xl border border-gray-100 px-5 py-3 text-center dark:border-gray-800">
-                        <p className="text-base text-gray-800 dark:text-gray-200">{currentCard.example}</p>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{currentCard.exampleVi}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-2 text-sm text-gray-400">Chạm vào thẻ hoặc nhấn Space để xem nghĩa</div>
-                  )}
+            <div className="px-6 pb-7 pt-4 sm:px-10">
+              <div className="flex items-center justify-between">
+                <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">
+                  {index + 1} / {cards.length}
+                </span>
+                <div className="-mr-2 flex items-center">
+                  <button
+                    onClick={toggleCurrentStar}
+                    className={`rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${isStarredCard ? 'text-accent-500' : 'text-slate-400 hover:text-slate-600'}`}
+                    title={isStarredCard ? 'Bỏ đánh dấu (phím ↓)' : 'Đánh dấu cần học (phím ↓)'}
+                    aria-label={isStarredCard ? 'Bỏ đánh dấu' : 'Đánh dấu cần học'}
+                    aria-pressed={isStarredCard}
+                  >
+                    <Star className={`h-5 w-5 ${isStarredCard ? 'fill-current' : ''}`} />
+                  </button>
+                  <button
+                    onClick={() => setShowIpa(!showIpa)}
+                    className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+                    title={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
+                    aria-label={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
+                  >
+                    {showIpa ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                  </button>
                 </div>
-
-                {isSpeechSupported() && showMeaning && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); speakEnglish(currentCard.example); }}
-                    className="absolute bottom-5 left-5 flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                  >
-                    <Volume2 className="h-4 w-4" />
-                    Đọc câu
-                  </button>
-                )}
-                {isSpeechSupported() && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
-                    className="absolute bottom-5 right-5 flex items-center gap-1.5 rounded-lg bg-primary-50 px-3 py-2 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-950/50 dark:text-primary-300 dark:hover:bg-primary-900/50"
-                  >
-                    <Volume2 className="h-4 w-4" />
-                    Phát âm
-                  </button>
-                )}
               </div>
-              <p className="mt-3 text-center text-xs text-gray-400">Phím tắt: Space lật thẻ · ← chưa thuộc · → thuộc rồi · ↓ đánh dấu sao</p>
+
+              <div className="mt-6 cursor-pointer select-none text-center" onClick={toggleMeaning}>
+                <h3 className="break-words font-display text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-6xl">
+                  {currentCard.word}
+                </h3>
+                <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
+                  <span className="font-display text-lg italic">{POS_SHORT[currentCard.pos]}</span>
+                  {showIpa && <span className="font-ipa text-lg text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
+                  {isSpeechSupported() && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
+                      className="rounded-full bg-primary-50 p-2 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
+                      aria-label="Nghe phát âm"
+                      title="Nghe phát âm"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </p>
+              </div>
+
+              <div
+                className={`grid transition-[grid-template-rows,opacity] duration-300 motion-reduce:transition-none ${
+                  showMeaning ? 'mt-7 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                }`}
+                aria-hidden={!showMeaning}
+              >
+                <div className="overflow-hidden">
+                  <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
+                    <p className="text-center text-xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
+                    <blockquote className="mt-5 border-l-2 border-primary-300 pl-4 dark:border-primary-700">
+                      <div className="flex items-start gap-2">
+                        <p className="flex-1 text-base leading-relaxed text-slate-800 dark:text-slate-200">{currentCard.example}</p>
+                        {isSpeechSupported() && (
+                          <button
+                            onClick={() => speakEnglish(currentCard.example)}
+                            tabIndex={showMeaning ? 0 : -1}
+                            className="flex-shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
+                            aria-label="Nghe câu ví dụ"
+                            title="Nghe câu ví dụ"
+                          >
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{currentCard.exampleVi}</p>
+                    </blockquote>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div className="grid grid-cols-2 gap-3">
-            <ReviewButton label="Chưa thuộc" sublabel="Ôn lại vào ngày mai" hint="←" onClick={() => handleReview('hard')} color="border-error-200 bg-error-50 text-error-700 hover:bg-error-100 dark:border-error-900 dark:bg-error-950/30 dark:text-error-400 dark:hover:bg-error-950/50" />
-            <ReviewButton label="Thuộc rồi" sublabel="Ôn lại sau vài ngày" hint="→" onClick={() => handleReview('good')} color="border-success-200 bg-success-50 text-success-700 hover:bg-success-100 dark:border-success-900 dark:bg-success-950/30 dark:text-success-400 dark:hover:bg-success-950/50" />
-          </div>
+          {showMeaning ? (
+            <div className="grid grid-cols-2 gap-3">
+              <ReviewButton
+                label="Chưa thuộc"
+                sublabel="Ôn lại ngày mai"
+                hint="←"
+                onClick={() => handleReview('hard')}
+                tone="border-error-200 bg-error-50 text-error-700 hover:bg-error-100 dark:border-error-900 dark:bg-error-950/30 dark:text-error-400 dark:hover:bg-error-950/50"
+              />
+              <ReviewButton
+                label="Thuộc rồi"
+                sublabel="Ôn lại sau vài ngày"
+                hint="→"
+                onClick={() => handleReview('good')}
+                tone="border-success-200 bg-success-50 text-success-700 hover:bg-success-100 dark:border-success-900 dark:bg-success-950/30 dark:text-success-400 dark:hover:bg-success-950/50"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={toggleMeaning}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-4 text-base font-semibold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)] transition-colors hover:bg-primary-700"
+            >
+              Xem nghĩa
+              <kbd className="hidden rounded border border-white/40 px-1.5 py-0.5 font-sans text-xs font-normal text-white/80 sm:inline">Space</kbd>
+            </button>
+          )}
 
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-            <span>Đã ôn: <strong className="text-gray-700 dark:text-gray-300">{sessionStats.reviewed}</strong></span>
-            <span className="text-error-500">Chưa thuộc: {sessionStats.unknown}</span>
-            <span className="text-success-500">Thuộc rồi: {sessionStats.known}</span>
-          </div>
+          <p className="hidden text-center text-xs text-slate-400 sm:block">
+            Phím tắt: Space lật thẻ, ← chưa thuộc, → thuộc rồi, ↓ đánh dấu
+          </p>
         </>
       )}
     </div>
   );
 }
 
-function ReviewButton({ label, sublabel, hint, onClick, color }: { label: string; sublabel: string; hint: string; onClick: () => void; color: string }) {
+function ReviewButton({ label, sublabel, hint, onClick, tone }: { label: string; sublabel: string; hint: string; onClick: () => void; tone: string }) {
   return (
-    <button onClick={onClick} className={`rounded-2xl border px-4 py-4 text-center transition-all active:scale-95 ${color}`}>
-      <div className="flex items-center justify-center gap-2 text-base font-bold">
+    <button onClick={onClick} className={`rounded-xl border px-4 py-3.5 text-center transition-transform active:scale-[0.98] ${tone}`}>
+      <div className="flex items-center justify-center gap-2 text-base font-semibold">
         {label}
-        <kbd className="rounded border border-current px-1.5 py-0.5 font-mono text-xs font-normal opacity-60">{hint}</kbd>
+        <kbd className="hidden rounded border border-current px-1.5 py-0.5 font-sans text-xs font-normal opacity-60 sm:inline">{hint}</kbd>
       </div>
-      <div className="mt-0.5 text-xs opacity-70">{sublabel}</div>
+      <div className="mt-0.5 text-xs opacity-75">{sublabel}</div>
     </button>
   );
 }
 
 function SessionComplete({ stats, onReset }: { stats: SessionStats; onReset: () => void }) {
+  const pct = stats.reviewed > 0 ? Math.round((stats.known / stats.reviewed) * 100) : 0;
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl border border-gray-200 bg-white py-16 dark:border-gray-800 dark:bg-gray-900">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-100 dark:bg-success-950/40">
-        <Check className="h-8 w-8 text-success-600 dark:text-success-400" />
+    <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-100 dark:bg-success-950/40">
+        <Check className="h-7 w-7 text-success-600 dark:text-success-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Hoàn thành phiên học!</h3>
-      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Bạn đã ôn {stats.reviewed} thẻ — Thuộc rồi: {stats.known}, Chưa thuộc: {stats.unknown}</p>
-      <button onClick={onReset} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700">
+      <h3 className="font-display text-3xl font-semibold text-slate-900 dark:text-slate-100">Xong phiên học</h3>
+      <p className="mt-2 text-slate-600 dark:text-slate-400">
+        Bạn đã ôn {stats.reviewed} thẻ và nhớ {pct}%. Thuộc rồi {stats.known}, chưa thuộc {stats.unknown}.
+      </p>
+      <button
+        onClick={onReset}
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+      >
         <RotateCcw className="h-4 w-4" />
-        Học lại
+        Học lại bộ này
       </button>
     </div>
   );
@@ -337,15 +386,20 @@ function SessionComplete({ stats, onReset }: { stats: SessionStats; onReset: () 
 
 function EmptyState({ onShowAll }: { onShowAll: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl border border-gray-200 bg-white py-16 dark:border-gray-800 dark:bg-gray-900">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-        <Inbox className="h-8 w-8 text-gray-400" />
+    <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+        <Inbox className="h-7 w-7 text-slate-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Chưa có thẻ</h3>
-      <p className="mt-2 max-w-xs text-center text-sm text-gray-500 dark:text-gray-400">Chưa có từ nào trong mục này. Học thêm để xem từ cần ôn lại.</p>
-      <button onClick={onShowAll} className="mt-6 inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Bộ này chưa có thẻ nào</h3>
+      <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
+        Thẻ sẽ xuất hiện ở đây khi bạn học và đánh dấu từ. Chọn "Tất cả" để bắt đầu.
+      </p>
+      <button
+        onClick={onShowAll}
+        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+      >
         <Layers className="h-4 w-4" />
-        Xem tất cả
+        Xem tất cả thẻ
       </button>
     </div>
   );
