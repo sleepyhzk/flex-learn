@@ -13,8 +13,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { key: 'home', label: 'Trang chủ', icon: Home },
-  { key: 'flashcards', label: 'Từ vựng', icon: Layers },
-  { key: 'lessons', label: 'Bài học', icon: GraduationCap },
+  { key: 'flashcards', label: 'Flashcard', icon: Layers },
+  { key: 'lessons', label: 'Từ vựng', icon: GraduationCap },
   { key: 'conversation', label: 'Giao tiếp', icon: MessageCircle },
   { key: 'spelling', label: 'Chính tả', icon: Keyboard },
   { key: 'dictionary', label: 'Tra cứu', icon: BookOpen },

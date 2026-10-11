@@ -1,7 +1,7 @@
 import type { Topic } from '@/data/vocabTopics';
 
 /** Cấp theo khung CEFR; 'extra' = từ ngoài danh sách chuẩn (nhóm "Bổ sung"). */
-export type Level = 'A1' | 'A2' | 'B1' | 'extra';
+export type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'extra';
 
 export type Pos = 'n' | 'v' | 'adj' | 'adv' | 'prep' | 'conj' | 'pron' | 'det' | 'phrase';
 

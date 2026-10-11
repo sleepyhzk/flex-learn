@@ -7,8 +7,9 @@ const GROUP_LABEL: Record<TopicGroup, string> = {
   daily: 'Giao tiếp hằng ngày',
   toeic: 'TOEIC & công việc',
   cyber: 'Chuyên ngành an ninh mạng',
+  academic: 'Học thuật & nâng cao (B2)',
 };
-const GROUP_ORDER: TopicGroup[] = ['daily', 'toeic', 'cyber'];
+const GROUP_ORDER: TopicGroup[] = ['daily', 'toeic', 'cyber', 'academic'];
 
 /** Ô chọn chủ đề từ vựng. counts = số từ của từng chủ đề trong danh sách đang xem; chủ đề hết từ thì ẩn. */
 export function TopicSelect({

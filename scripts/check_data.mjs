@@ -2,10 +2,16 @@
 // Cần Node 22.6 trở lên (chạy trực tiếp file .ts bằng --experimental-strip-types).
 import { INITIAL_VOCAB, LEVEL_ORDER } from '../src/data/vocabData.ts';
 import { TOPICS } from '../src/data/vocabTopics.ts';
-import { CONVERSATION_SENTENCES } from '../src/data/conversationData.ts';
+import { CONVERSATION_SENTENCES, CONVERSATION_CATEGORIES } from '../src/data/conversationData.ts';
 import { vocabKey } from '../src/lib/vocabKey.ts';
 
-const ID_RANGE = { A1: [1, 999], A2: [1001, 1999], B1: [2001, 2999], extra: [3001, 3999] };
+const ID_RANGE = {
+  A1: [[1, 999]],
+  A2: [[1001, 1999], [6001, 6999]],
+  B1: [[2001, 2999], [5001, 5999]],
+  extra: [[3001, 3999]],
+  B2: [[4001, 4999]],
+};
 const POS = new Set(['n', 'v', 'adj', 'adv', 'prep', 'conj', 'pron', 'det', 'phrase']);
 const topicKeys = new Set(TOPICS.map((t) => t.key));
 
@@ -38,8 +44,10 @@ for (const w of INITIAL_VOCAB) {
   if (!POS.has(w.pos)) err(`loại từ không hợp lệ "${w.pos}": ${tag}`);
   if (!LEVEL_ORDER.includes(w.level)) err(`cấp không hợp lệ "${w.level}": ${tag}`);
   else {
-    const [lo, hi] = ID_RANGE[w.level];
-    if (w.id < lo || w.id > hi) err(`id ngoài khoảng của cấp ${w.level} (${lo}-${hi}): ${tag}`);
+    const ranges = ID_RANGE[w.level];
+    if (!ranges.some(([lo, hi]) => w.id >= lo && w.id <= hi)) {
+      err(`id ngoài khoảng của cấp ${w.level} (${ranges.map(([a, b]) => `${a}-${b}`).join(', ')}): ${tag}`);
+    }
   }
   if (!/^\/[^/]+\/$/.test(w.ipa)) err(`IPA phải có dạng /.../ : ${tag} -> ${w.ipa}`);
   if (!/[.!?]$/.test(w.example)) warn(`câu ví dụ không kết thúc bằng dấu câu: ${tag}`);
@@ -53,10 +61,17 @@ for (const w of INITIAL_VOCAB) {
 }
 
 const cids = new Set();
+const cEnglish = new Set();
+const catKeys = new Set(CONVERSATION_CATEGORIES.map((c) => c.key));
 for (const c of CONVERSATION_SENTENCES) {
   if (cids.has(c.id)) err(`câu giao tiếp trùng id: ${c.id}`);
   cids.add(c.id);
   if (!c.english.trim() || !c.vietnamese.trim()) err(`câu giao tiếp #${c.id} có trường trống`);
+  if (!catKeys.has(c.category)) err(`câu giao tiếp #${c.id} có chủ đề không hợp lệ: ${c.category}`);
+  if (!['A1', 'A2', 'B1'].includes(c.level)) err(`câu giao tiếp #${c.id} có cấp không hợp lệ: ${c.level}`);
+  if (cEnglish.has(c.english)) err(`câu giao tiếp trùng nội dung: "${c.english}"`);
+  cEnglish.add(c.english);
+  if (!/[.!?]$/.test(c.english)) warn(`câu giao tiếp #${c.id} không kết thúc bằng dấu câu: "${c.english}"`);
 }
 
 // Thống kê
@@ -68,6 +83,11 @@ for (const t of TOPICS) {
   console.log(`  ${t.key.padEnd(8)} ${String(n).padStart(4)}  ${t.label}`);
 }
 console.log(`Câu giao tiếp: ${CONVERSATION_SENTENCES.length}`);
+for (const c of CONVERSATION_CATEGORIES) {
+  const list = CONVERSATION_SENTENCES.filter((s) => s.category === c.key);
+  const lv = ['A1', 'A2', 'B1'].map((l) => `${l}:${list.filter((s) => s.level === l).length}`).join(' ');
+  console.log(`  ${c.key.padEnd(10)} ${String(list.length).padStart(3)}  (${lv})  ${c.label}`);
+}
 
 if (warns.length) {
   console.log(`\nCảnh báo (${warns.length}):`);

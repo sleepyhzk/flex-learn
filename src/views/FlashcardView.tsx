@@ -190,7 +190,7 @@ export function FlashcardView() {
   return (
     <div className="mx-auto max-w-xl space-y-5">
       <header>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Ôn từ vựng</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Flashcard</h2>
         <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
           {dueCount > 0 ? `${dueCount} thẻ đến hạn hôm nay` : 'Chưa có thẻ nào đến hạn'}
         </p>

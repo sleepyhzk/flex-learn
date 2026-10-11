@@ -4,12 +4,11 @@ import {
   CONVERSATION_SENTENCES,
   CONVERSATION_CATEGORIES,
 } from '@/data/conversationData';
-import type { ConversationCategory } from '@/data/conversationData';
+import type { ConversationCategory, ConversationLevel } from '@/data/conversationData';
 import { speakEnglish, isSpeechSupported } from '@/lib/speech';
 import { LEVEL_LABEL } from '@/data/vocabData';
-import type { Level } from '@/lib/types';
 
-type ConvLevel = 'all' | Exclude<Level, 'extra'>;
+type ConvLevel = 'all' | ConversationLevel;
 
 const CATEGORY_LABELS = Object.fromEntries(
   CONVERSATION_CATEGORIES.map((c) => [c.key, c.label])

@@ -20,13 +20,17 @@ export type Topic =
   | 'feel'
   | 'verb'
   | 'grammar'
+  | 'school'
+  | 'general'
   | 'office'
   | 'biz'
   | 'hr'
   | 'tech'
-  | 'cyber';
+  | 'cyber'
+  | 'academic'
+  | 'society';
 
-export type TopicGroup = 'daily' | 'toeic' | 'cyber';
+export type TopicGroup = 'daily' | 'toeic' | 'cyber' | 'academic';
 
 export const TOPICS: { key: Topic; label: string; group: TopicGroup }[] = [
   { key: 'greet', label: 'Chào hỏi & xã giao', group: 'daily' },
@@ -43,11 +47,15 @@ export const TOPICS: { key: Topic; label: string; group: TopicGroup }[] = [
   { key: 'feel', label: 'Cảm xúc & tính cách', group: 'daily' },
   { key: 'verb', label: 'Động từ thường dùng', group: 'daily' },
   { key: 'grammar', label: 'Từ chức năng & ngữ pháp', group: 'daily' },
+  { key: 'school', label: 'Trường học & học tập', group: 'daily' },
+  { key: 'general', label: 'Từ thông dụng khác', group: 'daily' },
   { key: 'office', label: 'Văn phòng & công việc (TOEIC)', group: 'toeic' },
   { key: 'biz', label: 'Kinh doanh & tài chính (TOEIC)', group: 'toeic' },
   { key: 'hr', label: 'Tuyển dụng & nhân sự (TOEIC)', group: 'toeic' },
   { key: 'tech', label: 'Công nghệ & thiết bị', group: 'toeic' },
   { key: 'cyber', label: 'An ninh mạng', group: 'cyber' },
+  { key: 'academic', label: 'Học thuật & tư duy', group: 'academic' },
+  { key: 'society', label: 'Xã hội, môi trường & tin tức', group: 'academic' },
 ];
 
 export const TOPIC_LABEL = Object.fromEntries(TOPICS.map((t) => [t.key, t.label])) as Record<Topic, string>;

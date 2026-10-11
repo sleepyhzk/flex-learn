@@ -7,7 +7,7 @@ import { isDue } from '@/lib/srs';
 import type { ViewKey } from '@/components/Sidebar';
 
 const practice: { key: ViewKey; title: string; desc: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { key: 'lessons', title: 'Bài học và bài tập', desc: 'Xem từ theo cấp và chủ đề, làm trắc nghiệm', icon: GraduationCap },
+  { key: 'lessons', title: 'Từ vựng và bài tập', desc: 'Xem từ theo cấp và chủ đề, làm trắc nghiệm', icon: GraduationCap },
   { key: 'conversation', title: 'Giao tiếp thường dùng', desc: 'Câu mẫu theo tình huống, có phát âm', icon: MessageCircle },
   { key: 'spelling', title: 'Luyện chính tả', desc: 'Đọc nghĩa tiếng Việt, gõ lại từ tiếng Anh', icon: Keyboard },
   { key: 'dictionary', title: 'Tra cứu từ', desc: 'Tìm theo từ tiếng Anh hoặc nghĩa tiếng Việt', icon: BookOpen },

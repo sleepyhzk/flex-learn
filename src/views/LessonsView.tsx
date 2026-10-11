@@ -33,7 +33,7 @@ export function LessonsView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Bài học & Bài tập</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Từ vựng & Bài tập</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Từ vựng phân theo cấp độ A1, A2, B1 và bài tập trắc nghiệm kiểm tra khả năng ghi nhớ.
         </p>
@@ -162,6 +162,7 @@ function LevelAccordionVocab({
                     level === 'A1' ? 'bg-success-100 text-success-700 dark:bg-success-950/40 dark:text-success-400' :
                     level === 'A2' ? 'bg-accent-100 text-accent-700 dark:bg-accent-950/40 dark:text-accent-400' :
                     level === 'B1' ? 'bg-primary-100 text-primary-700 dark:bg-primary-950/40 dark:text-primary-400' :
+                    level === 'B2' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400' :
                     'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   }`}>
                     {label}
