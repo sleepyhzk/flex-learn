@@ -728,7 +728,7 @@ export function ShadowingView() {
               disabled={busy}
               className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-colors disabled:opacity-50 ${
                 phase === 'done'
-                  ? 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900'
+                  ? 'bg-primary-600 text-white hover:bg-primary-700 dark:bg-slate-100 dark:text-slate-900'
                   : 'border border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800'
               }`}
             >

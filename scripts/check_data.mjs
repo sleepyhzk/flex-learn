@@ -5,6 +5,7 @@ import { TOPICS } from '../src/data/vocabTopics.ts';
 import { CONVERSATION_SENTENCES, CONVERSATION_CATEGORIES } from '../src/data/conversationData.ts';
 import { vocabKey } from '../src/lib/vocabKey.ts';
 import { LEVEL_OVERRIDES } from '../src/data/vocab/levelOverrides.ts';
+import { SENSES } from '../src/data/vocab/senses.ts';
 
 const ID_RANGE = {
   A1: [[1, 999]],
@@ -62,6 +63,17 @@ for (const w of INITIAL_VOCAB) {
   if (!['det', 'pron', 'phrase'].includes(w.pos)) {
     const stem = w.word.toLowerCase().slice(0, Math.max(3, w.word.length - 2));
     if (!w.example.toLowerCase().includes(stem)) warn(`câu ví dụ có vẻ không chứa từ: ${tag} -> "${w.example}"`);
+  }
+}
+
+// Nghĩa khác (senses.ts): khóa phải trỏ tới một từ có thật, các trường không được trống
+for (const [key, list] of Object.entries(SENSES)) {
+  if (!wordPos.has(key)) err(`senses.ts: không có từ nào ứng với khóa "${key}"`);
+  if (!Array.isArray(list) || list.length === 0) err(`senses.ts: "${key}" không có nghĩa nào`);
+  for (const sn of list) {
+    for (const f of ['meaning', 'context', 'example']) {
+      if (typeof sn[f] !== 'string' || sn[f].trim() === '') err(`senses.ts: "${key}" có trường trống "${f}"`);
+    }
   }
 }
 

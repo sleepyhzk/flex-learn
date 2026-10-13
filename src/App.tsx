@@ -22,7 +22,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-paper-dark">
+    <div className="min-h-screen bg-grid-paper">
       <Sidebar current={view} onNavigate={go} theme={theme} onToggleTheme={toggle} />
       {/* Chừa chỗ cho thanh trên (14) và thanh tab dưới (điện thoại), hoặc thanh bên (máy tính) */}
       <main className="pb-24 pt-14 lg:pb-0 lg:pl-60 lg:pt-0">

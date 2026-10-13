@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --p-50: 248 237 220;
+  --p-100: 239 220 192;
+  --p-200: 226 200 166;
+  --p-300: 207 171 136;
+  --p-400: 185 131 104;
+  --p-500: 59 68 112;
+  --p-600: 26 34 69;
+  --p-700: 18 25 54;
+  --p-800: 13 18 41;
+  --p-900: 8 12 29;
+  --p-950: 58 42 32;
+}
+.dark {
+  --p-50: 58 42 32;
+  --p-100: 74 54 41;
+  --p-200: 98 72 54;
+  --p-300: 224 190 160;
+  --p-400: 212 165 132;
+  --p-500: 196 140 108;
+  --p-600: 154 96 72;
+  --p-700: 125 75 54;
+  --p-800: 96 56 40;
+  --p-900: 70 40 28;
+  --p-950: 58 42 32;
+}
+
 @layer base {
   body {
     @apply bg-paper text-slate-900 antialiased dark:bg-paper-dark dark:text-slate-100;
@@ -30,6 +57,22 @@
 }
 
 @layer utilities {
+  /* Nền giấy kẻ ô */
+  .bg-grid-paper {
+    background-color: theme('colors.paper.DEFAULT');
+    background-image:
+      radial-gradient(ellipse at 18% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+      linear-gradient(to right, rgba(140, 105, 70, 0.13) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(140, 105, 70, 0.13) 1px, transparent 1px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
+  }
+  .dark .bg-grid-paper {
+    background-color: theme('colors.paper.dark');
+    background-image:
+      linear-gradient(to right, rgba(230, 200, 160, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(230, 200, 160, 0.05) 1px, transparent 1px);
+    background-size: 28px 28px, 28px 28px;
+  }
   /* IPA cần font có đủ ký tự /ʃ θ ð ʌ/ ; trình duyệt tự dùng font dự phòng cho ký tự thiếu. */
   .font-ipa {
     font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Arial Unicode MS', system-ui, sans-serif;

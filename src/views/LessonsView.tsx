@@ -362,7 +362,7 @@ function QuizView() {
             })}
           </div>
           {answered && (
-            <button onClick={next} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
+            <button onClick={next} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
               {current + 1 >= questions.length ? 'Xem kết quả' : 'Câu tiếp theo'}
               <ChevronRight className="h-4 w-4" />
             </button>

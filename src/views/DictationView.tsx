@@ -274,7 +274,7 @@ export function DictationView() {
                 onClick={() => switchMode(m.key)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                   mode === m.key
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                    ? 'bg-primary-600 text-white dark:bg-slate-100 dark:text-slate-900'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
@@ -572,7 +572,7 @@ export function DictationView() {
               <div className="mt-4 flex gap-3">
                 <button
                   onClick={next}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 dark:bg-slate-100 dark:text-slate-900"
                 >
                   Tiếp theo
                   <ArrowRight className="h-4 w-4" />

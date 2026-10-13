@@ -7,6 +7,7 @@ import { B2_ROWS } from './vocab/b2.ts';
 import { C1_ROWS } from './vocab/c1.ts';
 import { EXTRA_ROWS } from './vocab/extra.ts';
 import { LEVEL_OVERRIDES } from './vocab/levelOverrides.ts';
+import { SENSES } from './vocab/senses.ts';
 
 /** Nhãn hiển thị của từng cấp. 'extra' = từ ngoài danh sách chuẩn A1-B1 (TOEIC nâng cao, an ninh mạng...). */
 export const LEVEL_LABEL: Record<Level, string> = {
@@ -45,9 +46,11 @@ const RAW_VOCAB: VocabItem[] = [
 ];
 
 /** Áp bảng ghi đè cấp (theo Oxford 3000). Id và thứ tự giữ nguyên. */
-export const INITIAL_VOCAB: VocabItem[] = RAW_VOCAB.map((w) =>
-  LEVEL_OVERRIDES[w.id] && LEVEL_OVERRIDES[w.id] !== w.level ? { ...w, level: LEVEL_OVERRIDES[w.id] } : w
-);
+export const INITIAL_VOCAB: VocabItem[] = RAW_VOCAB.map((w) => {
+  const level = LEVEL_OVERRIDES[w.id] && LEVEL_OVERRIDES[w.id] !== w.level ? LEVEL_OVERRIDES[w.id] : w.level;
+  const senses = SENSES[`${w.word}|${w.pos}`];
+  return { ...w, level, ...(senses ? { senses } : {}) };
+});
 
 export const VOCAB_BY_LEVEL: Record<Level, VocabItem[]> = {
   A1: INITIAL_VOCAB.filter((w) => w.level === 'A1'),

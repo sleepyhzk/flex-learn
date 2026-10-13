@@ -223,7 +223,7 @@ export function FlashcardView() {
         <>
           <section
             aria-label="Thẻ từ vựng"
-            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(37,99,235,0.25)] dark:border-slate-800 dark:bg-slate-900"
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(110,75,40,0.28)] dark:border-slate-800 dark:bg-slate-900"
           >
             <div
               className="h-1 bg-primary-100 dark:bg-slate-800"
@@ -308,6 +308,40 @@ export function FlashcardView() {
                       </div>
                       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{currentCard.exampleVi}</p>
                     </blockquote>
+
+                    {currentCard.senses && currentCard.senses.length > 0 && (
+                      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          Nghĩa khác ({currentCard.senses.length})
+                        </p>
+                        <ul className="mt-3 space-y-4">
+                          {currentCard.senses.map((sense, i) => (
+                            <li key={i}>
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span className="text-base font-semibold text-slate-900 dark:text-slate-100">{sense.meaning}</span>
+                                <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-950/60 dark:text-primary-300">
+                                  {sense.context}
+                                </span>
+                              </div>
+                              <div className="mt-1 flex items-start gap-1.5">
+                                <p className="flex-1 text-sm italic leading-relaxed text-slate-700 dark:text-slate-300">{sense.example}</p>
+                                {isSpeechSupported() && (
+                                  <button
+                                    onClick={() => speakEnglish(sense.example)}
+                                    tabIndex={showMeaning ? 0 : -1}
+                                    className="flex-shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
+                                    aria-label="Nghe câu ví dụ của nghĩa này"
+                                    title="Nghe câu ví dụ"
+                                  >
+                                    <Volume2 className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -334,7 +368,7 @@ export function FlashcardView() {
           ) : (
             <button
               onClick={toggleMeaning}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-4 text-base font-semibold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)] transition-colors hover:bg-primary-700"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-4 text-base font-semibold text-white shadow-[0_8px_20px_-8px_rgba(26,34,69,0.7)] transition-colors hover:bg-primary-700"
             >
               Xem nghĩa
               <kbd className="hidden rounded border border-white/40 px-1.5 py-0.5 font-sans text-xs font-normal text-white/80 sm:inline">Space</kbd>

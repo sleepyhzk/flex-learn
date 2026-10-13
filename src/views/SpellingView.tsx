@@ -304,7 +304,7 @@ export function SpellingView() {
               <div className="mt-4 flex gap-3">
                 <button
                   onClick={next}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 dark:bg-slate-100 dark:text-slate-900"
                 >
                   Từ tiếp theo
                   <ArrowRight className="h-4 w-4" />

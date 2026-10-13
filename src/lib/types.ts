@@ -5,6 +5,16 @@ export type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'extra';
 
 export type Pos = 'n' | 'v' | 'adj' | 'adv' | 'prep' | 'conj' | 'pron' | 'det' | 'phrase';
 
+/** Một nghĩa khác của từ nhiều nghĩa. */
+export interface Sense {
+  /** Nghĩa tiếng Việt. */
+  meaning: string;
+  /** Hoàn cảnh dùng nghĩa này, vd "kinh doanh", "khi nói về dòng sông". */
+  context: string;
+  /** Câu ví dụ tiếng Anh. */
+  example: string;
+}
+
 export interface VocabItem {
   /** Không bao giờ đổi: khóa tiến độ học lưu theo id. */
   id: number;
@@ -22,6 +32,8 @@ export interface VocabItem {
   exampleVi: string;
   /** Văn bản đưa cho giọng đọc, khi máy đọc sai từ gốc. */
   speak?: string;
+  /** Các nghĩa khác (nếu có), kèm hoàn cảnh dùng. */
+  senses?: Sense[];
 }
 
 export type ReviewQuality = 'easy' | 'good' | 'hard';
