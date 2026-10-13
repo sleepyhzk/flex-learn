@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Keyboard, Check, X, ArrowRight, RotateCcw, Volume2, Trophy, Lightbulb } from 'lucide-react';
 import { INITIAL_VOCAB, LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { TopicSelect, countByTopic } from '@/components/TopicSelect';
@@ -31,6 +31,7 @@ export function SpellingView() {
   const [queue, setQueue] = useState<VocabItem[]>(() => shuffleArray(INITIAL_VOCAB));
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const autoNextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { starred } = useStarred();
 
   const matchesLevel = useCallback(
@@ -52,13 +53,23 @@ export function SpellingView() {
 
   const current = pool.length > 0 ? pool[index % pool.length] : undefined;
 
+  const clearAutoNext = useCallback(() => {
+    if (autoNextTimer.current) {
+      clearTimeout(autoNextTimer.current);
+      autoNextTimer.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearAutoNext, [clearAutoNext]);
+
   const next = useCallback(() => {
+    clearAutoNext();
     setInput('');
     setAnswerState('idle');
     setHintUsed(false);
     setIndex((i) => i + 1);
     setTimeout(() => inputRef.current?.focus(), 50);
-  }, []);
+  }, [clearAutoNext]);
 
   const check = useCallback(() => {
     if (!input.trim() || answerState !== 'idle' || !current) return;
@@ -72,7 +83,7 @@ export function SpellingView() {
         setBestStreak((b) => Math.max(b, ns));
         return ns;
       });
-      setTimeout(() => next(), 1400);
+      autoNextTimer.current = setTimeout(() => next(), 1400);
     } else {
       setStreak(0);
     }
@@ -85,6 +96,7 @@ export function SpellingView() {
   }, [next]);
 
   const restart = useCallback(() => {
+    clearAutoNext();
     setInput('');
     setAnswerState('idle');
     setHintUsed(false);
@@ -94,7 +106,7 @@ export function SpellingView() {
     setCompleted(0);
     setQueue(shuffleArray(INITIAL_VOCAB));
     setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
+  }, [clearAutoNext]);
 
   const switchLevel = useCallback(
     (l: LevelFilter) => {
@@ -118,12 +130,20 @@ export function SpellingView() {
     setTimeout(() => inputRef.current?.focus(), 50);
   }, []);
 
-  const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+  // Enter: kiểm tra, hoặc sang từ tiếp theo sau khi đã có kết quả.
+  // Nghe ở cấp cửa sổ vì khi ô nhập bị khóa (sau khi trả lời) nó mất focus và không nhận phím nữa.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('button, select, a, textarea')) return; // để nút tự xử lý Enter
+      e.preventDefault();
       if (answerState === 'idle') check();
       else next();
-    }
-  };
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [answerState, check, next]);
 
   const filterBar = (
     <div className="space-y-3">
@@ -240,8 +260,7 @@ export function SpellingView() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKey}
-                disabled={answerState !== 'idle'}
+                readOnly={answerState !== 'idle'}
                 placeholder="Gõ từ tiếng Anh tại đây..."
                 autoFocus
                 autoCapitalize="off"

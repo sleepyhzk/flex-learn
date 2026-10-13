@@ -16,9 +16,9 @@ Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh
 
 Đã bỏ: luyện viết Hán tự, luyện gõ pinyin, bộ tách từ và phân tích câu tiếng Trung.
 
-**Dữ liệu (giai đoạn 2, lô 6):** 2673 từ, tự soạn, nghĩa tiếng Việt là bản nháp cần rà: A1 697 từ, A2 933 từ, B1 531 từ (gồm giao tiếp B1, TOEIC 500-700 và an ninh mạng cơ bản), B2 302 từ (học thuật, trừu tượng, cụm động từ, xã hội và tin tức), Bổ sung 210 từ (TOEIC 700+ và an ninh mạng chuyên sâu). Đang đối chiếu với danh sách Oxford 3000 (theo cấp CEFR): A1 và A2 đã đủ mọi từ trong danh sách, còn B1 và B2 chưa làm. Câu giao tiếp: 150 câu (10 chủ đề x 15 câu, mỗi chủ đề 6 câu A1, 6 câu A2, 3 câu B1), tự soạn, nghĩa là bản nháp cần rà.
+**Dữ liệu (giai đoạn 2, lô 8):** 3669 từ, nghĩa tiếng Việt là bản nháp cần rà. Cấp đã được chuyển theo danh sách Oxford 3000 (American, theo cấp CEFR): A1 929 từ, A2 898 từ, B1 889 từ, B2 774 từ, Bổ sung 179 từ (TOEIC 700+ và an ninh mạng chuyên sâu, không có trong Oxford). Từ nào không có trong Oxford thì giữ cấp tự gán. Bảng chuyển cấp nằm ở `src/data/vocab/levelOverrides.ts`: id và khóa tiến độ giữ nguyên, chỉ trường `level` đổi. Câu giao tiếp: 150 câu (10 chủ đề x 15 câu, mỗi chủ đề 6 câu A1, 6 câu A2, 3 câu B1), tự soạn, nghĩa là bản nháp cần rà.
 
-Dữ liệu nằm trong `src/data/vocab/` (một file mỗi cấp). Khoảng id: A1 1-999, A2 1001-1999 và 6001-6999, B1 2001-2999 và 5001-5999, Bổ sung 3001-3999, B2 4001-4999 (hết khoảng đầu thì dùng khoảng sau). Thêm từ mới vào cuối file với id kế tiếp. Sau mỗi lần sửa chạy `npm run check:data` (kiểm tra id và khóa trùng, trường trống, chủ đề, loại từ, định dạng IPA, câu ví dụ).
+Dữ liệu nằm trong `src/data/vocab/` (một file mỗi cấp). Khoảng id: A1 1-999, A2 1001-1999 và 6001-6999, B1 2001-2999 và 5001-5999, Bổ sung 3001-3999, B2 4001-4999 (hết khoảng đầu thì dùng khoảng sau). Thêm từ mới vào cuối file với id kế tiếp (cấp thật của từ = cấp của file, trừ khi có trong bảng chuyển cấp). Sau mỗi lần sửa chạy `npm run check:data` (kiểm tra id và khóa trùng, trường trống, chủ đề, loại từ, định dạng IPA, câu ví dụ).
 
 ## Cấu trúc dữ liệu
 

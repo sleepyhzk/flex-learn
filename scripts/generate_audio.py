@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tạo file mp3 giọng đọc AI (neural) cho toàn bộ từ vựng, câu ví dụ và câu giao tiếp của web.
+Tạo file mp3 giọng đọc AI (neural) cho toàn bộ từ vựng, câu ví dụ, câu giao tiếp và hội thoại dài của web.
 Web sẽ tự dùng các file này (public/audio/) thay cho giọng robot của trình duyệt.
 
 Cách dùng (chạy một lần, cần Python 3.9+ và Internet):
@@ -74,6 +74,16 @@ def collect_texts():
         lits = re.findall(STR, s)
         if len(lits) >= 3:  # [chủ đề, mức độ, câu tiếng Anh, nghĩa tiếng Việt]
             texts.append(unquote(lits[2]))
+    # Hội thoại dài cho Shadowing: mỗi lượt lời một dòng dạng ["A", "câu tiếng Anh", "nghĩa tiếng Việt"],
+    dlg_path = ROOT / "src/data/dialogueData.ts"
+    if dlg_path.exists():
+        for line in dlg_path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if not re.match(r'^\[["\'][AB]["\'],', s):
+                continue
+            lits = re.findall(STR, s)
+            if len(lits) >= 3:
+                texts.append(unquote(lits[1]))
     texts.append(SAMPLE_TEXT)
     seen, out = set(), []
     for t in texts:

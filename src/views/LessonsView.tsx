@@ -163,6 +163,7 @@ function LevelAccordionVocab({
                     level === 'A2' ? 'bg-accent-100 text-accent-700 dark:bg-accent-950/40 dark:text-accent-400' :
                     level === 'B1' ? 'bg-primary-100 text-primary-700 dark:bg-primary-950/40 dark:text-primary-400' :
                     level === 'B2' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400' :
+                    level === 'C1' ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400' :
                     'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   }`}>
                     {label}

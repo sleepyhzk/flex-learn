@@ -4,13 +4,15 @@ import { INITIAL_VOCAB, LEVEL_ORDER } from '../src/data/vocabData.ts';
 import { TOPICS } from '../src/data/vocabTopics.ts';
 import { CONVERSATION_SENTENCES, CONVERSATION_CATEGORIES } from '../src/data/conversationData.ts';
 import { vocabKey } from '../src/lib/vocabKey.ts';
+import { LEVEL_OVERRIDES } from '../src/data/vocab/levelOverrides.ts';
 
 const ID_RANGE = {
   A1: [[1, 999]],
   A2: [[1001, 1999], [6001, 6999]],
   B1: [[2001, 2999], [5001, 5999]],
   extra: [[3001, 3999]],
-  B2: [[4001, 4999]],
+  B2: [[4001, 4999], [7001, 7999]],
+  C1: [[8001, 8999], [9001, 9999]],
 };
 const POS = new Set(['n', 'v', 'adj', 'adv', 'prep', 'conj', 'pron', 'det', 'phrase']);
 const topicKeys = new Set(TOPICS.map((t) => t.key));
@@ -44,9 +46,12 @@ for (const w of INITIAL_VOCAB) {
   if (!POS.has(w.pos)) err(`loại từ không hợp lệ "${w.pos}": ${tag}`);
   if (!LEVEL_ORDER.includes(w.level)) err(`cấp không hợp lệ "${w.level}": ${tag}`);
   else {
-    const ranges = ID_RANGE[w.level];
-    if (!ranges.some(([lo, hi]) => w.id >= lo && w.id <= hi)) {
-      err(`id ngoài khoảng của cấp ${w.level} (${ranges.map(([a, b]) => `${a}-${b}`).join(', ')}): ${tag}`);
+    // Cấp gốc xác định theo khoảng id (nơi từ được tạo ra); cấp hiện tại = cấp gốc, trừ khi có bảng ghi đè.
+    const origin = LEVEL_ORDER.find((l) => ID_RANGE[l].some(([lo, hi]) => w.id >= lo && w.id <= hi));
+    if (!origin) err(`id không thuộc khoảng id nào: ${tag}`);
+    else {
+      const expected = LEVEL_OVERRIDES[w.id] ?? origin;
+      if (w.level !== expected) err(`cấp không khớp (mong đợi ${expected}, đang là ${w.level}): ${tag}`);
     }
   }
   if (!/^\/[^/]+\/$/.test(w.ipa)) err(`IPA phải có dạng /.../ : ${tag} -> ${w.ipa}`);

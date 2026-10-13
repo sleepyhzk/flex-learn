@@ -188,8 +188,18 @@ if (typeof window !== 'undefined') {
 // ---------------------------------------------------------------- phát âm
 
 let currentAudio: HTMLAudioElement | null = null;
+/** Mỗi lần phát hoặc dừng tăng một đơn vị; onEnd của lần phát cũ bị bỏ qua. */
+let playToken = 0;
+
+export interface SpeakOptions {
+  /** Nhân với tốc độ đã chọn, vd 0.7 = chậm hơn 30%. */
+  rateScale?: number;
+  /** Gọi khi đọc xong (không gọi nếu bị dừng hoặc bị thay bằng lần đọc khác). */
+  onEnd?: () => void;
+}
 
 export function stopSpeaking(): void {
+  playToken += 1;
   if (currentAudio) {
     const a = currentAudio;
     currentAudio = null; // đặt null trước để lỗi do pause() không kích hoạt dự phòng
@@ -198,7 +208,7 @@ export function stopSpeaking(): void {
   if (hasSynth()) window.speechSynthesis.cancel();
 }
 
-function speakWithBrowser(text: string): void {
+function speakWithBrowser(text: string, opts: SpeakOptions = {}, token = playToken): void {
   if (!hasSynth()) return;
   const synth = window.speechSynthesis;
   const voice = pickVoice();
@@ -206,7 +216,10 @@ function speakWithBrowser(text: string): void {
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = voice?.lang || 'en-US';
   if (voice) utterance.voice = voice;
-  utterance.rate = settings.rate;
+  utterance.rate = Math.min(2, Math.max(0.1, settings.rate * (opts.rateScale ?? 1)));
+  utterance.onend = () => {
+    if (token === playToken) opts.onEnd?.();
+  };
   utterance.pitch = 1;
   utterance.volume = 1;
 
@@ -220,31 +233,35 @@ function speakWithBrowser(text: string): void {
   }
 }
 
-function playFile(text: string, file: string): void {
+function playFile(text: string, file: string, opts: SpeakOptions = {}, token = playToken): void {
   const audio = new Audio(audioUrl(file));
   // File được thu ở tốc độ mặc định; thanh tốc độ chỉnh theo tỉ lệ so với mặc định
-  audio.playbackRate = Math.min(2, Math.max(0.5, settings.rate / DEFAULT_RATE));
+  audio.playbackRate = Math.min(2, Math.max(0.4, (settings.rate / DEFAULT_RATE) * (opts.rateScale ?? 1)));
   currentAudio = audio;
 
   const fallback = () => {
     if (currentAudio === audio) {
       currentAudio = null;
-      speakWithBrowser(text);
+      speakWithBrowser(text, opts, token);
     }
   };
+  audio.addEventListener('ended', () => {
+    if (token === playToken) opts.onEnd?.();
+  });
   audio.addEventListener('error', fallback, { once: true });
   audio.play().catch(fallback);
 }
 
 /** Đọc to một từ hoặc câu tiếng Anh. */
-export function speakEnglish(text: string): void {
+export function speakEnglish(text: string, opts: SpeakOptions = {}): void {
   if (typeof window === 'undefined') return;
   stopSpeaking();
+  const token = playToken;
   const file = manifest?.[text];
   if (file) {
-    playFile(text, file);
+    playFile(text, file, opts, token);
   } else {
-    speakWithBrowser(text);
+    speakWithBrowser(text, opts, token);
   }
 }
 

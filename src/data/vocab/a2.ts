@@ -939,4 +939,9 @@ export const A2_ROWS: VocabRow[] = [
   [1931, "lock", "n", "/lɑːk/", "ổ khóa", "general", "The lock is broken.", "Ổ khóa bị hỏng."],
   [1932, "race", "n", "/reɪs/", "cuộc đua", "general", "He won the race.", "Anh ấy đã thắng cuộc đua."],
   [1933, "reply", "n", "/rɪˈplaɪ/", "câu trả lời", "general", "I'm waiting for a reply.", "Tôi đang chờ câu trả lời."],
+  [1934, "architecture", "n", "/ˈɑːrkɪtektʃər/", "kiến trúc", "general", "I love the architecture of old buildings.", "Tôi thích kiến trúc của những tòa nhà cổ."],
+  [1935, "expert", "n", "/ˈekspɜːrt/", "chuyên gia", "general", "She is an expert in marketing.", "Cô ấy là chuyên gia về tiếp thị."],
+  [1936, "gun", "n", "/ɡʌn/", "khẩu súng", "general", "The police found a gun.", "Cảnh sát tìm thấy một khẩu súng."],
+  [1937, "penny", "n", "/ˈpeni/", "đồng xu một xu", "general", "I found a penny on the street.", "Tôi nhặt được một đồng xu trên đường."],
+  [1938, "washing", "n", "/ˈwɑːʃɪŋ/", "việc giặt giũ", "general", "I do the washing on Sunday.", "Tôi giặt đồ vào Chủ nhật."],
 ];

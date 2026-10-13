@@ -7,6 +7,8 @@ import { FlashcardView } from '@/views/FlashcardView';
 import { DictionaryView } from '@/views/DictionaryView';
 import { LessonsView } from '@/views/LessonsView';
 import { SpellingView } from '@/views/SpellingView';
+import { DictationView } from '@/views/DictationView';
+import { ShadowingView } from '@/views/ShadowingView';
 import { ConversationView } from '@/views/ConversationView';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -30,6 +32,8 @@ export default function App() {
           {view === 'lessons' && <LessonsView />}
           {view === 'conversation' && <ConversationView />}
           {view === 'spelling' && <SpellingView />}
+          {view === 'shadowing' && <ShadowingView />}
+          {view === 'dictation' && <DictationView />}
           {view === 'dictionary' && <DictionaryView />}
         </div>
       </main>

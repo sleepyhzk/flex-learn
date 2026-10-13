@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Layers, BookOpen, GraduationCap, Keyboard, MessageCircle, ChevronRight } from 'lucide-react';
+import { Layers, BookOpen, GraduationCap, Keyboard, Headphones, Mic, MessageCircle, ChevronRight } from 'lucide-react';
 import { INITIAL_VOCAB, LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { useSrsProgress } from '@/hooks/useSrsProgress';
 import { vocabKey } from '@/lib/vocabKey';
@@ -10,6 +10,8 @@ const practice: { key: ViewKey; title: string; desc: string; icon: React.Compone
   { key: 'lessons', title: 'Từ vựng và bài tập', desc: 'Xem từ theo cấp và chủ đề, làm trắc nghiệm', icon: GraduationCap },
   { key: 'conversation', title: 'Giao tiếp thường dùng', desc: 'Câu mẫu theo tình huống, có phát âm', icon: MessageCircle },
   { key: 'spelling', title: 'Luyện chính tả', desc: 'Đọc nghĩa tiếng Việt, gõ lại từ tiếng Anh', icon: Keyboard },
+  { key: 'dictation', title: 'Nghe chép', desc: 'Nghe phát âm, gõ lại từ hoặc câu', icon: Headphones },
+  { key: 'shadowing', title: 'Shadowing', desc: 'Nghe câu mẫu, nhại theo và thu âm giọng mình', icon: Mic },
   { key: 'dictionary', title: 'Tra cứu từ', desc: 'Tìm theo từ tiếng Anh hoặc nghĩa tiếng Việt', icon: BookOpen },
 ];
 

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings } from 'lucide-react';
+import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings, Headphones, Mic } from 'lucide-react';
 import { VoiceSettings } from './VoiceSettings';
 import { useAuth } from '@/hooks/useAuth';
 
-export type ViewKey = 'home' | 'flashcards' | 'dictionary' | 'lessons' | 'spelling' | 'conversation';
+export type ViewKey = 'home' | 'flashcards' | 'dictionary' | 'lessons' | 'spelling' | 'dictation' | 'shadowing' | 'conversation';
 
 interface NavItem {
   key: ViewKey;
@@ -17,6 +17,8 @@ const navItems: NavItem[] = [
   { key: 'lessons', label: 'Từ vựng', icon: GraduationCap },
   { key: 'conversation', label: 'Giao tiếp', icon: MessageCircle },
   { key: 'spelling', label: 'Chính tả', icon: Keyboard },
+  { key: 'dictation', label: 'Nghe chép', icon: Headphones },
+  { key: 'shadowing', label: 'Shadowing', icon: Mic },
   { key: 'dictionary', label: 'Tra cứu', icon: BookOpen },
 ];
 
@@ -164,7 +166,7 @@ export function Sidebar({ current, onNavigate, theme, onToggleTheme }: SidebarPr
 
       {/* Thanh tab dưới (điện thoại) */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md dark:border-slate-800 dark:bg-paper-dark/95 lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 flex overflow-x-auto border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md [scrollbar-width:none] dark:border-slate-800 dark:bg-paper-dark/95 lg:hidden [&::-webkit-scrollbar]:hidden"
         aria-label="Điều hướng chính"
       >
         {navItems.map((item) => {
@@ -175,7 +177,7 @@ export function Sidebar({ current, onNavigate, theme, onToggleTheme }: SidebarPr
               key={item.key}
               onClick={() => onNavigate(item.key)}
               aria-current={active ? 'page' : undefined}
-              className={`flex flex-col items-center gap-0.5 pb-1.5 pt-2 text-[10px] font-medium transition-colors ${
+              className={`flex min-w-[4.5rem] flex-1 shrink-0 flex-col items-center gap-0.5 pb-1.5 pt-2 text-[10px] font-medium transition-colors ${
                 active ? 'text-primary-700 dark:text-primary-300' : 'text-slate-500 dark:text-slate-400'
               }`}
             >
