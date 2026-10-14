@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Volume2, Eye, EyeOff, RotateCcw, Check, Layers, Inbox, Star } from 'lucide-react';
+import { Volume2, Eye, EyeOff, RotateCcw, Check, Layers, Inbox, Star, Shuffle, XCircle, CheckCircle2 } from 'lucide-react';
 import { INITIAL_VOCAB, VOCAB_BY_LEVEL, LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { topicOf } from '@/data/vocabTopics';
 import { TopicSelect, countByTopic } from '@/components/TopicSelect';
@@ -10,7 +10,7 @@ import { useSrsProgress } from '@/hooks/useSrsProgress';
 import { useStarred } from '@/hooks/useStarred';
 import { vocabKey, speechText } from '@/lib/vocabKey';
 import { isDue } from '@/lib/srs';
-import type { VocabItem, ReviewQuality, FlashcardFilter, SrsState } from '@/lib/types';
+import type { VocabItem, ReviewQuality, FlashcardFilter, SrsState, Level } from '@/lib/types';
 
 type ProgressMap = Record<string, SrsState>;
 type SessionStats = { reviewed: number; known: number; unknown: number };
@@ -48,16 +48,51 @@ function listFor(filter: FlashcardFilter, progressMap: ProgressMap, starred: Set
   return list;
 }
 
-function buildDeck(filter: FlashcardFilter, topic: TopicFilter, progressMap: ProgressMap, starred: Set<string>): VocabItem[] {
-  let list = listFor(filter, progressMap, starred);
+/** Học thẻ mới / Ôn tập lại thẻ đã chấm "Chưa thuộc" hoặc "Thuộc rồi". */
+type Mode = 'learn' | 'review';
+type ReviewKind = 'hard' | 'good';
+
+interface DeckSpec {
+  filter: FlashcardFilter;
+  level: 'all' | Level;
+  shuffle: boolean;
+}
+
+function baseListFor(spec: DeckSpec, progressMap: ProgressMap, starred: Set<string>): VocabItem[] {
+  const list = listFor(spec.filter, progressMap, starred);
+  return spec.level === 'all' ? list : list.filter((w) => w.level === spec.level);
+}
+
+function shuffled<T>(list: T[]): T[] {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildDeck(spec: DeckSpec, topic: TopicFilter, progressMap: ProgressMap, starred: Set<string>): VocabItem[] {
+  let list = baseListFor(spec, progressMap, starred);
   if (topic !== 'all') list = list.filter((w) => topicOf(w) === topic);
+  if (spec.shuffle) return shuffled(list);
+  // Ôn lại thẻ đã thuộc: thẻ lâu chưa xem nhất lên trước
+  if (spec.filter === 'good') {
+    return [...list].sort((a, b) =>
+      (progressMap[vocabKey(a)]?.lastReviewed ?? '').localeCompare(progressMap[vocabKey(b)]?.lastReviewed ?? '')
+    );
+  }
   return sortByDue(list, progressMap);
 }
 
 export function FlashcardView() {
   const { progressMap, upsert } = useSrsProgress();
   const { starred, toggle: toggleStar } = useStarred();
+  const [mode, setMode] = useState<Mode>('learn');
   const [filter, setFilter] = useState<FlashcardFilter>('all');
+  const [reviewKind, setReviewKind] = useState<ReviewKind>('hard');
+  const [reviewLevel, setReviewLevel] = useState<'all' | Level>('all');
+  const [shuffle, setShuffle] = useState(false);
   const [topic, setTopic] = useState<TopicFilter>('all');
   const [showIpa, setShowIpa] = useState(true);
   const [showMeaning, setShowMeaning] = useState(false);
@@ -72,10 +107,17 @@ export function FlashcardView() {
   const starredRef = useRef(starred);
   starredRef.current = starred;
 
-  const [cards, setCards] = useState<VocabItem[]>(() => buildDeck('all', 'all', progressMap, starred));
+  const spec = useMemo<DeckSpec>(
+    () => (mode === 'learn' ? { filter, level: 'all', shuffle: false } : { filter: reviewKind, level: reviewLevel, shuffle }),
+    [mode, filter, reviewKind, reviewLevel, shuffle]
+  );
 
-  const startSession = useCallback((f: FlashcardFilter, t: TopicFilter) => {
-    setCards(buildDeck(f, t, progressRef.current, starredRef.current));
+  const [cards, setCards] = useState<VocabItem[]>(() =>
+    buildDeck({ filter: 'all', level: 'all', shuffle: false }, 'all', progressMap, starred)
+  );
+
+  const startSession = useCallback((sp: DeckSpec, t: TopicFilter) => {
+    setCards(buildDeck(sp, t, progressRef.current, starredRef.current));
     setIndex(0);
     setShowMeaning(false);
     setFinished(false);
@@ -83,15 +125,20 @@ export function FlashcardView() {
   }, []);
 
   useEffect(() => {
-    startSession(filter, topic);
-  }, [filter, topic, startSession]);
+    startSession(spec, topic);
+  }, [spec, topic, startSession]);
 
   const currentCard: VocabItem | undefined = cards[index];
 
   // Chỉ còn 2 mức: "Chưa thuộc" -> hard (quên, ôn lại ngày mai), "Thuộc rồi" -> good
   const handleReview = (quality: Extract<ReviewQuality, 'hard' | 'good'>) => {
     if (!currentCard || finished) return;
-    upsert(vocabKey(currentCard), quality);
+    // Ôn lại thẻ đã thuộc khi chưa đến hạn: chỉ tính vào thống kê phiên, không đẩy lịch ôn xa thêm.
+    // (Nếu quên thì vẫn ghi "Chưa thuộc".)
+    const prev = progressRef.current[vocabKey(currentCard)];
+    const practiceOnly =
+      mode === 'review' && quality === 'good' && !!prev && prev.lastQuality !== 'hard' && !isDue(prev.nextReview);
+    if (!practiceOnly) upsert(vocabKey(currentCard), quality);
     setSessionStats((prev) => ({
       reviewed: prev.reviewed + 1,
       known: prev.known + (quality === 'good' ? 1 : 0),
@@ -154,7 +201,7 @@ export function FlashcardView() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const reset = () => startSession(filter, topic);
+  const reset = () => startSession(spec, topic);
 
   const isStarredCard = currentCard ? starred.has(vocabKey(currentCard)) : false;
 
@@ -169,16 +216,32 @@ export function FlashcardView() {
   }).length;
 
   // Số từ của từng chủ đề trong bộ lọc đang chọn (A1/A2/B1, Đã đánh dấu...)
-  const baseList = listFor(filter, progressMap, starred);
+  const baseList = baseListFor(spec, progressMap, starred);
   const topicCounts = useMemo(() => countByTopic(baseList), [baseList]);
 
   const filterTabs: { key: FlashcardFilter; label: string; count: number }[] = [
     { key: 'all', label: 'Tất cả', count: INITIAL_VOCAB.length },
     ...LEVEL_ORDER.map((l) => ({ key: l as FlashcardFilter, label: LEVEL_LABEL[l], count: VOCAB_BY_LEVEL[l].length })),
     { key: 'starred', label: 'Đã đánh dấu', count: starred.size },
-    { key: 'hard', label: 'Cần ôn', count: hardCount },
-    { key: 'good', label: 'Đã thuộc', count: goodCount },
   ];
+
+  // Chế độ Ôn tập: số thẻ theo từng cấp của nhóm đang chọn
+  const kindList = listFor(reviewKind, progressMap, starred);
+  const reviewLevelTabs: { key: 'all' | Level; label: string; count: number }[] = [
+    { key: 'all', label: 'Tất cả', count: kindList.length },
+    ...LEVEL_ORDER.map((l) => ({ key: l as 'all' | Level, label: LEVEL_LABEL[l], count: kindList.filter((w) => w.level === l).length })),
+  ];
+  const kindCard = (kind: ReviewKind, active: boolean) =>
+    kind === 'hard'
+      ? `border-error-200 bg-error-50 text-error-700 dark:border-error-900 dark:bg-error-950/30 dark:text-error-400 ${active ? 'ring-2 ring-error-500/60' : 'opacity-70 hover:opacity-100'}`
+      : `border-success-200 bg-success-50 text-success-700 dark:border-success-900 dark:bg-success-950/30 dark:text-success-400 ${active ? 'ring-2 ring-success-500/60' : 'opacity-70 hover:opacity-100'}`;
+
+  const modeBtn = (active: boolean) =>
+    `flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+      active
+        ? 'bg-primary-600 text-white'
+        : 'text-slate-600 hover:bg-primary-100/60 dark:text-slate-400 dark:hover:bg-slate-800'
+    }`;
 
   const chip = (active: boolean) =>
     `flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
@@ -196,7 +259,72 @@ export function FlashcardView() {
         </p>
       </header>
 
-      <div className="-mx-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
+      <div role="tablist" aria-label="Chế độ" className="flex w-full max-w-xs gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+        <button role="tab" aria-selected={mode === 'learn'} onClick={() => setMode('learn')} className={modeBtn(mode === 'learn')}>
+          Học thẻ
+        </button>
+        <button role="tab" aria-selected={mode === 'review'} onClick={() => setMode('review')} className={modeBtn(mode === 'review')}>
+          Ôn tập
+        </button>
+      </div>
+
+      {mode === 'review' && (
+        <section aria-label="Ôn tập" className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {([
+              { kind: 'hard' as const, label: 'Chưa thuộc', sub: 'thẻ cần ôn lại', count: hardCount, Icon: XCircle },
+              { kind: 'good' as const, label: 'Thuộc rồi', sub: 'thẻ để kiểm tra lại', count: goodCount, Icon: CheckCircle2 },
+            ]).map(({ kind, label, sub, count, Icon }) => (
+              <button
+                key={kind}
+                onClick={() => setReviewKind(kind)}
+                aria-pressed={reviewKind === kind}
+                className={`rounded-2xl border p-4 text-left transition ${kindCard(kind, reviewKind === kind)}`}
+              >
+                <span className="flex items-center gap-2 text-base font-bold">
+                  <Icon className="h-5 w-5" />
+                  {label}
+                </span>
+                <span className="mt-2 block font-display text-4xl font-extrabold tabular-nums">{count}</span>
+                <span className="block text-xs opacity-80">{sub}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="-mx-4 min-w-0 flex-1 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
+              <div role="tablist" aria-label="Cấp độ" className="flex w-max gap-1.5">
+                {reviewLevelTabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    role="tab"
+                    aria-selected={reviewLevel === tab.key}
+                    onClick={() => setReviewLevel(tab.key)}
+                    className={chip(reviewLevel === tab.key)}
+                  >
+                    {tab.label}
+                    <span className={`text-xs tabular-nums ${reviewLevel === tab.key ? 'text-white/75' : 'text-slate-400'}`}>{tab.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => setShuffle((v) => !v)}
+              aria-pressed={shuffle}
+              title={shuffle ? 'Đang xáo trộn thứ tự' : 'Xáo trộn thứ tự thẻ'}
+              className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                shuffle
+                  ? 'border-primary-600 bg-primary-600 text-white'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-primary-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+              }`}
+            >
+              <Shuffle className="h-4 w-4" />
+              <span className="hidden sm:inline">Xáo trộn</span>
+            </button>
+          </div>
+        </section>
+      )}
+
+      <div className={`-mx-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0 ${mode === 'review' ? 'hidden' : ''}`}>
         <div role="tablist" aria-label="Bộ thẻ" className="flex w-max gap-1.5">
           {filterTabs.map((tab) => (
             <button
@@ -216,9 +344,27 @@ export function FlashcardView() {
       <TopicSelect value={topic} onChange={setTopic} counts={topicCounts} total={baseList.length} />
 
       {finished ? (
-        <SessionComplete stats={sessionStats} onReset={reset} />
+        <SessionComplete stats={sessionStats} onReset={reset} review={mode === 'review'} />
       ) : cards.length === 0 || !currentCard ? (
-        <EmptyState onShowAll={() => { setFilter('all'); setTopic('all'); }} />
+        mode === 'review' ? (
+          <EmptyState
+            title={reviewKind === 'hard' ? 'Chưa có thẻ nào ở mục "Chưa thuộc"' : 'Chưa có thẻ nào ở mục "Thuộc rồi"'}
+            desc={
+              reviewKind === 'hard'
+                ? 'Thẻ bạn bấm "Chưa thuộc" khi học sẽ xuất hiện ở đây để ôn lại.'
+                : 'Thẻ bạn bấm "Thuộc rồi" khi học sẽ xuất hiện ở đây để kiểm tra lại.'
+            }
+            actionLabel="Quay lại học thẻ"
+            onAction={() => { setMode('learn'); setTopic('all'); }}
+          />
+        ) : (
+          <EmptyState
+            title="Bộ này chưa có thẻ nào"
+            desc='Thẻ sẽ xuất hiện ở đây khi bạn học và đánh dấu từ. Chọn "Tất cả" để bắt đầu.'
+            actionLabel="Xem tất cả thẻ"
+            onAction={() => { setFilter('all'); setTopic('all'); }}
+          />
+        )
       ) : (
         <>
           <section
@@ -396,14 +542,14 @@ function ReviewButton({ label, sublabel, hint, onClick, tone }: { label: string;
   );
 }
 
-function SessionComplete({ stats, onReset }: { stats: SessionStats; onReset: () => void }) {
+function SessionComplete({ stats, onReset, review }: { stats: SessionStats; onReset: () => void; review: boolean }) {
   const pct = stats.reviewed > 0 ? Math.round((stats.known / stats.reviewed) * 100) : 0;
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900">
       <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-100 dark:bg-success-950/40">
         <Check className="h-7 w-7 text-success-600 dark:text-success-400" />
       </div>
-      <h3 className="font-display text-3xl font-semibold text-slate-900 dark:text-slate-100">Xong phiên học</h3>
+      <h3 className="font-display text-3xl font-semibold text-slate-900 dark:text-slate-100">{review ? 'Xong phiên ôn tập' : 'Xong phiên học'}</h3>
       <p className="mt-2 text-slate-600 dark:text-slate-400">
         Bạn đã ôn {stats.reviewed} thẻ và nhớ {pct}%. Thuộc rồi {stats.known}, chưa thuộc {stats.unknown}.
       </p>
@@ -412,28 +558,26 @@ function SessionComplete({ stats, onReset }: { stats: SessionStats; onReset: () 
         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
       >
         <RotateCcw className="h-4 w-4" />
-        Học lại bộ này
+        {review ? 'Ôn tiếp phần còn lại' : 'Học lại bộ này'}
       </button>
     </div>
   );
 }
 
-function EmptyState({ onShowAll }: { onShowAll: () => void }) {
+function EmptyState({ title, desc, actionLabel, onAction }: { title: string; desc: string; actionLabel: string; onAction: () => void }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900">
       <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
         <Inbox className="h-7 w-7 text-slate-400" />
       </div>
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Bộ này chưa có thẻ nào</h3>
-      <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-        Thẻ sẽ xuất hiện ở đây khi bạn học và đánh dấu từ. Chọn "Tất cả" để bắt đầu.
-      </p>
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+      <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">{desc}</p>
       <button
-        onClick={onShowAll}
+        onClick={onAction}
         className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
       >
         <Layers className="h-4 w-4" />
-        Xem tất cả thẻ
+        {actionLabel}
       </button>
     </div>
   );

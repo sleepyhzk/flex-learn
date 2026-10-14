@@ -54,6 +54,38 @@ const SOURCES: { key: Source; label: string; desc: string }[] = [
 
 const CONVERSATION_LEVELS: Level[] = ['A1', 'A2', 'B1'];
 
+/** Ô chọn gọn dạng danh sách thả xuống, dùng để gom các hàng nút thành một hàng. */
+function MiniSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: { key: T; label: string }[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <select
+      aria-label={label}
+      title={label}
+      value={value}
+      onChange={(e) => {
+        onChange(e.target.value as T);
+        e.currentTarget.blur(); // trả phím tắt về cho bài tập
+      }}
+      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-primary-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    >
+      {options.map((o) => (
+        <option key={o.key} value={o.key}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 /** Nghe chép chính tả: nghe phát âm rồi gõ lại. Không phân biệt chữ hoa, chữ thường và dấu câu. */
 export function DictationView() {
   const [mode, setMode] = useState<Mode>('full');
@@ -263,73 +295,40 @@ export function DictationView() {
       </div>
 
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex w-fit gap-1.5 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
-            {([
-              { key: 'full' as const, label: 'Gõ cả câu' },
-              { key: 'cloze' as const, label: 'Đục lỗ (điền chỗ trống)' },
-            ]).map((m) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <MiniSelect
+            label="Kiểu bài"
+            value={mode}
+            onChange={switchMode}
+            options={[
+              { key: 'full', label: 'Gõ cả câu' },
+              { key: 'cloze', label: 'Đục lỗ (điền chỗ trống)' },
+            ]}
+          />
+          <MiniSelect
+            label="Nguồn"
+            value={source}
+            onChange={switchSource}
+            options={SOURCES.filter((s) => mode === 'full' || s.key !== 'word')}
+          />
+          {mode === 'cloze' && (
+            <MiniSelect label="Độ khó" value={difficulty} onChange={switchDifficulty} options={DIFFICULTIES} />
+          )}
+          <div className="flex w-fit flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+            {levelTabs.map((tab) => (
               <button
-                key={m.key}
-                onClick={() => switchMode(m.key)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                  mode === m.key
-                    ? 'bg-primary-600 text-white dark:bg-slate-100 dark:text-slate-900'
+                key={tab.key}
+                onClick={() => switchLevel(tab.key)}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  levelFilter === tab.key
+                    ? 'bg-primary-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
-                {m.label}
+                {tab.label}
               </button>
             ))}
           </div>
-          {mode === 'cloze' && (
-            <div className="flex w-fit gap-1.5 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
-              {DIFFICULTIES.map((d) => (
-                <button
-                  key={d.key}
-                  onClick={() => switchDifficulty(d.key)}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    difficulty === d.key
-                      ? 'bg-primary-600 text-white'
-                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="flex w-fit flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
-          {SOURCES.filter((s) => mode === 'full' || s.key !== 'word').map((s) => (
-            <button
-              key={s.key}
-              onClick={() => switchSource(s.key)}
-              title={s.desc}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                source === s.key
-                  ? 'bg-primary-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex w-fit flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
-          {levelTabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => switchLevel(tab.key)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                levelFilter === tab.key
-                  ? 'bg-primary-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
         {source !== 'conversation' && (
           <TopicSelect value={topic} onChange={switchTopic} counts={topicCounts} total={levelItems.length} />
