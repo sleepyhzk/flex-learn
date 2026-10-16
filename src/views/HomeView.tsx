@@ -59,7 +59,7 @@ export function HomeView({ onNavigate }: { onNavigate: (view: ViewKey) => void }
         <p className="mt-3 text-lg text-slate-700 dark:text-slate-300">{sub}</p>
         <button
           onClick={() => onNavigate('flashcards')}
-          className="mt-7 inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary-700 via-primary-600 to-[#a9705a] px-7 py-4 text-lg font-bold text-white shadow-[0_14px_28px_-12px_rgba(26,34,69,0.75),inset_0_1px_0_rgba(255,255,255,0.18)] transition hover:brightness-110 active:scale-[0.98]"
+          className="mt-7 inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary-700 via-primary-600 to-[#a9705a] dark:from-primary-600 dark:via-primary-600 dark:to-primary-500 px-7 py-4 text-lg font-bold text-white shadow-[0_14px_28px_-12px_rgba(26,34,69,0.75),inset_0_1px_0_rgba(255,255,255,0.18)] transition hover:brightness-110 active:scale-[0.98]"
         >
           <Layers className="h-6 w-6" />
           {cta}

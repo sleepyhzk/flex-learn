@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { CONVERSATION_LEVELS } from '@/data/conversationData';
 import { Mic, Square, Volume2, Turtle, ArrowRight, Play, Eye, EyeOff, Trophy, RotateCcw, AlertTriangle, MessagesSquare, CheckCircle2 } from 'lucide-react';
 import { LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { TopicSelect, countByTopic } from '@/components/TopicSelect';
@@ -26,7 +27,6 @@ const SOURCES: { key: SentenceSource; label: string }[] = [
   { key: 'dialogue', label: 'Hội thoại dài' },
 ];
 const DIALOGUE_LEVELS: Level[] = LEVEL_ORDER.filter((l) => DIALOGUES.some((d) => d.level === l));
-const CONVERSATION_LEVELS: Level[] = ['A1', 'A2', 'B1'];
 const PASS_SCORE = 70;
 const MAX_RECORD_MS = 20000;
 

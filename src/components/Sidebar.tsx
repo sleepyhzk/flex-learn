@@ -60,21 +60,30 @@ function SettingsPanel({
     <div className="space-y-1">
       {auth.enabled && !auth.loading &&
         (auth.user ? (
-          <div className="mb-3 rounded-2xl border border-slate-200 bg-white px-3.5 py-3 shadow-[0_6px_16px_-10px_rgba(110,75,40,0.5)] dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-[13px] leading-snug text-slate-700 dark:text-slate-400">Đã đăng nhập, tiến độ được lưu trên tài khoản</p>
-            <p className="mt-0.5 truncate text-base font-bold text-ink dark:text-slate-100" title={auth.user.email ?? ''}>
-              {auth.user.email}
-            </p>
-            <button
-              onClick={() => {
-                void auth.signOut();
-                onAfterAction?.();
-              }}
-              className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-ink hover:underline dark:text-slate-300"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              Đăng xuất
-            </button>
+          <div className="mb-3 rounded-2xl border border-slate-200 bg-white px-2.5 py-2 shadow-[0_6px_16px_-10px_rgba(110,75,40,0.5)] dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center gap-2.5" title={auth.user.email ?? undefined}>
+              <span
+                aria-hidden="true"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-200 text-sm font-bold uppercase text-primary-700 dark:bg-primary-200 dark:text-primary-300"
+              >
+                {(auth.user.email ?? '?').charAt(0)}
+              </span>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="text-[13px] font-semibold text-ink dark:text-slate-100">Đã đăng nhập</p>
+                <p className="text-[11.5px] text-slate-600 dark:text-slate-400">Tiến độ được lưu</p>
+              </div>
+              <button
+                onClick={() => {
+                  void auth.signOut();
+                  onAfterAction?.();
+                }}
+                className="flex-shrink-0 rounded-lg p-1.5 text-slate-600 transition-colors hover:bg-primary-100/70 hover:text-ink dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                aria-label="Đăng xuất"
+                title="Đăng xuất"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         ) : (
           <button
@@ -82,7 +91,7 @@ function SettingsPanel({
               auth.openAuth();
               onAfterAction?.();
             }}
-            className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-700 via-primary-600 to-[#a9705a] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_-8px_rgba(26,34,69,0.7)] transition hover:brightness-110"
+            className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-700 via-primary-600 to-[#a9705a] dark:from-primary-600 dark:via-primary-600 dark:to-primary-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_-8px_rgba(26,34,69,0.7)] transition hover:brightness-110"
           >
             <LogIn className="h-4 w-4" />
             Đăng nhập để lưu tiến độ
@@ -105,7 +114,7 @@ function SettingsPanel({
           {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           Chế độ tối
         </span>
-        <span className={`relative h-6 w-11 rounded-full shadow-inner transition-colors ${theme === 'dark' ? 'bg-primary-400' : 'bg-slate-300'}`}>
+        <span className={`relative h-6 w-11 rounded-full shadow-inner transition-colors ${theme === 'dark' ? 'bg-[#c29f81]' : 'bg-slate-300'}`}>
           <span
             className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${theme === 'dark' ? 'left-[22px]' : 'left-0.5'}`}
           />
@@ -149,7 +158,7 @@ export function Sidebar({ current, onNavigate, theme, onToggleTheme }: SidebarPr
                 aria-current={active ? 'page' : undefined}
                 className={`relative flex w-full items-center gap-3.5 rounded-2xl px-4 py-3 text-[15px] transition-colors ${
                   active
-                    ? "bg-primary-200 font-medium text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] before:absolute before:-left-3 before:top-1/2 before:h-8 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-ink dark:bg-primary-800/70 dark:text-slate-100 dark:before:bg-primary-400"
+                    ? "bg-primary-200 font-medium text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] before:absolute before:-left-3 before:top-1/2 before:h-8 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-ink dark:bg-primary-600 dark:text-white dark:shadow-none dark:before:bg-primary-300"
                     : 'text-slate-700 hover:bg-primary-100/60 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
@@ -178,10 +187,10 @@ export function Sidebar({ current, onNavigate, theme, onToggleTheme }: SidebarPr
               onClick={() => onNavigate(item.key)}
               aria-current={active ? 'page' : undefined}
               className={`flex min-w-[4.5rem] flex-1 shrink-0 flex-col items-center gap-0.5 pb-1.5 pt-2 text-[10px] font-medium transition-colors ${
-                active ? 'text-primary-700 dark:text-primary-300' : 'text-slate-500 dark:text-slate-400'
+                active ? 'text-primary-700 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'
               }`}
             >
-              <span className={`rounded-full px-4 py-1 transition-colors ${active ? 'bg-primary-200 dark:bg-primary-800/70' : ''}`}>
+              <span className={`rounded-full px-4 py-1 transition-colors ${active ? 'bg-primary-200 dark:bg-primary-600 dark:text-white' : ''}`}>
                 <Icon className="h-5 w-5" />
               </span>
               {item.label}

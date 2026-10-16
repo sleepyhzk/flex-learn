@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { CONVERSATION_LEVELS } from '@/data/conversationData';
 import { Headphones, Check, X, ArrowRight, RotateCcw, Volume2, Trophy, Lightbulb, Eye } from 'lucide-react';
 import { LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { buildItems, shuffle } from '@/lib/dictItems';
@@ -52,7 +53,6 @@ const SOURCES: { key: Source; label: string; desc: string }[] = [
   { key: 'conversation', label: 'Câu giao tiếp', desc: 'Nghe câu giao tiếp thường dùng, gõ lại cả câu' },
 ];
 
-const CONVERSATION_LEVELS: Level[] = ['A1', 'A2', 'B1'];
 
 /** Ô chọn gọn dạng danh sách thả xuống, dùng để gom các hàng nút thành một hàng. */
 function MiniSelect<T extends string>({

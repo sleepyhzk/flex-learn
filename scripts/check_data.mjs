@@ -2,10 +2,11 @@
 // Cần Node 22.6 trở lên (chạy trực tiếp file .ts bằng --experimental-strip-types).
 import { INITIAL_VOCAB, LEVEL_ORDER } from '../src/data/vocabData.ts';
 import { TOPICS } from '../src/data/vocabTopics.ts';
-import { CONVERSATION_SENTENCES, CONVERSATION_CATEGORIES } from '../src/data/conversationData.ts';
+import { CONVERSATION_SENTENCES, CONVERSATION_CATEGORIES, CONVERSATION_LEVELS } from '../src/data/conversationData.ts';
 import { vocabKey } from '../src/lib/vocabKey.ts';
 import { LEVEL_OVERRIDES } from '../src/data/vocab/levelOverrides.ts';
 import { SENSES } from '../src/data/vocab/senses.ts';
+import { readFileSync } from 'node:fs';
 
 const ID_RANGE = {
   A1: [[1, 999]],
@@ -77,6 +78,14 @@ for (const [key, list] of Object.entries(SENSES)) {
   }
 }
 
+// Hình minh họa (wordVisualScenes.tsx là file JSX nên đọc dạng chữ): khóa phải trỏ tới một từ có thật
+{
+  const src = readFileSync(new URL('../src/components/wordVisualScenes.tsx', import.meta.url), 'utf8');
+  const keys = [...src.matchAll(/^  '([^']+\|[a-z]+)': \(\)/gm)].map((m) => m[1]);
+  for (const k of keys) if (!wordPos.has(k)) err(`wordVisualScenes.tsx: không có từ nào ứng với khóa "${k}"`);
+  console.log(`Hình minh họa động: ${keys.length}`);
+}
+
 const cids = new Set();
 const cEnglish = new Set();
 const catKeys = new Set(CONVERSATION_CATEGORIES.map((c) => c.key));
@@ -85,7 +94,7 @@ for (const c of CONVERSATION_SENTENCES) {
   cids.add(c.id);
   if (!c.english.trim() || !c.vietnamese.trim()) err(`câu giao tiếp #${c.id} có trường trống`);
   if (!catKeys.has(c.category)) err(`câu giao tiếp #${c.id} có chủ đề không hợp lệ: ${c.category}`);
-  if (!['A1', 'A2', 'B1'].includes(c.level)) err(`câu giao tiếp #${c.id} có cấp không hợp lệ: ${c.level}`);
+  if (!CONVERSATION_LEVELS.includes(c.level)) err(`câu giao tiếp #${c.id} có cấp không hợp lệ: ${c.level}`);
   if (cEnglish.has(c.english)) err(`câu giao tiếp trùng nội dung: "${c.english}"`);
   cEnglish.add(c.english);
   if (!/[.!?]$/.test(c.english)) warn(`câu giao tiếp #${c.id} không kết thúc bằng dấu câu: "${c.english}"`);
@@ -102,7 +111,7 @@ for (const t of TOPICS) {
 console.log(`Câu giao tiếp: ${CONVERSATION_SENTENCES.length}`);
 for (const c of CONVERSATION_CATEGORIES) {
   const list = CONVERSATION_SENTENCES.filter((s) => s.category === c.key);
-  const lv = ['A1', 'A2', 'B1'].map((l) => `${l}:${list.filter((s) => s.level === l).length}`).join(' ');
+  const lv = CONVERSATION_LEVELS.map((l) => `${l}:${list.filter((s) => s.level === l).length}`).join(' ');
   console.log(`  ${c.key.padEnd(10)} ${String(list.length).padStart(3)}  (${lv})  ${c.label}`);
 }
 

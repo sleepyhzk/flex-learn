@@ -11,6 +11,7 @@ import { useStarred } from '@/hooks/useStarred';
 import { vocabKey, speechText } from '@/lib/vocabKey';
 import { isDue } from '@/lib/srs';
 import type { VocabItem, ReviewQuality, FlashcardFilter, SrsState, Level } from '@/lib/types';
+import { WordVisual } from '@/components/WordVisual';
 
 type ProgressMap = Record<string, SrsState>;
 type SessionStats = { reviewed: number; known: number; unknown: number };
@@ -237,39 +238,40 @@ export function FlashcardView() {
       : `border-success-200 bg-success-50 text-success-700 dark:border-success-900 dark:bg-success-950/30 dark:text-success-400 ${active ? 'ring-2 ring-success-500/60' : 'opacity-70 hover:opacity-100'}`;
 
   const modeBtn = (active: boolean) =>
-    `flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+    `rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
       active
         ? 'bg-primary-600 text-white'
         : 'text-slate-600 hover:bg-primary-100/60 dark:text-slate-400 dark:hover:bg-slate-800'
     }`;
 
   const chip = (active: boolean) =>
-    `flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+    `flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-medium transition-colors ${
       active
         ? 'border-primary-600 bg-primary-600 text-white'
         : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
     }`;
 
   return (
-    <div className="mx-auto max-w-xl space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Flashcard</h2>
-        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-          {dueCount > 0 ? `${dueCount} thẻ đến hạn hôm nay` : 'Chưa có thẻ nào đến hạn'}
-        </p>
+    <div className="mx-auto max-w-2xl space-y-4">
+      <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Flashcard</h2>
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+            {dueCount > 0 ? `${dueCount} thẻ đến hạn hôm nay` : 'Chưa có thẻ nào đến hạn'}
+          </p>
+        </div>
+        <div role="tablist" aria-label="Chế độ" className="flex gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+          <button role="tab" aria-selected={mode === 'learn'} onClick={() => setMode('learn')} className={modeBtn(mode === 'learn')}>
+            Học thẻ
+          </button>
+          <button role="tab" aria-selected={mode === 'review'} onClick={() => setMode('review')} className={modeBtn(mode === 'review')}>
+            Ôn tập
+          </button>
+        </div>
       </header>
 
-      <div role="tablist" aria-label="Chế độ" className="flex w-full max-w-xs gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
-        <button role="tab" aria-selected={mode === 'learn'} onClick={() => setMode('learn')} className={modeBtn(mode === 'learn')}>
-          Học thẻ
-        </button>
-        <button role="tab" aria-selected={mode === 'review'} onClick={() => setMode('review')} className={modeBtn(mode === 'review')}>
-          Ôn tập
-        </button>
-      </div>
-
       {mode === 'review' && (
-        <section aria-label="Ôn tập" className="space-y-4">
+        <section aria-label="Ôn tập" className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             {([
               { kind: 'hard' as const, label: 'Chưa thuộc', sub: 'thẻ cần ôn lại', count: hardCount, Icon: XCircle },
@@ -279,13 +281,13 @@ export function FlashcardView() {
                 key={kind}
                 onClick={() => setReviewKind(kind)}
                 aria-pressed={reviewKind === kind}
-                className={`rounded-2xl border p-4 text-left transition ${kindCard(kind, reviewKind === kind)}`}
+                className={`rounded-2xl border px-4 py-3 text-left transition ${kindCard(kind, reviewKind === kind)}`}
               >
                 <span className="flex items-center gap-2 text-base font-bold">
                   <Icon className="h-5 w-5" />
                   {label}
                 </span>
-                <span className="mt-2 block font-display text-4xl font-extrabold tabular-nums">{count}</span>
+                <span className="mt-1 block font-display text-3xl font-extrabold tabular-nums">{count}</span>
                 <span className="block text-xs opacity-80">{sub}</span>
               </button>
             ))}
@@ -324,24 +326,25 @@ export function FlashcardView() {
         </section>
       )}
 
-      <div className={`-mx-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0 ${mode === 'review' ? 'hidden' : ''}`}>
-        <div role="tablist" aria-label="Bộ thẻ" className="flex w-max gap-1.5">
-          {filterTabs.map((tab) => (
-            <button
-              key={String(tab.key)}
-              role="tab"
-              aria-selected={filter === tab.key}
-              onClick={() => setFilter(tab.key)}
-              className={chip(filter === tab.key)}
-            >
-              {tab.label}
-              <span className={`text-xs tabular-nums ${filter === tab.key ? 'text-white/75' : 'text-slate-400'}`}>{tab.count}</span>
-            </button>
-          ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className={`-mx-4 w-[calc(100%+2rem)] min-w-0 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:w-auto sm:flex-1 sm:px-0 ${mode === 'review' ? 'hidden' : ''}`}>
+          <div role="tablist" aria-label="Bộ thẻ" className="flex w-max gap-1.5">
+            {filterTabs.map((tab) => (
+              <button
+                key={String(tab.key)}
+                role="tab"
+                aria-selected={filter === tab.key}
+                onClick={() => setFilter(tab.key)}
+                className={chip(filter === tab.key)}
+              >
+                {tab.label}
+                <span className={`text-xs tabular-nums ${filter === tab.key ? 'text-white/75' : 'text-slate-400'}`}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
         </div>
+        <TopicSelect compact value={topic} onChange={setTopic} counts={topicCounts} total={baseList.length} />
       </div>
-
-      <TopicSelect value={topic} onChange={setTopic} counts={topicCounts} total={baseList.length} />
 
       {finished ? (
         <SessionComplete stats={sessionStats} onReset={reset} review={mode === 'review'} />
@@ -382,7 +385,7 @@ export function FlashcardView() {
               <div className="h-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
             </div>
 
-            <div className="px-6 pb-7 pt-4 sm:px-10">
+            <div className="flex min-h-[23rem] flex-col px-6 pb-8 pt-5 sm:min-h-[27rem] sm:px-12">
               <div className="flex items-center justify-between">
                 <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">
                   {index + 1} / {cards.length}
@@ -408,13 +411,13 @@ export function FlashcardView() {
                 </div>
               </div>
 
-              <div className="mt-6 cursor-pointer select-none text-center" onClick={toggleMeaning}>
-                <h3 className="break-words font-display text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-6xl">
+              <div className="mt-4 flex flex-1 cursor-pointer select-none flex-col justify-center text-center" onClick={toggleMeaning}>
+                <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-6xl">
                   {currentCard.word}
                 </h3>
                 <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-                  <span className="font-display text-lg italic">{POS_SHORT[currentCard.pos]}</span>
-                  {showIpa && <span className="font-ipa text-lg text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
+                  <span className="font-display text-xl italic">{POS_SHORT[currentCard.pos]}</span>
+                  {showIpa && <span className="font-ipa text-xl text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
                   {isSpeechSupported() && (
                     <button
                       onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
@@ -436,10 +439,11 @@ export function FlashcardView() {
               >
                 <div className="overflow-hidden">
                   <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
-                    <p className="text-center text-xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
+                    {showMeaning && <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} />}
+                    <p className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
                     <blockquote className="mt-5 border-l-2 border-primary-300 pl-4 dark:border-primary-700">
                       <div className="flex items-start gap-2">
-                        <p className="flex-1 text-base leading-relaxed text-slate-800 dark:text-slate-200">{currentCard.example}</p>
+                        <p className="flex-1 text-lg leading-relaxed text-slate-800 dark:text-slate-200">{currentCard.example}</p>
                         {isSpeechSupported() && (
                           <button
                             onClick={() => speakEnglish(currentCard.example)}
@@ -452,7 +456,7 @@ export function FlashcardView() {
                           </button>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{currentCard.exampleVi}</p>
+                      <p className="mt-1 text-base text-slate-500 dark:text-slate-400">{currentCard.exampleVi}</p>
                     </blockquote>
 
                     {currentCard.senses && currentCard.senses.length > 0 && (
@@ -514,7 +518,7 @@ export function FlashcardView() {
           ) : (
             <button
               onClick={toggleMeaning}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-4 text-base font-semibold text-white shadow-[0_8px_20px_-8px_rgba(26,34,69,0.7)] transition-colors hover:bg-primary-700"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-5 text-lg font-semibold text-white shadow-[0_8px_20px_-8px_rgba(26,34,69,0.7)] transition-colors hover:bg-primary-700"
             >
               Xem nghĩa
               <kbd className="hidden rounded border border-white/40 px-1.5 py-0.5 font-sans text-xs font-normal text-white/80 sm:inline">Space</kbd>
@@ -532,8 +536,8 @@ export function FlashcardView() {
 
 function ReviewButton({ label, sublabel, hint, onClick, tone }: { label: string; sublabel: string; hint: string; onClick: () => void; tone: string }) {
   return (
-    <button onClick={onClick} className={`rounded-xl border px-4 py-3.5 text-center transition-transform active:scale-[0.98] ${tone}`}>
-      <div className="flex items-center justify-center gap-2 text-base font-semibold">
+    <button onClick={onClick} className={`rounded-xl border px-4 py-4 text-center transition-transform active:scale-[0.98] ${tone}`}>
+      <div className="flex items-center justify-center gap-2 text-lg font-semibold">
         {label}
         <kbd className="hidden rounded border border-current px-1.5 py-0.5 font-sans text-xs font-normal opacity-60 sm:inline">{hint}</kbd>
       </div>

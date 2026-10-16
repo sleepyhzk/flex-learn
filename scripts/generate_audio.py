@@ -69,7 +69,7 @@ def collect_texts():
             texts.append(example)
     for line in conv.splitlines():
         s = line.strip()
-        if not s.startswith("['"):
+        if not s.startswith(('["', "['")):
             continue
         lits = re.findall(STR, s)
         if len(lits) >= 3:  # [chủ đề, mức độ, câu tiếng Anh, nghĩa tiếng Việt]

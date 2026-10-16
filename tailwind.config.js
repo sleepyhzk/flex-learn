@@ -13,21 +13,22 @@ export default {
       colors: {
         // Tông giấy kem ấm
         white: '#fdf6e9',
-        paper: { DEFAULT: '#fbf1e0', dark: '#15110e', side: '#fbefdc', sidedark: '#1b1612' },
+        paper: { DEFAULT: '#fbf1e0', dark: '#16151a', side: '#fbefdc', sidedark: '#211f24' },
         ink: { DEFAULT: '#111a3a', dark: '#f6e9d6' },
         // Thang xám chuyển sang nâu cát ấm (thay cho slate xanh lạnh)
+        // Thang xám nâu cát. Giá trị sáng/tối nằm ở src/index.css (biến --s-*)
         slate: {
-          50: '#fcf6ea',
-          100: '#f6e9d6',
-          200: '#e8d3b8',
-          300: '#d6bd9e',
-          400: '#a98b70',
-          500: '#7f6652',
-          600: '#604b3b',
-          700: '#47372b',
-          800: '#2f241c',
-          900: '#201813',
-          950: '#14100c',
+          50: 'rgb(var(--s-50) / <alpha-value>)',
+          100: 'rgb(var(--s-100) / <alpha-value>)',
+          200: 'rgb(var(--s-200) / <alpha-value>)',
+          300: 'rgb(var(--s-300) / <alpha-value>)',
+          400: 'rgb(var(--s-400) / <alpha-value>)',
+          500: 'rgb(var(--s-500) / <alpha-value>)',
+          600: 'rgb(var(--s-600) / <alpha-value>)',
+          700: 'rgb(var(--s-700) / <alpha-value>)',
+          800: 'rgb(var(--s-800) / <alpha-value>)',
+          900: 'rgb(var(--s-900) / <alpha-value>)',
+          950: 'rgb(var(--s-950) / <alpha-value>)',
         },
         // Màu chủ đạo: navy (sáng) / nâu đất (tối). Giá trị nằm ở src/index.css
         primary: {
