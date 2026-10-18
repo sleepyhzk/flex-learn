@@ -1,0 +1,31 @@
+{
+  "name": "Flex Learn - Tự học tiếng Anh",
+  "short_name": "Flex Learn",
+  "description": "Tự học tiếng Anh: flashcard, trò chơi theo chủ đề, nghe chép, shadowing.",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f2fb",
+  "theme_color": "#3b2a9c",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

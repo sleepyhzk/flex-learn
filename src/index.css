@@ -3,51 +3,91 @@
 @tailwind utilities;
 
 :root {
-  --s-50: 252 246 234;
-  --s-100: 246 233 214;
-  --s-200: 232 211 184;
-  --s-300: 214 189 158;
-  --s-400: 169 139 112;
-  --s-500: 127 102 82;
-  --s-600: 96 75 59;
-  --s-700: 71 55 43;
-  --s-800: 47 36 28;
-  --s-900: 32 24 19;
-  --s-950: 20 16 12;
-  --p-50: 248 237 220;
-  --p-100: 239 220 192;
-  --p-200: 226 200 166;
-  --p-300: 207 171 136;
-  --p-400: 185 131 104;
-  --p-500: 59 68 112;
-  --p-600: 26 34 69;
-  --p-700: 18 25 54;
-  --p-800: 13 18 41;
-  --p-900: 8 12 29;
-  --p-950: 58 42 32;
+  --s-50: 247 247 252;
+  --s-100: 238 238 247;
+  --s-200: 222 222 238;
+  --s-300: 200 200 224;
+  --s-400: 150 150 182;
+  --s-500: 110 110 140;
+  --s-600: 80 80 112;
+  --s-700: 58 58 90;
+  --s-800: 40 40 70;
+  --s-900: 29 26 48;
+  --s-950: 20 18 34;
+  --p-50: 245 243 255;
+  --p-100: 232 229 251;
+  --p-200: 217 211 250;
+  --p-300: 190 180 247;
+  --p-400: 150 134 240;
+  --p-500: 112 92 235;
+  --p-600: 59 42 156;
+  --p-700: 47 33 128;
+  --p-800: 36 26 100;
+  --p-900: 26 19 72;
+  --p-950: 18 13 52;
+  /* Màu nhấn: tím indigo nhạt (sáng) */
+  --a-50: 245 243 255;
+  --a-100: 236 232 255;
+  --a-200: 218 211 253;
+  --a-300: 190 178 250;
+  --a-400: 160 142 246;
+  --a-500: 124 104 240;
+  --a-600: 112 92 235;
+  --a-700: 88 68 200;
+  --a-800: 70 54 160;
+  --a-900: 54 43 124;
+  --a-950: 36 28 84;
+  /* Đèn lồng */
+  --ln-1: #f7bfb9;
+  --ln-2: #ee9f99;
+  --ln-cap: #f2d8a6;
+  --ln-cord: #dfcca6;
+  --ln-rib: #ffffff;
+  --ln-tassel: #eba98a;
 }
 .dark {
-  /* Chế độ tối: nền gần đen, thẻ xám đậm, màu nhấn cam cháy, chữ kem / đào */
-  --s-100: 255 250 244;
-  --s-300: 242 226 211;
-  --s-400: 226 189 157;
-  --s-500: 168 151 138;
-  --s-600: 119 112 116;
-  --s-700: 67 66 75;
-  --s-800: 50 49 58;
-  --s-900: 39 38 44;
-  --s-950: 29 28 33;
-  --p-50: 58 38 29;
-  --p-100: 82 52 37;
-  --p-200: 104 64 42;
-  --p-300: 246 190 150;
-  --p-400: 236 150 100;
-  --p-500: 212 105 52;
-  --p-600: 194 90 39;
-  --p-700: 163 70 28;
-  --p-800: 120 56 28;
-  --p-900: 88 42 22;
-  --p-950: 70 40 28;
+  /* Chế độ tối: nền gần đen ngả tím, thẻ tím than, màu chủ đạo tím violet, nhấn hồng; đèn lồng đỏ viền vàng */
+  --s-50: 250 249 255;
+  --s-100: 240 238 250;
+  --s-200: 218 214 236;
+  --s-300: 190 185 215;
+  --s-400: 150 145 178;
+  --s-500: 112 108 140;
+  --s-600: 80 76 108;
+  --s-700: 54 50 82;
+  --s-800: 43 39 69;
+  --s-900: 27 24 45;
+  --s-950: 14 12 24;
+  --p-50: 245 243 255;
+  --p-100: 237 233 254;
+  --p-200: 221 214 254;
+  --p-300: 196 181 253;
+  --p-400: 167 139 250;
+  --p-500: 139 108 245;
+  --p-600: 109 78 224;
+  --p-700: 84 58 184;
+  --p-800: 62 44 140;
+  --p-900: 44 32 100;
+  --p-950: 30 22 70;
+  /* Màu nhấn: hồng (tối) */
+  --a-50: 253 242 248;
+  --a-100: 252 231 243;
+  --a-200: 251 207 232;
+  --a-300: 249 168 212;
+  --a-400: 244 114 182;
+  --a-500: 236 72 153;
+  --a-600: 219 39 119;
+  --a-700: 190 24 93;
+  --a-800: 157 23 77;
+  --a-900: 131 24 67;
+  --a-950: 80 7 36;
+  /* Đèn lồng */
+  --ln-1: #b8383d;
+  --ln-2: #8e2229;
+  --ln-cap: #d4aa55;
+  --ln-cord: #8a6f35;
+  --ln-rib: #ffd9a8;
+  --ln-tassel: #d4aa55;
 }
 
 @layer base {
@@ -82,17 +122,76 @@
   .bg-grid-paper {
     background-color: theme('colors.paper.DEFAULT');
     background-image:
-      radial-gradient(ellipse at 18% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
-      linear-gradient(to right, rgba(140, 105, 70, 0.13) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(140, 105, 70, 0.13) 1px, transparent 1px);
-    background-size: 100% 100%, 28px 28px, 28px 28px;
+      radial-gradient(circle 430px at 100% 0%, rgba(245, 225, 215, 0.4), transparent 70%),
+      radial-gradient(circle 380px at 0% 26%, rgba(246, 222, 244, 0.55), transparent 70%),
+      linear-gradient(to right, rgba(115, 95, 175, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(115, 95, 175, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+  }
+  /* Dòng chữ lớn chạy dọc ở nền, bên phải màn hình rộng.
+     Cỡ chữ tính theo chiều cao màn hình để cả dòng (33 ký tự) luôn vừa khung, nằm dưới dây đèn lồng, không bị cắt. */
+  .bg-quote {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    white-space: nowrap;
+    font-weight: 800;
+    font-size: clamp(10px, calc((100vh - 160px) / 42), 22px);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    max-height: calc(100vh - 140px);
+    overflow: hidden;
+    color: rgb(230, 226, 248);
+  }
+  @media (max-height: 559px) {
+    .bg-quote {
+      display: none !important;
+    }
+  }
+  .dark .bg-quote {
+    color: rgba(120, 100, 220, 0.16);
   }
   .dark .bg-grid-paper {
     background-color: theme('colors.paper.dark');
     background-image:
+      radial-gradient(ellipse at 0% 45%, rgba(150, 50, 90, 0.2), transparent 45%),
+      radial-gradient(ellipse at 100% 0%, rgba(90, 60, 190, 0.14), transparent 45%),
       linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 28px 28px, 28px 28px;
+    background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+  }
+  /* Hiệu ứng nổi khi di chuột: nhích lên và đổ bóng đậm hơn. Chỉ dùng dịch chuyển 2D theo số nguyên điểm ảnh, vì perspective/translateZ làm chữ bị mờ. */
+  .lift {
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, border-color 0.2s ease;
+  }
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 30px -14px rgba(80, 72, 150, 0.5), 0 2px 0 rgba(255, 255, 255, 0.7) inset;
+  }
+  .lift:active {
+    transform: translateY(-1px);
+  }
+  /* Mục menu bên trái: nổi lên và nhích sang phải như một nút được nhấc khỏi nền */
+  .lift-nav {
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  .lift-nav:hover {
+    transform: translateX(6px) translateY(-2px);
+    box-shadow: 0 12px 20px -10px rgba(80, 72, 150, 0.5), 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+  }
+  .lift-nav:active {
+    transform: translateX(3px);
+  }
+  .dark .lift:hover,
+  .dark .lift-nav:hover {
+    box-shadow: 0 18px 30px -14px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lift:hover,
+    .lift:active,
+    .lift-nav:hover,
+    .lift-nav:active {
+      transform: none;
+    }
   }
   /* IPA cần font có đủ ký tự /ʃ θ ð ʌ/ ; trình duyệt tự dùng font dự phòng cho ký tự thiếu. */
   .font-ipa {

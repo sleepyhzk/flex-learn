@@ -11,12 +11,11 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
-        // Tông giấy kem ấm
-        white: '#fdf6e9',
-        paper: { DEFAULT: '#fbf1e0', dark: '#16151a', side: '#fbefdc', sidedark: '#211f24' },
-        ink: { DEFAULT: '#111a3a', dark: '#f6e9d6' },
-        // Thang xám chuyển sang nâu cát ấm (thay cho slate xanh lạnh)
-        // Thang xám nâu cát. Giá trị sáng/tối nằm ở src/index.css (biến --s-*)
+        // Tông giấy kẻ ô trắng xanh lavender (theo ảnh mẫu)
+        white: '#fdfcff',
+        paper: { DEFAULT: '#f4f3fb', dark: '#0e0c18', side: '#ebe9f8', sidedark: '#13111f' },
+        ink: { DEFAULT: '#1d1a30', dark: '#f6e9d6' },
+        // Thang xám tím xanh nhạt (sáng) / xám đậm (tối). Giá trị nằm ở src/index.css (biến --s-*)
         slate: {
           50: 'rgb(var(--s-50) / <alpha-value>)',
           100: 'rgb(var(--s-100) / <alpha-value>)',
@@ -30,7 +29,7 @@ export default {
           900: 'rgb(var(--s-900) / <alpha-value>)',
           950: 'rgb(var(--s-950) / <alpha-value>)',
         },
-        // Màu chủ đạo: navy (sáng) / nâu đất (tối). Giá trị nằm ở src/index.css
+        // Màu chủ đạo: navy và hồng mauve (sáng) / cam cháy (tối). Giá trị nằm ở src/index.css
         primary: {
           50: 'rgb(var(--p-50) / <alpha-value>)',
           100: 'rgb(var(--p-100) / <alpha-value>)',
@@ -45,16 +44,17 @@ export default {
           950: 'rgb(var(--p-950) / <alpha-value>)',
         },
         accent: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+          50: 'rgb(var(--a-50) / <alpha-value>)',
+          100: 'rgb(var(--a-100) / <alpha-value>)',
+          200: 'rgb(var(--a-200) / <alpha-value>)',
+          300: 'rgb(var(--a-300) / <alpha-value>)',
+          400: 'rgb(var(--a-400) / <alpha-value>)',
+          500: 'rgb(var(--a-500) / <alpha-value>)',
+          600: 'rgb(var(--a-600) / <alpha-value>)',
+          700: 'rgb(var(--a-700) / <alpha-value>)',
+          800: 'rgb(var(--a-800) / <alpha-value>)',
+          900: 'rgb(var(--a-900) / <alpha-value>)',
+          950: 'rgb(var(--a-950) / <alpha-value>)',
         },
         success: {
           50: '#ecfdf5',
@@ -67,6 +67,7 @@ export default {
           700: '#047857',
           800: '#065946',
           900: '#064e3b',
+          950: '#022c22',
         },
         warning: {
           50: '#fffbeb',
@@ -91,6 +92,7 @@ export default {
           700: '#b91c1c',
           800: '#991b1b',
           900: '#7f1d1d',
+          950: '#450a0a',
         },
       },
     },

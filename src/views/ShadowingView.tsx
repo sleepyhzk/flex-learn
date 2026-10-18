@@ -24,7 +24,7 @@ type Phase = 'idle' | 'listening' | 'recording' | 'done';
 const SOURCES: { key: SentenceSource; label: string }[] = [
   { key: 'conversation', label: 'Câu giao tiếp' },
   { key: 'example', label: 'Câu ví dụ' },
-  { key: 'dialogue', label: 'Hội thoại dài' },
+  { key: 'dialogue', label: 'Hội thoại dài và talk show' },
 ];
 const DIALOGUE_LEVELS: Level[] = LEVEL_ORDER.filter((l) => DIALOGUES.some((d) => d.level === l));
 const PASS_SCORE = 70;
@@ -78,6 +78,10 @@ export function ShadowingView() {
   const [dialogueId, setDialogueId] = useState<number>(DIALOGUES[0]?.id ?? 0);
   const [role, setRole] = useState<Role>('both');
   const [playingAll, setPlayingAll] = useState(false);
+  // Nghe cả hội thoại: câu đang đọc và câu sẽ đọc tiếp khi bấm "Nghe tiếp" sau khi dừng
+  const [playingLine, setPlayingLine] = useState<number | null>(null);
+  const [resumeLine, setResumeLine] = useState<number | null>(null);
+  const playingLineRef = useRef<number | null>(null);
   const [index, setIndex] = useState(0);
   const [seed, setSeed] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -195,6 +199,7 @@ export function ShadowingView() {
     setScore(null);
     setMyAudioUrl(null);
     setPlayingAll(false);
+    setPlayingLine(null);
     setPhase('idle');
   }, [releaseMic]);
 
@@ -340,17 +345,54 @@ export function ShadowingView() {
     playSequence([...leadIn(current), current.speak], () => void startRecording());
   }, [current, resetAttempt, startRecording, playSequence, leadIn]);
 
+  /** Nghe cả hội thoại. Bấm "Dừng" thì nhớ câu đang đọc; bấm lại sẽ đọc tiếp từ câu đó, không phải từ đầu. */
+  const playLinesFrom = useCallback(
+    (from: number) => {
+      if (!dialogue) return;
+      const lines = dialogue.lines;
+      const step = (i: number) => {
+        if (i >= lines.length) {
+          playingLineRef.current = null;
+          setPlayingLine(null);
+          setResumeLine(null);
+          setPlayingAll(false);
+          return;
+        }
+        playingLineRef.current = i;
+        setPlayingLine(i);
+        speakEnglish(lines[i].english, { onEnd: () => step(i + 1) });
+      };
+      setPlayingAll(true);
+      step(from);
+    },
+    [dialogue]
+  );
+
   const playAll = useCallback(() => {
     if (!dialogue) return;
     if (playingAll) {
       stopSpeaking();
+      setResumeLine(playingLineRef.current);
+      setPlayingLine(null);
       setPlayingAll(false);
       return;
     }
-    resetAttempt();
-    setPlayingAll(true);
-    playSequence(dialogue.lines.map((l) => l.english), () => setPlayingAll(false));
-  }, [dialogue, playingAll, resetAttempt, playSequence]);
+    stopSpeaking();
+    playerRef.current?.pause();
+    playLinesFrom(resumeLine !== null && resumeLine < dialogue.lines.length ? resumeLine : 0);
+  }, [dialogue, playingAll, resumeLine, playLinesFrom]);
+
+  const playAllFromStart = useCallback(() => {
+    stopSpeaking();
+    setResumeLine(null);
+    playLinesFrom(0);
+  }, [playLinesFrom]);
+
+  /** Dừng việc đang đọc mẫu trước khi thu (không xóa kết quả hay vị trí nào). */
+  const cancelListening = useCallback(() => {
+    stopSpeaking();
+    setPhase('idle');
+  }, []);
 
   const listenOnly = (slow: boolean) => {
     if (!current) return;
@@ -386,13 +428,19 @@ export function ShadowingView() {
     resetAttempt();
     setShowMeaning(false);
     setIndex(0);
+    setResumeLine(null);
     setSeed((x) => x + 1);
     setPassed(0);
     setCompleted(0);
     setStreak(0);
   }, [resetAttempt]);
 
-  // Tự đọc câu mẫu khi sang câu mới? Không: người học tự bấm để chủ động. Nhưng dừng âm thanh khi rời trang (cleanup phía trên).
+  // Cuộn tới câu đang được đọc khi nghe cả hội thoại
+  useEffect(() => {
+    if (playingLine === null) return;
+    document.getElementById(`shadow-line-${playingLine}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [playingLine]);
+
 
   // Enter: bắt đầu nghe và nhại / dừng thu / sang câu tiếp.
   useEffect(() => {
@@ -421,6 +469,9 @@ export function ShadowingView() {
   };
   const switchDialogue = (id: number) => {
     setDialogueId(id);
+    // Đoạn độc thoại chỉ có người nói A nên không đóng vai B được
+    const target = DIALOGUES.find((d) => d.id === id);
+    if (role === 'B' && target && !target.lines.some((l) => l.speaker === 'B')) setRole('both');
     restart();
   };
   const switchRole = (r: Role) => {
@@ -502,6 +553,7 @@ export function ShadowingView() {
                 ))}
               </select>
             </label>
+            {dialogue.lines.some((l) => l.speaker === 'B') && (
             <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
               <span className="font-medium">Bạn đóng vai:</span>
               <select
@@ -517,6 +569,7 @@ export function ShadowingView() {
                 <option value="B">B: {dialogue.roleB}</option>
               </select>
             </label>
+            )}
           </div>
         )}
       </div>
@@ -649,10 +702,18 @@ export function ShadowingView() {
             >
               <Square className="h-9 w-9 fill-current" />
             </button>
+          ) : phase === 'listening' ? (
+            <button
+              onClick={cancelListening}
+              className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-700 text-white shadow-lg transition-transform hover:scale-105 active:scale-95 dark:bg-slate-600"
+              aria-label="Dừng đọc mẫu"
+            >
+              <Square className="h-9 w-9 fill-current" />
+            </button>
           ) : (
             <button
               onClick={listenThenRecord}
-              disabled={phase === 'listening' || !recordSupported}
+              disabled={!recordSupported}
               className="flex h-24 w-24 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition-transform hover:scale-105 hover:bg-primary-700 active:scale-95 disabled:opacity-60"
               aria-label="Nghe rồi nhại"
             >
@@ -661,7 +722,7 @@ export function ShadowingView() {
           )}
           <p className="text-sm text-slate-500 dark:text-slate-400">
             {phase === 'idle' && 'Bấm micro: app đọc câu mẫu, rồi tự thu giọng bạn'}
-            {phase === 'listening' && 'Đang đọc câu mẫu... chuẩn bị nói theo'}
+            {phase === 'listening' && 'Đang đọc câu mẫu... chuẩn bị nói theo (bấm vuông để dừng)'}
             {phase === 'recording' && 'Đang nghe bạn nói... hãy nói theo câu mẫu (bấm vuông để dừng)'}
             {phase === 'done' && (score !== null ? 'Xong! Xem kết quả bên dưới' : 'Xong lần thu này')}
           </p>
@@ -743,20 +804,32 @@ export function ShadowingView() {
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   {dialogue.title} · lượt {Math.min(index + 1, pool.length)}/{pool.length}
                 </p>
-                <button onClick={playAll} disabled={phase === 'recording' || phase === 'listening'} className={ghostBtn}>
-                  {playingAll ? <Square className="h-4 w-4" /> : <MessagesSquare className="h-4 w-4" />}
-                  {playingAll ? 'Dừng' : 'Nghe cả hội thoại'}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {!playingAll && resumeLine !== null && (
+                    <button onClick={playAllFromStart} disabled={phase === 'recording' || phase === 'listening'} className={ghostBtn}>
+                      <RotateCcw className="h-4 w-4" />
+                      Từ đầu
+                    </button>
+                  )}
+                  <button onClick={playAll} disabled={phase === 'recording' || phase === 'listening'} className={ghostBtn}>
+                    {playingAll ? <Square className="h-4 w-4" /> : <MessagesSquare className="h-4 w-4" />}
+                    {playingAll ? 'Dừng' : resumeLine !== null ? `Nghe tiếp (câu ${resumeLine + 1})` : 'Nghe cả hội thoại'}
+                  </button>
+                </div>
               </div>
               <ul className="space-y-2">
                 {dialogue.lines.map((l, i) => {
                   const mine = role === 'both' || l.speaker === role;
                   const active = (current as ShItem).lineIdx === i;
+                  const playing = playingLine === i;
                   return (
                     <li
                       key={i}
-                      className={`flex gap-3 rounded-xl px-3 py-2 text-sm ${
-                        active
+                      id={`shadow-line-${i}`}
+                      className={`flex gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
+                        playing
+                          ? 'bg-accent-100 ring-1 ring-accent-400 dark:bg-accent-950/40 dark:ring-accent-500'
+                          : active
                           ? 'bg-primary-50 ring-1 ring-primary-300 dark:bg-primary-950/40 dark:ring-primary-700'
                           : mine
                           ? 'bg-slate-50 dark:bg-slate-800/60'
@@ -780,6 +853,8 @@ export function ShadowingView() {
                         onClick={() => {
                           if (phase !== 'recording') {
                             setPlayingAll(false);
+                            setPlayingLine(null);
+                            setResumeLine(i);
                             speakEnglish(l.english);
                           }
                         }}

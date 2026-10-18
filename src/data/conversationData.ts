@@ -52,7 +52,7 @@ export const CONVERSATION_CATEGORIES: { key: ConversationCategory; label: string
 /**
  * Câu giao tiếp: 14 chủ đề, từ A1 đến C1. Tự soạn, nghĩa tiếng Việt là bản nháp cần rà.
  * Định dạng mỗi dòng: [chủ đề, mức độ, câu tiếng Anh, nghĩa tiếng Việt].
- * id của câu là số thứ tự trong danh sách; thêm câu mới vào CUỐI danh sách, không chèn giữa.
+ * id của câu là số thứ tự trong danh sách (không được lưu ở đâu nên đổi thứ tự không mất dữ liệu).
  */
 const RAW: [ConversationCategory, ConversationLevel, string, string][] = [
   // greeting

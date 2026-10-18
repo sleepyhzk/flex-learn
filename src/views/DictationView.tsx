@@ -89,6 +89,25 @@ function MiniSelect<T extends string>({
 /** Nghe chép chính tả: nghe phát âm rồi gõ lại. Không phân biệt chữ hoa, chữ thường và dấu câu. */
 export function DictationView() {
   const [mode, setMode] = useState<Mode>('full');
+  // Tự đọc khi sang mục mới: mặc định TẮT, nhớ lựa chọn của người học
+  const [autoPlay, setAutoPlay] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('flex_dictation_autoplay') === 'on';
+    } catch {
+      return false;
+    }
+  });
+  const autoPlayRef = useRef(autoPlay);
+  autoPlayRef.current = autoPlay;
+  const toggleAutoPlay = () =>
+    setAutoPlay((v) => {
+      try {
+        localStorage.setItem('flex_dictation_autoplay', v ? 'off' : 'on');
+      } catch {
+        // ignore
+      }
+      return !v;
+    });
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [fills, setFills] = useState<string[]>([]);
   const [source, setSource] = useState<Source>('word');
@@ -148,9 +167,9 @@ export function DictationView() {
   }, []);
   useEffect(() => clearAutoNext, [clearAutoNext]);
 
-  // Tự đọc khi sang mục mới.
+  // Tự đọc khi sang mục mới (chỉ khi người học bật công tắc "Tự đọc").
   useEffect(() => {
-    if (!current) return;
+    if (!current || !autoPlayRef.current) return;
     const t = setTimeout(() => speakEnglish(current.speak), 250);
     return () => clearTimeout(t);
   }, [current]);
@@ -393,7 +412,18 @@ export function DictationView() {
           >
             <Volume2 className="h-10 w-10" />
           </button>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Bấm để nghe lại</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Bấm loa để nghe</p>
+          <button
+            onClick={toggleAutoPlay}
+            role="switch"
+            aria-checked={autoPlay}
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          >
+            <span className={`relative inline-block h-4 w-7 rounded-full transition-colors ${autoPlay ? 'bg-primary-600' : 'bg-slate-300 dark:bg-slate-600'}`}>
+              <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${autoPlay ? 'left-3.5' : 'left-0.5'}`} />
+            </span>
+            Tự đọc khi sang câu mới
+          </button>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
             {mode === 'full' && (

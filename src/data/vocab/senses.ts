@@ -542,7 +542,6 @@ const RAW: Record<string, Row[]> = {
   ],
   'free|adj': [['tự do', 'xã hội, quyền', 'It is a free country.']],
   'firm|adj': [['kiên quyết', 'thái độ, quyết định', 'She was firm about her decision.']],
-  'content|adj': [['hài lòng, mãn nguyện', 'cảm xúc', 'He is content with his life.']],
 };
 
 /** Gắn nghĩa khác vào từ theo khóa `từ|loại từ`. */

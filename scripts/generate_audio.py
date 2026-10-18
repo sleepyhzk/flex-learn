@@ -84,6 +84,13 @@ def collect_texts():
             lits = re.findall(STR, s)
             if len(lits) >= 3:
                 texts.append(unquote(lits[1]))
+    # Câu ví dụ của "Nghĩa khác": mỗi nghĩa dạng ['nghĩa', 'hoàn cảnh', 'câu tiếng Anh'],
+    senses_path = ROOT / "src/data/vocab/senses.ts"
+    if senses_path.exists():
+        pat = re.compile(r"\[\s*(" + STR + r")\s*,\s*(" + STR + r")\s*,\s*(" + STR + r")\s*\]")
+        for line in senses_path.read_text(encoding="utf-8").splitlines():
+            for m in pat.finditer(line):
+                texts.append(unquote(m.group(3)))
     texts.append(SAMPLE_TEXT)
     seen, out = set(), []
     for t in texts:

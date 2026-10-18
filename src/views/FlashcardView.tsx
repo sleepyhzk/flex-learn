@@ -252,7 +252,7 @@ export function FlashcardView() {
     }`;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Flashcard</h2>
@@ -372,7 +372,7 @@ export function FlashcardView() {
         <>
           <section
             aria-label="Thẻ từ vựng"
-            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(110,75,40,0.28)] dark:border-slate-800 dark:bg-slate-900"
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)] dark:border-slate-800 dark:bg-slate-900"
           >
             <div
               className="h-1 bg-primary-100 dark:bg-slate-800"
@@ -385,7 +385,7 @@ export function FlashcardView() {
               <div className="h-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
             </div>
 
-            <div className="flex min-h-[23rem] flex-col px-6 pb-8 pt-5 sm:min-h-[27rem] sm:px-12">
+            <div className="flex min-h-[24rem] flex-col px-6 pb-8 pt-5 sm:min-h-[30rem] sm:px-16">
               <div className="flex items-center justify-between">
                 <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">
                   {index + 1} / {cards.length}
@@ -412,7 +412,7 @@ export function FlashcardView() {
               </div>
 
               <div className="mt-4 flex flex-1 cursor-pointer select-none flex-col justify-center text-center" onClick={toggleMeaning}>
-                <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-6xl">
+                <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-7xl">
                   {currentCard.word}
                 </h3>
                 <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">

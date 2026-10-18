@@ -30,7 +30,7 @@ Chưa điền `.env.local` thì web vẫn chạy, chỉ lưu tiến độ trên 
 
 Kiểm tra nhanh:
 - Học vài thẻ ở "Từ vựng", mở lại trang: tiến độ còn nguyên.
-- Đăng nhập bằng tài khoản Hán Tự đang có (hoặc đăng ký mới): thanh bên hiện "Tiến độ đang được lưu".
+- Đăng nhập bằng tài khoản Hán Tự đang có (hoặc đăng ký mới): thanh bên hiện "Tiến độ được lưu".
 - Chấm một thẻ, vào Supabase, Table Editor, `flex_progress`: có dòng mới với `card_key` dạng `hello#1`.
 - Mở Hán Tự cùng tài khoản: tiến độ tiếng Trung không thay đổi.
 
