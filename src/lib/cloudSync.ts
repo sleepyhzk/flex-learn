@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import type { SrsState } from './types';
 import type { StudyMap } from './studyTime';
 import type { GameProgress, TopicGameProgress } from './gameProgress';
+import type { ToeicProgress, ToeicRecord } from './toeicProgress';
 
 export type ProgressMap = Record<string, SrsState>;
 export type StarEntry = { on: boolean; at: string };
@@ -212,5 +213,50 @@ export async function pushGames(userId: string, map: GameProgress, topics: strin
     .filter((t) => map[t])
     .map((t) => ({ user_id: userId, topic_key: t, data: map[t], updated_at: now }));
   const { error } = await supabase.from('flex_games').upsert(rows, { onConflict: 'user_id,topic_key' });
+  if (error) throw error;
+}
+
+// ------------------------------------------------------------------ điểm TOEIC (mỗi Part một dòng)
+
+function mergeToeicRecord(a: ToeicRecord | undefined, b: ToeicRecord | undefined): ToeicRecord {
+  if (!a) return b!;
+  if (!b) return a;
+  const newer = time(a.at) >= time(b.at) ? a : b;
+  return {
+    best: Math.max(a.best, b.best),
+    last: newer.last,
+    attempts: Math.max(a.attempts, b.attempts),
+    at: newer.at ?? a.at ?? b.at,
+  };
+}
+
+/** Gộp điểm TOEIC: điểm cao nhất lấy giá trị lớn hơn, "gần nhất" lấy bản làm sau cùng. */
+export function mergeToeic(local: ToeicProgress, cloud: ToeicProgress) {
+  const merged: ToeicProgress = { ...cloud };
+  const toPush: string[] = [];
+  for (const key of Object.keys(local)) {
+    const m = mergeToeicRecord(local[key], cloud[key]);
+    merged[key] = m;
+    if (JSON.stringify(m) !== JSON.stringify(cloud[key])) toPush.push(key);
+  }
+  return { merged, toPush };
+}
+
+export async function fetchToeic(): Promise<ToeicProgress> {
+  if (!supabase) return {};
+  const { data, error } = await supabase.from('flex_toeic').select('part_key,data');
+  if (error) throw error;
+  const out: ToeicProgress = {};
+  for (const r of data ?? []) out[r.part_key as string] = r.data as ToeicRecord;
+  return out;
+}
+
+export async function pushToeic(userId: string, map: ToeicProgress, keys: string[]) {
+  if (!supabase || keys.length === 0) return;
+  const now = new Date().toISOString();
+  const rows = keys
+    .filter((k) => map[k])
+    .map((k) => ({ user_id: userId, part_key: k, data: map[k], updated_at: now }));
+  const { error } = await supabase.from('flex_toeic').upsert(rows, { onConflict: 'user_id,part_key' });
   if (error) throw error;
 }

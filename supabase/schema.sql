@@ -1,6 +1,6 @@
 -- Chạy toàn bộ file này trong Supabase -> SQL Editor.
 -- Flex Learn dùng CHUNG project Supabase với Hán Tự (chung tài khoản đăng nhập) nhưng có bảng riêng,
--- nên file này chỉ tạo các bảng mới (flex_progress, flex_starred, flex_study_days, flex_games) và không đụng vào bảng của Hán Tự
+-- nên file này chỉ tạo các bảng mới (flex_progress, flex_starred, flex_study_days, flex_games, flex_toeic) và không đụng vào bảng của Hán Tự
 -- (user_progress, user_starred).
 -- Mỗi người dùng chỉ đọc/ghi được dòng của chính mình (Row Level Security).
 
@@ -37,6 +37,23 @@ create table if not exists public.flex_games (
   updated_at timestamptz not null default now(),
   primary key (user_id, topic_key)
 );
+
+-- Điểm luyện TOEIC: mỗi Part một dòng (part_key = 'p1'...'p7' hoặc 'mix'; data = { best, last, attempts, at }).
+create table if not exists public.flex_toeic (
+  user_id    uuid        not null references auth.users (id) on delete cascade,
+  part_key   text        not null,
+  data       jsonb       not null,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, part_key)
+);
+
+alter table public.flex_toeic enable row level security;
+
+drop policy if exists "own flex toeic" on public.flex_toeic;
+create policy "own flex toeic" on public.flex_toeic
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 alter table public.flex_study_days enable row level security;
 alter table public.flex_games      enable row level security;

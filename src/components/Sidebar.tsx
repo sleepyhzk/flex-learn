@@ -1,10 +1,10 @@
 import { useId, useState } from 'react';
-import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings, Headphones, Mic, Gamepad2, SunMedium, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings, Headphones, Mic, Gamepad2, ClipboardCheck, SunMedium, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { BRIGHTNESS_DEFAULT, BRIGHTNESS_MAX, BRIGHTNESS_MIN } from '@/hooks/useBrightness';
 import { VoiceSettings } from './VoiceSettings';
 import { useAuth } from '@/hooks/useAuth';
 
-export type ViewKey = 'home' | 'flashcards' | 'games' | 'dictionary' | 'lessons' | 'spelling' | 'dictation' | 'shadowing' | 'conversation';
+export type ViewKey = 'home' | 'flashcards' | 'games' | 'test' | 'dictionary' | 'lessons' | 'spelling' | 'dictation' | 'shadowing' | 'conversation';
 
 interface NavItem {
   key: ViewKey;
@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { key: 'home', label: 'Trang chủ', icon: Home },
   { key: 'flashcards', label: 'Flashcard', icon: Layers },
   { key: 'games', label: 'Trò chơi', icon: Gamepad2 },
+  { key: 'test', label: 'Kiểm tra', icon: ClipboardCheck },
   { key: 'lessons', label: 'Từ vựng', icon: GraduationCap },
   { key: 'conversation', label: 'Giao tiếp', icon: MessageCircle },
   { key: 'spelling', label: 'Chính tả', icon: Keyboard },

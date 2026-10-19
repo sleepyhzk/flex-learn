@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { SIGNED_OUT_EVENT, useAuth } from '@/hooks/useAuth';
-import { fetchGames, fetchStudyDays, mergeGames, mergeStudy, pushGames, pushStudyDays } from '@/lib/cloudSync';
+import { fetchGames, fetchStudyDays, fetchToeic, mergeGames, mergeStudy, mergeToeic, pushGames, pushStudyDays, pushToeic } from '@/lib/cloudSync';
 import {
   GAMES_CHANGED_EVENT,
   GAMES_SAVED_EVENT,
@@ -8,10 +8,17 @@ import {
   loadGameProgress,
   saveGameProgress,
 } from '@/lib/gameProgress';
+import {
+  TOEIC_CHANGED_EVENT,
+  TOEIC_SAVED_EVENT,
+  clearToeicProgress,
+  loadToeicProgress,
+  saveToeicProgress,
+} from '@/lib/toeicProgress';
 import { clearStudy, getStudySnapshot, markTouchedDays, replaceStudyMap, takeTouchedDays } from '@/lib/studyTime';
 
 /**
- * Đồng bộ streak (flex_study_days) và tiến độ trò chơi (flex_games) lên Supabase khi đã đăng nhập.
+ * Đồng bộ streak (flex_study_days), tiến độ trò chơi (flex_games) và điểm TOEIC (flex_toeic) lên Supabase khi đã đăng nhập.
  * - Đăng nhập: kéo bản cloud về, gộp với bản trên máy (không bên nào bị mất), rồi đẩy phần mới hơn lên.
  * - Sau đó: đẩy ngày học mỗi 30 giây / khi ẩn tab; đẩy tiến độ trò chơi 1,5 giây sau mỗi lần lưu.
  * - Chỉ đẩy sau khi đã gộp xong, để bản cũ trên máy không ghi đè bản mới trên cloud.
@@ -21,6 +28,7 @@ export function useExtrasSync() {
   const userId = user?.id ?? null;
   const ready = useRef(false);
   const lastGames = useRef<Record<string, string>>({});
+  const lastToeic = useRef<Record<string, string>>({});
 
   // 1) Gộp khi đăng nhập
   useEffect(() => {
@@ -29,7 +37,7 @@ export function useExtrasSync() {
     let cancelled = false;
     (async () => {
       try {
-        const [cloudStudy, cloudGames] = await Promise.all([fetchStudyDays(), fetchGames()]);
+        const [cloudStudy, cloudGames, cloudToeic] = await Promise.all([fetchStudyDays(), fetchGames(), fetchToeic()]);
         if (cancelled) return;
         const s = mergeStudy(getStudySnapshot(), cloudStudy);
         replaceStudyMap(s.merged, s.toPush);
@@ -39,9 +47,16 @@ export function useExtrasSync() {
         for (const k of Object.keys(g.merged)) {
           if (!g.toPush.includes(k)) lastGames.current[k] = JSON.stringify(g.merged[k]);
         }
+        const t = mergeToeic(loadToeicProgress(), cloudToeic);
+        lastToeic.current = {};
+        for (const k of Object.keys(t.merged)) {
+          if (!t.toPush.includes(k)) lastToeic.current[k] = JSON.stringify(t.merged[k]);
+        }
         ready.current = true;
         saveGameProgress(g.merged);
         window.dispatchEvent(new Event(GAMES_CHANGED_EVENT));
+        saveToeicProgress(t.merged);
+        window.dispatchEvent(new Event(TOEIC_CHANGED_EVENT));
       } catch {
         // Mất mạng: giữ dữ liệu trên máy, lần đăng nhập/mở app sau sẽ gộp lại.
       }
@@ -109,13 +124,45 @@ export function useExtrasSync() {
     };
   }, [userId]);
 
+  // 3b) Đẩy điểm TOEIC
+  useEffect(() => {
+    if (!userId) return;
+    let timer: number | undefined;
+    const run = async () => {
+      if (!ready.current) return;
+      const cur = loadToeicProgress();
+      const changed = Object.keys(cur).filter((k) => JSON.stringify(cur[k]) !== lastToeic.current[k]);
+      if (changed.length === 0) return;
+      try {
+        await pushToeic(userId, cur, changed);
+        for (const k of changed) lastToeic.current[k] = JSON.stringify(cur[k]);
+      } catch {
+        // Thử lại ở lần lưu sau hoặc khi có mạng.
+      }
+    };
+    const onSaved = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void run(), 1500);
+    };
+    const onOnline = () => void run();
+    window.addEventListener(TOEIC_SAVED_EVENT, onSaved);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener(TOEIC_SAVED_EVENT, onSaved);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [userId]);
+
   // 4) Đăng xuất: xóa dữ liệu học trên máy này (giống tiến độ SRS và dấu sao)
   useEffect(() => {
     const onSignedOut = () => {
       ready.current = false;
       lastGames.current = {};
+      lastToeic.current = {};
       clearStudy();
       clearGameProgress();
+      clearToeicProgress();
     };
     window.addEventListener(SIGNED_OUT_EVENT, onSignedOut);
     return () => window.removeEventListener(SIGNED_OUT_EVENT, onSignedOut);

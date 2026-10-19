@@ -1,12 +1,12 @@
 # Đưa Flex Learn lên Supabase + Vercel
 
 Flex Learn dùng **chung project Supabase với Hán Tự**: cùng tài khoản đăng nhập, nhưng bảng dữ liệu riêng
-(`flex_progress`, `flex_starred`), nên tiến độ hai app không lẫn nhau và nút reset của app này không xóa dữ liệu app kia.
+(`flex_progress`, `flex_starred`, `flex_study_days`, `flex_games`, `flex_toeic`), nên tiến độ hai app không lẫn nhau và nút reset của app này không xóa dữ liệu app kia.
 
 ## 1. Tạo bảng cho Flex Learn trong project Hán Tự đang dùng
 1. Vào supabase.com, mở project mà Hán Tự đang dùng.
-2. SQL Editor, New query, dán toàn bộ `supabase/schema.sql`, bấm Run. File chỉ tạo 2 bảng mới và chính sách bảo mật; không sửa gì ở bảng của Hán Tự.
-3. Table Editor: phải thấy thêm `flex_progress` và `flex_starred`.
+2. SQL Editor, New query, dán toàn bộ `supabase/schema.sql`, bấm Run. File chỉ tạo 5 bảng mới và chính sách bảo mật; không sửa gì ở bảng của Hán Tự.
+3. Table Editor: phải thấy thêm `flex_progress`, `flex_starred`, `flex_study_days`, `flex_games` và `flex_toeic`.
 4. Project Settings, API: copy **Project URL** và **anon / publishable key** (cùng giá trị Hán Tự đang dùng). Không dùng service_role.
 
 ## 2. Đăng nhập: không cần bật lại, chỉ thêm địa chỉ cho phép

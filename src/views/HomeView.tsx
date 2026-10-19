@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Layers, BookOpen, GraduationCap, Keyboard, Headphones, Mic, MessageCircle, ChevronRight, Gamepad2, Flame, Check } from 'lucide-react';
+import { Layers, BookOpen, GraduationCap, Keyboard, Headphones, Mic, MessageCircle, ChevronRight, Gamepad2, ClipboardCheck, Flame, Check } from 'lucide-react';
 import { INITIAL_VOCAB, LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { useSrsProgress } from '@/hooks/useSrsProgress';
 import { vocabKey } from '@/lib/vocabKey';
@@ -10,6 +10,7 @@ import type { ViewKey } from '@/components/Sidebar';
 
 const practice: { key: ViewKey; title: string; desc: string; tone: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: 'games', title: 'Trò chơi theo chủ đề', desc: 'Học từng bài theo chủ đề, rồi chơi để ôn lại', tone: 'bg-[#d8eaf7] text-[#2b9fd0] dark:bg-sky-950/60 dark:text-sky-300', icon: Gamepad2 },
+  { key: 'test', title: 'Kiểm tra TOEIC', desc: 'Luyện các Part nghe và đọc, có giải thích từng câu', tone: 'bg-[#f6e8c8] text-[#c98a12] dark:bg-yellow-950/60 dark:text-yellow-300', icon: ClipboardCheck },
   { key: 'lessons', title: 'Từ vựng và bài tập', desc: 'Xem từ theo cấp và chủ đề, làm trắc nghiệm', tone: 'bg-[#e4e0fb] text-[#7a5af0] dark:bg-violet-950/60 dark:text-violet-300', icon: GraduationCap },
   { key: 'conversation', title: 'Giao tiếp thường dùng', desc: 'Câu mẫu theo tình huống, có phát âm', tone: 'bg-[#d8ece4] text-[#2fb37a] dark:bg-emerald-950/60 dark:text-emerald-300', icon: MessageCircle },
   { key: 'spelling', title: 'Luyện chính tả', desc: 'Đọc nghĩa tiếng Việt, gõ lại từ tiếng Anh', tone: 'bg-[#f3e6da] text-[#e8913a] dark:bg-orange-950/60 dark:text-orange-300', icon: Keyboard },

@@ -12,6 +12,7 @@ import { DictationView } from '@/views/DictationView';
 import { ShadowingView } from '@/views/ShadowingView';
 import { ConversationView } from '@/views/ConversationView';
 import { GamesView } from '@/views/GamesView';
+import { TestView } from '@/views/TestView';
 import { useTheme } from '@/hooks/useTheme';
 import { useBrightness } from '@/hooks/useBrightness';
 import { useStudyTracker } from '@/hooks/useStudyTime';
@@ -72,6 +73,7 @@ export default function App() {
           {view === 'home' && <HomeView onNavigate={go} />}
           {view === 'flashcards' && <FlashcardView />}
           {view === 'games' && <GamesView />}
+          {view === 'test' && <TestView />}
           {view === 'lessons' && <LessonsView />}
           {view === 'conversation' && <ConversationView />}
           {view === 'spelling' && <SpellingView />}

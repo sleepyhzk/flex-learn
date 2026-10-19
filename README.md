@@ -1,6 +1,6 @@
 # Flex Learn
 
-Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh mạng). Vite + React + TypeScript + Tailwind, đăng nhập và đồng bộ bằng Supabase (chung project và tài khoản với Hán Tự, bảng riêng `flex_progress`, `flex_starred`), deploy Vercel. Dựng từ khung của Hán Tự.
+Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh mạng). Vite + React + TypeScript + Tailwind, đăng nhập và đồng bộ bằng Supabase (chung project và tài khoản với Hán Tự, bảng riêng `flex_progress`, `flex_starred`, `flex_study_days`, `flex_games`, `flex_toeic`), deploy Vercel. Dựng từ khung của Hán Tự.
 
 ## Trạng thái
 
@@ -11,10 +11,10 @@ Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh
 - Giao tiếp: 486 câu theo 14 chủ đề và 5 cấp (A1 đến C1), có phát âm.
 - Nghe chép và Shadowing (dùng chung dữ liệu câu giao tiếp và hội thoại). Nghe chép mặc định KHÔNG tự đọc; có công tắc "Tự đọc khi sang câu mới" (localStorage `flex_dictation_autoplay`). Shadowing có 16 hội thoại: 2 talk show phỏng vấn (id 13, 14) và 2 đoạn độc thoại một người nói (id 15, 16); "Nghe cả hội thoại" dừng được và nghe tiếp đúng câu đang đọc.
 - Thanh bên (máy tính) thu gọn thành cột biểu tượng nhỏ bằng nút ở góc thanh bên, lưu ở localStorage `flex_sidebar`. Dây đèn lồng hồng ở mép trên (`src/components/Lanterns.tsx`, chỉ máy tính). Hiệu ứng nổi khi rê chuột dùng lớp `.lift` và `.lift-nav` trong `src/index.css`.
-- Trang chủ: mỗi cấp hiện rõ số từ thuộc rồi (lần ôn gần nhất là good/easy), chưa thuộc (hard) và chưa học. Thẻ Chuỗi học (streak): đạt 15 phút mỗi ngày thì tính một ngày; thời gian đếm khi ở các mục học (không tính trang chủ), tab đang mở và có thao tác trong 60 giây qua; lưu ở localStorage `flex_study_time_v1` (`src/lib/studyTime.ts`, `src/hooks/useStudyTime.ts`), chưa đồng bộ Supabase.
+- Trang chủ: mỗi cấp hiện rõ số từ thuộc rồi (lần ôn gần nhất là good/easy), chưa thuộc (hard) và chưa học. Thẻ Chuỗi học (streak): đạt 15 phút mỗi ngày thì tính một ngày; thời gian đếm khi ở các mục học (không tính trang chủ), tab đang mở và có thao tác trong 60 giây qua; lưu ở localStorage `flex_study_time_v1` (`src/lib/studyTime.ts`, `src/hooks/useStudyTime.ts`); đồng bộ Supabase bảng `flex_study_days` (mỗi ngày lấy số giây lớn hơn) qua `src/hooks/useExtrasSync.ts`.
 - Icon app: `public/favicon.svg` (đèn lồng san hô trên nền indigo), các bản PNG và `public/manifest.webmanifest` để thêm vào màn hình chính.
 - Độ sáng: thanh kéo 60% đến 130% ở phần cài đặt (thanh bên, hoặc biểu tượng bánh răng trên điện thoại), lưu ở localStorage `flex_brightness`; áp bằng CSS filter lên thẻ html (`src/hooks/useBrightness.ts`).
-- Trò chơi (menu "Trò chơi"): chọn một chủ đề, rồi chọn một bài 10 từ (dễ đến khó); trong bài có phần học (hình minh họa, nghĩa khác) và 4 trò Trắc nghiệm, Ghép cặp, Nghe và chọn, Xếp chữ chỉ dùng từ của bài đó. Tiến độ bài học và điểm cao lưu ở localStorage (`flex_games_v1`), chưa đồng bộ Supabase. Mã ở `src/views/GamesView.tsx` và `src/views/games/`.
+- Trò chơi (menu "Trò chơi"): chọn một chủ đề, rồi chọn một bài 10 từ (dễ đến khó); trong bài có phần học (hình minh họa, nghĩa khác) và 4 trò Trắc nghiệm, Ghép cặp, Nghe và chọn, Xếp chữ chỉ dùng từ của bài đó. Tiến độ bài học và điểm cao lưu ở localStorage (`flex_games_v1`) và đồng bộ Supabase bảng `flex_games` (hợp các bài đã học, điểm cao lấy giá trị lớn hơn). Mã ở `src/views/GamesView.tsx` và `src/views/games/`.
 - Chính tả: xem nghĩa tiếng Việt, gõ từ tiếng Anh.
 - Tra cứu: tìm theo từ tiếng Anh hoặc nghĩa tiếng Việt.
 - Giọng đọc tiếng Anh (Web Speech API, ưu tiên giọng Natural/Neural), script tạo mp3 bằng `npm run audio`.
@@ -36,3 +36,5 @@ Khóa tiến độ: `word#id` (`src/lib/vocabKey.ts`). 23 chủ đề ở `src/d
 Xem `HUONG_DAN_TRIEN_KHAI.md`.
 
 Cần Node 22.6 trở lên (để chạy `npm run check:data`).
+- Kiểm tra TOEIC (menu "Kiểm tra"): Part 1 (mô tả tranh, tranh SVG ở `src/data/toeicScenes.ts`), Part 2, 3, 4 (nghe, đọc bằng giọng thiết bị), Part 5, 6, 7 (đọc) và Thi thử mini. Ngân hàng đề ở `src/data/toeicData.ts`, `src/data/toeicExtra.ts`, `toeicExtra2.ts`, `toeicExtra3.ts` và `toeicExtra4.ts` (đáp án đúng viết đầu tiên, chương trình tự xáo trộn). Đề do AI soạn, cần đọc lại. Điểm lưu ở localStorage `flex_toeic_v1` và đồng bộ Supabase bảng `flex_toeic`. Giao diện ở `src/views/TestView.tsx`.
+- Thi thử tùy chỉnh (Kiểm tra > "Thi thử tùy chỉnh"): chọn Part, số câu, bấm giờ (mặc định 0,6 phút/câu như đề thật) và "chế độ thi thật" (chỉ chấm và xem giải thích sau khi nộp bài). Logic rút đề ở `src/lib/toeicMock.ts`, giao diện ở `src/views/TestView.tsx`. Kết quả lưu với khóa `custom` trong `flex_toeic_v1` và đồng bộ lên Supabase như các Part khác.
