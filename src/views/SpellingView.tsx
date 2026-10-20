@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Keyboard, Check, X, ArrowRight, RotateCcw, Volume2, Trophy, Lightbulb } from 'lucide-react';
 import { INITIAL_VOCAB, LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
-import { TopicSelect, countByTopic } from '@/components/TopicSelect';
+import { TopicSelect } from '@/components/TopicSelect';
+import { countByTopic } from '@/lib/topicUtils';
 import type { TopicFilter } from '@/components/TopicSelect';
 import { speakEnglish, isSpeechSupported } from '@/lib/speech';
 import { vocabKey, speechText } from '@/lib/vocabKey';

@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "check:data": "node --experimental-strip-types scripts/check_data.mjs",
+    "check:why": "npx tsx scripts/check_why.mjs",
     "audio": "python scripts/generate_audio.py"
   },
   "dependencies": {

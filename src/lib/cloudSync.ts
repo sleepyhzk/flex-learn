@@ -3,6 +3,7 @@ import type { SrsState } from './types';
 import type { StudyMap } from './studyTime';
 import type { GameProgress, TopicGameProgress } from './gameProgress';
 import type { ToeicProgress, ToeicRecord } from './toeicProgress';
+import type { ReviewStore, SessionLog, WrongEntry } from './toeicReview';
 
 export type ProgressMap = Record<string, SrsState>;
 export type StarEntry = { on: boolean; at: string };
@@ -259,4 +260,101 @@ export async function pushToeic(userId: string, map: ToeicProgress, keys: string
     .map((k) => ({ user_id: userId, part_key: k, data: map[k], updated_at: now }));
   const { error } = await supabase.from('flex_toeic').upsert(rows, { onConflict: 'user_id,part_key' });
   if (error) throw error;
+}
+
+// ------------------------------------------------------------------ ôn tập TOEIC (câu đã sai + lịch sử làm bài)
+// Bảng flex_toeic_review, mỗi dòng một mục:
+//   item_key 'w:<đơn vị>:<câu>' (kind 'wrong')  = một câu đã sai; deleted = true là "đã bỏ khỏi danh sách ôn".
+//   item_key 's:<id>'           (kind 'session') = một lượt làm bài.
+// updated_at là thời điểm của chính mục đó (không phải lúc ghi), dùng để chọn bản mới hơn khi gộp.
+
+export interface ReviewRow {
+  item_key: string;
+  kind: 'wrong' | 'session';
+  data: unknown;
+  deleted: boolean;
+  updated_at: string;
+}
+
+const MAX_SESSIONS = 10;
+const REVIEW_PAGE = 1000;
+
+/** Chuyển kho ôn tập thành danh sách dòng cloud. */
+export function reviewRows(store: ReviewStore): ReviewRow[] {
+  const rows: ReviewRow[] = [];
+  for (const [k, e] of Object.entries(store.wrong)) rows.push({ item_key: `w:${k}`, kind: 'wrong', data: e, deleted: false, updated_at: e.at });
+  for (const [k, at] of Object.entries(store.gone)) rows.push({ item_key: `w:${k}`, kind: 'wrong', data: {}, deleted: true, updated_at: at });
+  for (const x of store.sessions) rows.push({ item_key: `s:${x.id}`, kind: 'session', data: x, deleted: false, updated_at: x.at });
+  return rows;
+}
+
+export async function fetchReview(): Promise<ReviewStore> {
+  const out: ReviewStore = { sessions: [], wrong: {}, gone: {} };
+  if (!supabase) return out;
+  // Các câu sai/đã bỏ: lấy hết (có thể hơn 1000 dòng nên đọc theo trang)
+  for (let from = 0; ; from += REVIEW_PAGE) {
+    const { data, error } = await supabase
+      .from('flex_toeic_review')
+      .select('item_key,data,deleted,updated_at')
+      .eq('kind', 'wrong')
+      .order('item_key')
+      .range(from, from + REVIEW_PAGE - 1);
+    if (error) throw error;
+    for (const r of data ?? []) {
+      const k = (r.item_key as string).slice(2);
+      if (r.deleted) out.gone[k] = r.updated_at as string;
+      else out.wrong[k] = r.data as WrongEntry;
+    }
+    if (!data || data.length < REVIEW_PAGE) break;
+  }
+  // Lượt làm bài: chỉ cần vài lượt mới nhất
+  const { data: ses, error: e2 } = await supabase
+    .from('flex_toeic_review')
+    .select('data')
+    .eq('kind', 'session')
+    .order('updated_at', { ascending: false })
+    .limit(MAX_SESSIONS);
+  if (e2) throw e2;
+  out.sessions = (ses ?? []).map((r) => r.data as SessionLog);
+  return out;
+}
+
+/**
+ * Gộp ôn tập giữa máy và cloud, từng câu một: bản có thời điểm mới hơn thắng
+ * (câu sai mới hơn lần bỏ -> còn trong danh sách; lần bỏ mới hơn -> đã bỏ). Lượt làm bài gộp theo id, giữ 10 lượt mới nhất.
+ */
+export function mergeReview(local: ReviewStore, cloud: ReviewStore): ReviewStore {
+  const merged: ReviewStore = { sessions: [], wrong: {}, gone: {} };
+  const keys = new Set([...Object.keys(local.wrong), ...Object.keys(local.gone), ...Object.keys(cloud.wrong), ...Object.keys(cloud.gone)]);
+  for (const k of keys) {
+    const cands: { t: number; entry?: WrongEntry; at?: string }[] = [];
+    if (local.wrong[k]) cands.push({ t: time(local.wrong[k].at), entry: local.wrong[k] });
+    if (cloud.wrong[k]) cands.push({ t: time(cloud.wrong[k].at), entry: cloud.wrong[k] });
+    if (local.gone[k]) cands.push({ t: time(local.gone[k]), at: local.gone[k] });
+    if (cloud.gone[k]) cands.push({ t: time(cloud.gone[k]), at: cloud.gone[k] });
+    // Bằng giờ thì ưu tiên mục "còn sai" để không làm mất câu cần ôn
+    cands.sort((a, b) => b.t - a.t || (a.entry ? -1 : 1));
+    const win = cands[0];
+    if (win.entry) merged.wrong[k] = win.entry;
+    else if (win.at) merged.gone[k] = win.at;
+  }
+  const byId = new Map<string, SessionLog>();
+  for (const x of [...cloud.sessions, ...local.sessions]) byId.set(x.id, x);
+  merged.sessions = [...byId.values()].sort((a, b) => time(b.at) - time(a.at)).slice(0, MAX_SESSIONS);
+  return merged;
+}
+
+export async function pushReview(userId: string, rows: ReviewRow[]) {
+  if (!supabase || rows.length === 0) return;
+  for (let i = 0; i < rows.length; i += 200) {
+    const batch = rows.slice(i, i + 200).map((r) => ({ ...r, user_id: userId }));
+    const { error } = await supabase.from('flex_toeic_review').upsert(batch, { onConflict: 'user_id,item_key' });
+    if (error) throw error;
+  }
+}
+
+/** Xóa các lượt làm bài cũ trên cloud, chỉ giữ MAX_SESSIONS lượt mới nhất (best effort, lỗi cũng không sao). */
+export async function pruneReviewSessions(oldestKept: string) {
+  if (!supabase) return;
+  await supabase.from('flex_toeic_review').delete().eq('kind', 'session').lt('updated_at', oldestKept);
 }

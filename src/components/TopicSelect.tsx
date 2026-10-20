@@ -1,15 +1,9 @@
+import { GROUP_LABEL, GROUP_ORDER } from '@/lib/topicUtils';
 import { TOPICS } from '@/data/vocabTopics';
-import type { Topic, TopicGroup } from '@/data/vocabTopics';
+import type { Topic } from '@/data/vocabTopics';
 
 export type TopicFilter = 'all' | Topic;
 
-export const GROUP_LABEL: Record<TopicGroup, string> = {
-  daily: 'Giao tiếp hằng ngày',
-  toeic: 'TOEIC & công việc',
-  cyber: 'Chuyên ngành an ninh mạng',
-  academic: 'Học thuật & nâng cao (B2)',
-};
-export const GROUP_ORDER: TopicGroup[] = ['daily', 'toeic', 'cyber', 'academic'];
 
 /** Ô chọn chủ đề từ vựng. counts = số từ của từng chủ đề trong danh sách đang xem; chủ đề hết từ thì ẩn. */
 export function TopicSelect({
@@ -58,8 +52,3 @@ export function TopicSelect({
   );
 }
 
-export function countByTopic(words: { topic: Topic }[]) {
-  const counts: Partial<Record<Topic, number>> = {};
-  for (const w of words) counts[w.topic] = (counts[w.topic] ?? 0) + 1;
-  return counts;
-}

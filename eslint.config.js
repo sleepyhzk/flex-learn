@@ -24,5 +24,11 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
+  },
+  {
+    // Bảng cảnh SVG minh họa từ: nhiều khối dựng nhỏ dùng nội bộ cùng bảng SCENES xuất ra.
+    // Cố ý để chung một file nên tắt luật HMR (chỉ ảnh hưởng tải lại nóng khi dev) cho đúng file này.
+    files: ['src/components/wordVisualScenes.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   }
 );

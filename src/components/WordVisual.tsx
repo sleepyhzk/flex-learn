@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { SCENES } from './wordVisualScenes';
 
-/** Có hình minh họa cho từ này không (khóa là `từ|loại từ`). */
-export const hasWordVisual = (word: string, pos: string) => `${word}|${pos}` in SCENES;
-
 /**
  * Hình động minh họa nghĩa của từ. Không có hình thì không hiện gì.
  * Người dùng bật "giảm chuyển động" trong hệ điều hành thì hình đứng yên ở khung đầu.

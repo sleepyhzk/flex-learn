@@ -39,7 +39,7 @@ export function MatchGame({
   const [finished, setFinished] = useState(false);
   const timers = useRef<number[]>([]);
 
-  const current = rounds[roundIdx] ?? [];
+  const current = useMemo(() => rounds[roundIdx] ?? [], [rounds, roundIdx]);
   const leftOrder = useMemo(() => shuffle(current), [current]);
   const rightOrder = useMemo(() => shuffle(current), [current]);
   const total = rounds.reduce((n, r) => n + r.length, 0);

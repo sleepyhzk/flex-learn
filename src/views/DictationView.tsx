@@ -4,7 +4,8 @@ import { Headphones, Check, X, ArrowRight, RotateCcw, Volume2, Trophy, Lightbulb
 import { LEVEL_LABEL, LEVEL_ORDER } from '@/data/vocabData';
 import { buildItems, shuffle } from '@/lib/dictItems';
 import type { DictItem, Source } from '@/lib/dictItems';
-import { TopicSelect, countByTopic } from '@/components/TopicSelect';
+import { TopicSelect } from '@/components/TopicSelect';
+import { countByTopic } from '@/lib/topicUtils';
 import type { TopicFilter } from '@/components/TopicSelect';
 import { speakEnglish, isSpeechSupported } from '@/lib/speech';
 import { isDictationCorrect, diffWords, maskWordCount, normalizeSentence } from '@/lib/spelling';

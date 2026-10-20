@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, BookOpen, CheckCircle2, ClipboardCheck, Clock, Headphones, Play, RotateCcw, SlidersHorizontal, Timer, Trophy, XCircle } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, BookOpen, CheckCircle2, ClipboardCheck, ClipboardList, Clock, Headphones, Play, RotateCcw, SlidersHorizontal, Timer, Trophy, XCircle } from 'lucide-react';
 import { PARTS, TOEIC_UNITS, questionCount } from '@/data/toeicData';
 import type { PartKey, Unit } from '@/data/toeicData';
 import { sceneSvg } from '@/data/toeicScenes';
 import { shuffle } from '@/lib/dictItems';
 import { ORDER, autoMinutes, bankSize, buildCustomUnits } from '@/lib/toeicMock';
 import type { MockConfig } from '@/lib/toeicMock';
-import { speakEnglish, stopSpeaking } from '@/lib/speech';
+import { explainOptions, resolveLog, speakTexts, UNIT_BY_ID } from '@/lib/toeicExplain';
+import { recordSession, loadReview } from '@/lib/toeicReview';
+import type { AnswerLog, WrongEntry } from '@/lib/toeicReview';
+import { LETTERS, partLabel, useSequencePlayer } from '@/lib/toeicUi';
+import { ReviewHub, ReviewList } from './ToeicReview';
+import { ExplainPanel, Passage } from './toeicShared';
 import { TOEIC_CHANGED_EVENT, loadToeicProgress, recordToeicResult } from '@/lib/toeicProgress';
 import type { ToeicProgress } from '@/lib/toeicProgress';
 
@@ -16,6 +21,8 @@ interface PQ {
   options: string[];
   answer: number;
   why: string;
+  /** Vị trí câu trong đơn vị đề gốc (để lưu và ôn tập). */
+  qi: number;
 }
 interface PUnit {
   unit: Unit;
@@ -24,16 +31,15 @@ interface PUnit {
   speak?: string[];
 }
 
-function prepare(unit: Unit): PUnit {
-  const questions = unit.questions.map((r) => {
+/** `only`: chỉ lấy các câu có vị trí này (dùng khi luyện lại câu sai); giữ nguyên đoạn văn/lời thoại của đơn vị. */
+function prepare(unit: Unit, only?: number[]): PUnit {
+  const questions: PQ[] = [];
+  unit.questions.forEach((r, qi) => {
+    if (only && !only.includes(qi)) return;
     const options = shuffle([r.correct, ...r.wrongs]);
-    return { prompt: r.prompt, options, answer: options.indexOf(r.correct), why: r.why };
+    questions.push({ prompt: r.prompt, options, answer: options.indexOf(r.correct), why: r.why, qi });
   });
-  let speak: string[] | undefined;
-  if (unit.part === 'p1') speak = [...questions[0].options];
-  else if (unit.part === 'p2' && unit.lines) speak = [unit.lines[0].text, ...questions[0].options];
-  else if (unit.lines) speak = unit.lines.map((l) => l.text);
-  return { unit, questions, speak };
+  return { unit, questions, speak: speakTexts(unit, questions[0].options) };
 }
 
 const pick = (part: PartKey, n: number): Unit[] => shuffle(TOEIC_UNITS[part]).slice(0, n);
@@ -41,73 +47,35 @@ const pick = (part: PartKey, n: number): Unit[] => shuffle(TOEIC_UNITS[part]).sl
 const MIX: [PartKey, number][] = [['p1', 2], ['p2', 4], ['p3', 1], ['p4', 1], ['p5', 4], ['p6', 1], ['p7', 1]];
 
 function buildSession(key: PartKey | 'mix'): PUnit[] {
-  if (key === 'mix') return MIX.flatMap(([p, n]) => pick(p, n)).map(prepare);
+  if (key === 'mix') return MIX.flatMap(([p, n]) => pick(p, n)).map((u) => prepare(u));
   const info = PARTS.find((p) => p.key === key)!;
-  return pick(key, info.perSession).map(prepare);
+  return pick(key, info.perSession).map((u) => prepare(u));
 }
 
 // ------------------------------------------------------------------ thi thử tùy chỉnh
-const buildCustom = (parts: PartKey[], total: number): PUnit[] => buildCustomUnits(parts, total).map(prepare);
+const buildCustom = (parts: PartKey[], total: number): PUnit[] => buildCustomUnits(parts, total).map((u) => prepare(u));
 
-const partLabel = (p: PartKey) => PARTS.find((x) => x.key === p)!.title.split(' · ')[0];
-const LETTERS = ['A', 'B', 'C', 'D'];
+/** Dựng lượt luyện lại từ các câu đã sai: gom theo đơn vị đề, xếp nghe trước đọc sau. */
+function buildReview(entries: WrongEntry[]): PUnit[] {
+  const byUnit = new Map<string, number[]>();
+  for (const e of entries) byUnit.set(e.u, [...(byUnit.get(e.u) ?? []), e.q]);
+  return [...byUnit.entries()]
+    .map(([id, qis]) => ({ unit: UNIT_BY_ID.get(id)!, qis }))
+    .filter((x) => x.unit)
+    .sort((a, b) => ORDER.indexOf(a.unit.part) - ORDER.indexOf(b.unit.part))
+    .map((x) => prepare(x.unit, x.qis));
+}
+
+const titleOfKey = (key: string) => (key === 'mix' ? 'Thi thử mini' : key === 'custom' ? 'Thi thử tùy chỉnh' : key === 'review' ? 'Ôn câu sai' : PARTS.find((p) => p.key === key)?.title ?? key);
 const fmt = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 
-// ------------------------------------------------------------------ phát âm theo chuỗi
-function useSequencePlayer() {
-  const timer = useRef<number | undefined>(undefined);
-  const [playing, setPlaying] = useState(false);
-
-  const stop = useCallback(() => {
-    window.clearTimeout(timer.current);
-    stopSpeaking();
-    setPlaying(false);
-  }, []);
-
-  const play = useCallback(
-    (texts: string[], gap = 700) => {
-      stop();
-      setPlaying(true);
-      const step = (i: number) => {
-        if (i >= texts.length) {
-          setPlaying(false);
-          return;
-        }
-        speakEnglish(texts[i], { onEnd: () => (timer.current = window.setTimeout(() => step(i + 1), gap)) });
-      };
-      step(0);
-    },
-    [stop]
-  );
-
-  useEffect(() => stop, [stop]);
-  return { play, stop, playing };
-}
-
 // ------------------------------------------------------------------ khối hiển thị
-function Passage({ text }: { text: string }) {
-  const parts = text.split(/(\[\d\])/);
-  return (
-    <div className="whitespace-pre-line rounded-2xl border border-slate-200 bg-white p-5 text-[15px] leading-relaxed text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-      {parts.map((p, i) => {
-        const m = /^\[(\d)\]$/.exec(p);
-        return m ? (
-          <span key={i} className="mx-0.5 rounded-md bg-primary-100 px-1.5 py-0.5 font-semibold text-primary-800 dark:bg-primary-900/50 dark:text-primary-200">
-            ({m[1]}) ______
-          </span>
-        ) : (
-          <span key={i}>{p}</span>
-        );
-      })}
-    </div>
-  );
-}
-
 const PICKED = 'border-primary-500 bg-primary-100 text-primary-900 dark:border-primary-400 dark:bg-primary-900/40 dark:text-primary-100';
 const IDLE = 'border-slate-200 bg-white text-slate-800 hover:border-primary-300 hover:bg-primary-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800';
 
 function QuestionBlock({
   number,
+  unit,
   pq,
   value,
   onPick,
@@ -116,6 +84,7 @@ function QuestionBlock({
   exam,
 }: {
   number: number;
+  unit: Unit;
   pq: PQ;
   value: number | undefined;
   onPick: (i: number) => void;
@@ -172,27 +141,19 @@ function QuestionBlock({
         </div>
       )}
       {reveal && (
-        <div className={`mt-3 rounded-xl px-4 py-3 text-sm ${correct ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100' : 'bg-rose-50 text-rose-900 dark:bg-rose-950/30 dark:text-rose-100'}`}>
-          <p className="flex items-center gap-1.5 font-semibold">
+        <>
+          <p className={`mt-3 flex items-center gap-1.5 text-sm font-semibold ${correct ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
             {correct ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-            {correct ? 'Chính xác' : `Đáp án đúng: ${LETTERS[pq.answer]}`}
+            {correct ? 'Chính xác!' : `Chưa đúng, đáp án đúng là ${LETTERS[pq.answer]}`}
           </p>
-          <p className="mt-1 leading-relaxed">{pq.why}</p>
-        </div>
+          <ExplainPanel options={pq.options} answer={pq.answer} why={pq.why} notes={explainOptions(unit, pq.qi, pq.options)} chosen={value} />
+        </>
       )}
     </div>
   );
 }
 
 // ------------------------------------------------------------------ một lượt làm bài
-interface WrongItem {
-  part: PartKey;
-  prompt: string;
-  correct: string;
-  chosen: string;
-  why: string;
-}
-
 function Session({
   units,
   exam,
@@ -205,7 +166,7 @@ function Session({
   /** Giới hạn thời gian, tính bằng giây. */
   timeLimit?: number;
   onExit: () => void;
-  onFinish: (correct: number, total: number, wrong: WrongItem[], elapsedSec: number) => void;
+  onFinish: (correct: number, total: number, log: AnswerLog[], elapsedSec: number) => void;
 }) {
   const [uIdx, setUIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -267,23 +228,16 @@ function Session({
 
   const finish = () => {
     let correct = 0;
-    const wrong: WrongItem[] = [];
+    const log: AnswerLog[] = [];
     units.forEach((u, ui) =>
       u.questions.forEach((pq, qi) => {
         const v = answers[`${ui}-${qi}`];
         if (v === pq.answer) correct += 1;
-        else
-          wrong.push({
-            part: u.unit.part,
-            prompt: pq.prompt ?? (u.unit.lines?.[0]?.text ?? (u.unit.scene ? `Tranh: ${u.unit.title ?? ''}` : '')),
-            correct: pq.options[pq.answer],
-            chosen: v === undefined ? '(bỏ trống)' : pq.options[v],
-            why: pq.why,
-          });
+        log.push({ u: u.unit.id, q: pq.qi, o: pq.options, c: v ?? -1 });
       })
     );
     stop();
-    onFinish(correct, totalQ, wrong, Math.round((Date.now() - startedAt.current) / 1000));
+    onFinish(correct, totalQ, log, Math.round((Date.now() - startedAt.current) / 1000));
   };
 
   // Hết giờ thì tự nộp bài
@@ -375,6 +329,7 @@ function Session({
           <QuestionBlock
             key={`${uIdx}-${qi}`}
             number={offset + qi + 1}
+            unit={cur.unit}
             pq={pq}
             value={answers[`${uIdx}-${qi}`]}
             onPick={(i) => setAnswers((a) => ({ ...a, [`${uIdx}-${qi}`]: i }))}
@@ -590,12 +545,13 @@ function MockSetup({ onStart, onBack }: { onStart: (cfg: MockConfig) => void; on
 }
 
 // ------------------------------------------------------------------ màn hình chính
-type Key = PartKey | 'mix' | 'custom';
+type Key = PartKey | 'mix' | 'custom' | 'review';
 type Screen =
   | { kind: 'hub' }
   | { kind: 'setup' }
+  | { kind: 'review' }
   | { kind: 'session'; key: Key; units: PUnit[]; cfg?: MockConfig }
-  | { kind: 'result'; key: Key; correct: number; total: number; wrong: WrongItem[]; elapsed: number; cfg?: MockConfig };
+  | { kind: 'result'; key: Key; correct: number; total: number; log: AnswerLog[]; elapsed: number; cfg?: MockConfig };
 
 export function TestView() {
   const [screen, setScreen] = useState<Screen>({ kind: 'hub' });
@@ -618,8 +574,29 @@ export function TestView() {
     setScreen({ kind: 'session', key: 'custom', units: buildCustom(cfg.parts, cfg.total), cfg });
   };
 
+  /** Luyện lại các câu đã sai (nhận danh sách, hoặc tự lấy từ ngân hàng câu sai). */
+  const startReview = (entries?: WrongEntry[]) => {
+    const list =
+      entries ??
+      Object.values(loadReview().wrong)
+        .filter((w) => resolveLog(w))
+        .sort((a, b) => b.times - a.times)
+        .slice(0, 30);
+    const units = buildReview(list);
+    if (units.length === 0) {
+      setScreen({ kind: 'review' });
+      return;
+    }
+    window.scrollTo({ top: 0 });
+    setScreen({ kind: 'session', key: 'review', units });
+  };
+
   if (screen.kind === 'setup') {
     return <MockSetup onStart={startCustom} onBack={() => setScreen({ kind: 'hub' })} />;
+  }
+
+  if (screen.kind === 'review') {
+    return <ReviewHub onBack={() => setScreen({ kind: 'hub' })} onPractice={startReview} />;
   }
 
   if (screen.kind === 'session') {
@@ -630,11 +607,13 @@ export function TestView() {
         units={screen.units}
         exam={cfg?.exam}
         timeLimit={cfg?.timer ? cfg.minutes * 60 : undefined}
-        onExit={() => setScreen(cfg ? { kind: 'setup' } : { kind: 'hub' })}
-        onFinish={(correct, total, wrong, elapsed) => {
-          setProgress(recordToeicResult(screen.key, Math.round((correct / total) * 100)));
+        onExit={() => setScreen(screen.key === 'review' ? { kind: 'review' } : cfg ? { kind: 'setup' } : { kind: 'hub' })}
+        onFinish={(correct, total, log, elapsed) => {
+          // Lượt luyện lại câu sai không tính vào điểm các Part
+          if (screen.key !== 'review') setProgress(recordToeicResult(screen.key, Math.round((correct / total) * 100)));
+          recordSession({ key: screen.key, title: titleOfKey(screen.key), correct, total, items: log }, (a) => resolveLog(a)?.ok ?? false);
           window.scrollTo({ top: 0 });
-          setScreen({ kind: 'result', key: screen.key, correct, total, wrong, elapsed, cfg });
+          setScreen({ kind: 'result', key: screen.key, correct, total, log, elapsed, cfg });
         }}
       />
     );
@@ -642,7 +621,9 @@ export function TestView() {
 
   if (screen.kind === 'result') {
     const pct = Math.round((screen.correct / screen.total) * 100);
-    const title = screen.key === 'mix' ? 'Thi thử mini' : screen.key === 'custom' ? 'Thi thử tùy chỉnh' : PARTS.find((p) => p.key === screen.key)!.title;
+    const title = titleOfKey(screen.key);
+    const wrongCount = screen.total - screen.correct;
+    const hasWrongBank = Object.keys(loadReview().wrong).length > 0;
     return (
       <div className="space-y-5">
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center dark:border-slate-800 dark:bg-slate-900">
@@ -662,11 +643,22 @@ export function TestView() {
             {pct >= 80 ? 'Rất tốt, bạn nắm khá chắc dạng bài này.' : pct >= 60 ? 'Khá ổn, hãy xem lại các câu sai bên dưới.' : 'Cần luyện thêm, xem kỹ phần giải thích rồi làm lại.'}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <button
-              onClick={() => (screen.cfg ? startCustom(screen.cfg) : start(screen.key as PartKey | 'mix'))}
-              className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-3 text-[15px] font-semibold text-white hover:bg-primary-700"
-            >
-              <RotateCcw className="h-4 w-4" /> Làm đề khác
+            {screen.key === 'review' ? (
+              hasWrongBank && (
+                <button onClick={() => startReview()} className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-3 text-[15px] font-semibold text-white hover:bg-primary-700">
+                  <RotateCcw className="h-4 w-4" /> Luyện tiếp câu sai
+                </button>
+              )
+            ) : (
+              <button
+                onClick={() => (screen.cfg ? startCustom(screen.cfg) : start(screen.key as PartKey | 'mix'))}
+                className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-3 text-[15px] font-semibold text-white hover:bg-primary-700"
+              >
+                <RotateCcw className="h-4 w-4" /> Làm đề khác
+              </button>
+            )}
+            <button onClick={() => setScreen({ kind: 'review' })} className="flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-[15px] font-semibold text-slate-700 hover:bg-primary-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+              <ClipboardList className="h-4 w-4" /> Mở mục Ôn tập
             </button>
             {screen.cfg && (
               <button onClick={() => setScreen({ kind: 'setup' })} className="rounded-xl border border-slate-300 px-5 py-3 text-[15px] font-semibold text-slate-700 hover:bg-primary-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
@@ -678,25 +670,19 @@ export function TestView() {
             </button>
           </div>
         </div>
-        {screen.wrong.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="font-display text-xl font-semibold text-slate-900 dark:text-slate-100">Các câu cần xem lại ({screen.wrong.length})</h4>
-            {screen.wrong.map((w, i) => (
-              <div key={i} className="rounded-2xl border border-slate-200 bg-white p-4 text-[15px] dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{partLabel(w.part)}</p>
-                <p className="mt-1 text-slate-900 dark:text-slate-100">{w.prompt}</p>
-                <p className="mt-2 text-rose-700 dark:text-rose-300">Bạn chọn: {w.chosen}</p>
-                <p className="text-emerald-700 dark:text-emerald-300">Đáp án đúng: {w.correct}</p>
-                <p className="mt-1 text-slate-600 dark:text-slate-300">{w.why}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="space-y-3">
+          <h4 className="font-display text-xl font-semibold text-slate-900 dark:text-slate-100">Xem lại bài làm</h4>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Xem từng câu: đáp án bạn chọn, đáp án đúng, vì sao đúng và vì sao các đáp án khác sai. Bài này đã được lưu trong mục Ôn tập{wrongCount > 0 ? `, ${wrongCount} câu sai nằm trong danh sách câu cần ôn.` : '.'}
+          </p>
+          <ReviewList items={screen.log} initialFilter={wrongCount > 0 ? 'wrong' : 'all'} />
+        </div>
       </div>
     );
   }
 
   const rec = (k: string) => progress[k];
+  const wrongBank = Object.values(loadReview().wrong).filter((w) => resolveLog(w)).length;
   return (
     <div className="space-y-6">
       <header>
@@ -707,6 +693,20 @@ export function TestView() {
           Luyện từng Part (1 đến 7) theo dạng đề Listening và Reading, hoặc tự chọn Part và số câu để thi thử có bấm giờ. Phần nghe dùng giọng đọc của thiết bị (chỉnh ở mục "Giọng đọc"). Đề do Flex Learn soạn theo dạng bài TOEIC, không phải đề thi thật.
         </p>
       </header>
+
+      <button
+        onClick={() => setScreen({ kind: 'review' })}
+        className="lift flex w-full items-center gap-4 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-left dark:border-amber-800 dark:bg-amber-950/30"
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white">
+          <ClipboardList className="h-6 w-6" />
+        </span>
+        <span className="flex-1">
+          <span className="block font-display text-xl font-semibold text-slate-900 dark:text-slate-100">Ôn tập</span>
+          <span className="block text-sm text-slate-600 dark:text-slate-300">Xem lại câu đã sai kèm giải thích, luyện lại câu sai, mở lại các bài đã làm.</span>
+          <span className="mt-1 block text-sm font-semibold text-amber-800 dark:text-amber-300">{wrongBank > 0 ? `${wrongBank} câu cần ôn` : 'Chưa có câu sai nào được lưu'}</span>
+        </span>
+      </button>
 
       <div className="grid gap-4 md:grid-cols-2">
         <button

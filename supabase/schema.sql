@@ -1,6 +1,6 @@
 -- Chạy toàn bộ file này trong Supabase -> SQL Editor.
 -- Flex Learn dùng CHUNG project Supabase với Hán Tự (chung tài khoản đăng nhập) nhưng có bảng riêng,
--- nên file này chỉ tạo các bảng mới (flex_progress, flex_starred, flex_study_days, flex_games, flex_toeic) và không đụng vào bảng của Hán Tự
+-- nên file này chỉ tạo các bảng mới (flex_progress, flex_starred, flex_study_days, flex_games, flex_toeic, flex_toeic_review) và không đụng vào bảng của Hán Tự
 -- (user_progress, user_starred).
 -- Mỗi người dùng chỉ đọc/ghi được dòng của chính mình (Row Level Security).
 
@@ -81,6 +81,31 @@ create policy "own flex progress" on public.flex_progress
 
 drop policy if exists "own flex starred" on public.flex_starred;
 create policy "own flex starred" on public.flex_starred
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Ôn tập TOEIC: câu đã làm sai + lịch sử các lượt làm bài, mỗi mục một dòng.
+--   item_key = 'w:<id đơn vị>:<vị trí câu>' (kind 'wrong')   -> một câu đã sai; deleted = true nghĩa là đã bỏ khỏi danh sách ôn
+--   item_key = 's:<id lượt làm>'            (kind 'session') -> một lượt làm bài (app chỉ giữ 10 lượt mới nhất)
+-- updated_at là thời điểm của chính mục đó (không phải lúc ghi), dùng để chọn bản mới hơn khi gộp giữa các thiết bị.
+create table if not exists public.flex_toeic_review (
+  user_id    uuid        not null references auth.users (id) on delete cascade,
+  item_key   text        not null,
+  kind       text        not null check (kind in ('wrong', 'session')),
+  data       jsonb       not null default '{}'::jsonb,
+  deleted    boolean     not null default false,
+  updated_at timestamptz not null,
+  primary key (user_id, item_key)
+);
+
+create index if not exists flex_toeic_review_kind_idx
+  on public.flex_toeic_review (user_id, kind, updated_at desc);
+
+alter table public.flex_toeic_review enable row level security;
+
+drop policy if exists "own flex toeic review" on public.flex_toeic_review;
+create policy "own flex toeic review" on public.flex_toeic_review
   for all to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);

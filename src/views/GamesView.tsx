@@ -3,7 +3,7 @@ import { Gamepad2, ArrowLeft, BookOpen, Check, Headphones, ListChecks, Link2, Pu
 import { INITIAL_VOCAB } from '@/data/vocabData';
 import { TOPICS, TOPIC_LABEL } from '@/data/vocabTopics';
 import type { Topic } from '@/data/vocabTopics';
-import { GROUP_LABEL, GROUP_ORDER } from '@/components/TopicSelect';
+import { GROUP_LABEL, GROUP_ORDER } from '@/lib/topicUtils';
 import type { VocabItem } from '@/lib/types';
 import { GAMES_CHANGED_EVENT, loadGameProgress, saveGameProgress } from '@/lib/gameProgress';
 import type { GameKey, GameProgress } from '@/lib/gameProgress';
@@ -98,7 +98,6 @@ export function GamesView() {
     setShowAllLessons(false);
     window.scrollTo({ top: 0 });
   };
-  const backToHub = () => setScreen('hub');
 
   // ---------------------------------------------------------------- chọn chủ đề
   if (!topic || !data) {

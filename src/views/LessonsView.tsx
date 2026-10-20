@@ -5,7 +5,8 @@ import { speakEnglish, isSpeechSupported } from '@/lib/speech';
 import { POS_SHORT } from '@/lib/pos';
 import { vocabKey, speechText } from '@/lib/vocabKey';
 import { useStarred } from '@/hooks/useStarred';
-import { TopicSelect, countByTopic } from '@/components/TopicSelect';
+import { TopicSelect } from '@/components/TopicSelect';
+import { countByTopic } from '@/lib/topicUtils';
 import type { TopicFilter } from '@/components/TopicSelect';
 import type { VocabItem, Level } from '@/lib/types';
 
@@ -19,7 +20,7 @@ export function LessonsView() {
   const [expandedLevel, setExpandedLevel] = useState<Level | null>('A1');
   const starredHook = useStarred();
 
-  const baseVocab = levelTab === 'all' ? INITIAL_VOCAB : VOCAB_BY_LEVEL[levelTab] ?? [];
+  const baseVocab = useMemo(() => (levelTab === 'all' ? INITIAL_VOCAB : VOCAB_BY_LEVEL[levelTab] ?? []), [levelTab]);
 
   const filteredVocab = useMemo(() => {
     if (!searchQuery.trim()) return baseVocab;
