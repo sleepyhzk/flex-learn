@@ -57,7 +57,7 @@ export function LearnLesson({
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-success-100 dark:bg-success-950/40">
             <Check className="h-7 w-7 text-success-600 dark:text-success-400" />
           </div>
-          <h3 className="font-display text-3xl font-semibold text-slate-900 dark:text-slate-100">Xong bài {lessonNo}</h3>
+          <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Xong bài {lessonNo}</h3>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Xem lại {words.length} từ vừa học, rồi làm bài kiểm tra nhanh để nhớ chắc hơn.</p>
         </div>
         <ul className="mx-auto mt-5 max-w-md divide-y divide-slate-200 dark:divide-slate-800">
@@ -105,9 +105,9 @@ export function LearnLesson({
 
       <section className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center dark:border-slate-800 dark:bg-slate-900 sm:px-10">
         <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-950/60 dark:text-primary-300">{LEVEL_LABEL[w.level]}</span>
-        <h3 className="mt-3 break-words font-display text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-6xl">{w.word}</h3>
+        <h3 className="mt-3 break-words text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-6xl">{w.word}</h3>
         <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-          <span className="font-display text-xl italic">{POS_SHORT[w.pos]}</span>
+          <span className="text-xl italic">{POS_SHORT[w.pos]}</span>
           <span className="font-ipa text-xl text-primary-600 dark:text-primary-400">{w.ipa}</span>
           {isSpeechSupported() && (
             <button onClick={() => speakEnglish(speechText(w))} className="rounded-full bg-primary-50 p-2 text-primary-600 hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300" aria-label="Nghe phát âm">

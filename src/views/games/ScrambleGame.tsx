@@ -196,7 +196,7 @@ export function ScrambleGame({
         <p className="text-sm text-slate-500 dark:text-slate-400">Sắp xếp các chữ cái thành từ có nghĩa</p>
         <h3 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-slate-50">{item.word.meaning}</h3>
         <p className="mt-1 text-slate-500 dark:text-slate-400">
-          <span className="font-display italic">{POS_SHORT[item.word.pos]}</span>
+          <span className="italic">{POS_SHORT[item.word.pos]}</span>
           <span className="font-ipa ml-3 text-primary-600 dark:text-primary-400">{item.word.ipa}</span>
           {isSpeechSupported() && (
             <button onClick={() => speakEnglish(speechText(item.word))} className="ml-2 inline-block rounded-full p-1.5 align-middle text-slate-400 hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800" aria-label="Nghe phát âm">

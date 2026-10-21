@@ -195,7 +195,7 @@ export function ReviewHub({ onBack, onPractice }: { onBack: () => void; onPracti
       <div className="space-y-5">
         {back}
         <header>
-          <h1 className="font-display text-2xl font-semibold text-slate-900 dark:text-slate-100">{open.title}</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{open.title}</h1>
           <p className="mt-1 text-[15px] text-slate-600 dark:text-slate-300">
             {fmtDate(open.at)} · đúng {open.correct}/{open.total} câu ({pct}%)
           </p>
@@ -209,7 +209,7 @@ export function ReviewHub({ onBack, onPractice }: { onBack: () => void; onPracti
     <div className="space-y-6">
       {back}
       <header>
-        <h1 className="flex items-center gap-3 font-display text-3xl font-semibold text-slate-900 dark:text-slate-100">
+        <h1 className="flex items-center gap-3 text-3xl font-semibold text-slate-900 dark:text-slate-100">
           <ClipboardList className="h-8 w-8 text-primary-600 dark:text-primary-300" /> Ôn tập
         </h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-slate-600 dark:text-slate-300">
@@ -280,7 +280,7 @@ export function ReviewHub({ onBack, onPractice }: { onBack: () => void; onPracti
                   {pct}%
                 </span>
                 <span className="flex-1">
-                  <span className="block font-display text-lg font-semibold text-slate-900 dark:text-slate-100">{s.title}</span>
+                  <span className="block text-lg font-semibold text-slate-900 dark:text-slate-100">{s.title}</span>
                   <span className="block text-sm text-slate-500 dark:text-slate-400">
                     {fmtDate(s.at)} · đúng {s.correct}/{s.total} câu
                   </span>

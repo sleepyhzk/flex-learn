@@ -46,7 +46,6 @@ function Hero({
   onStart: () => void;
 }) {
   const cta = due > 0 || learned === 0 ? 'Bắt đầu ôn ngay' : 'Học từ mới';
-  const underline = 'underline decoration-amber-300 decoration-wavy decoration-2';
   return (
     <section
       aria-labelledby="today"
@@ -62,11 +61,11 @@ function Hero({
           </span>
           <h1 id="today" className="text-base font-extrabold leading-snug tracking-tight sm:text-lg md:text-xl">
             {learned === 0 ? (
-              <>Chào {name}! Bắt đầu với những <span className={underline}>từ đầu tiên</span></>
+              <>Chào {name}! Bắt đầu với những từ đầu tiên</>
             ) : due > 0 ? (
-              <>Chào {name}! Có <span className={underline}>{fmt(due)} thẻ</span> cần ôn hôm nay</>
+              <>Chào {name}! Có {fmt(due)} thẻ cần ôn hôm nay</>
             ) : (
-              <>Chào {name}! Bạn đã ôn xong <span className={underline}>các thẻ đến hạn</span></>
+              <>Chào {name}! Bạn đã ôn xong các thẻ đến hạn</>
             )}
           </h1>
           <p className="mt-1 max-w-sm text-[11.5px] leading-relaxed text-purple-100">

@@ -31,6 +31,7 @@ import {
   saveToeicProgress,
 } from '@/lib/toeicProgress';
 import { REVIEW_SAVED_EVENT, clearReview, loadReview, saveReview } from '@/lib/toeicReview';
+import { clearToeicStats } from '@/lib/toeicStats';
 import { clearStudy, getStudySnapshot, markTouchedDays, replaceStudyMap, takeTouchedDays } from '@/lib/studyTime';
 
 /**
@@ -220,6 +221,7 @@ export function useExtrasSync() {
       clearStudy();
       clearGameProgress();
       clearToeicProgress();
+      clearToeicStats();
       clearReview();
     };
     window.addEventListener(SIGNED_OUT_EVENT, onSignedOut);

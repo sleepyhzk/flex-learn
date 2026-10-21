@@ -12,6 +12,7 @@ export default {
       },
       boxShadow: {
         soft: '0 8px 30px rgba(0, 0, 0, 0.04)',
+        card: '0 4px 20px -2px rgba(24, 24, 48, 0.05), 0 1px 4px -1px rgba(24, 24, 48, 0.03)',
         'card-hover': '0 14px 35px -4px rgba(112, 92, 235, 0.16)',
       },
       colors: {

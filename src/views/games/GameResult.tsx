@@ -26,7 +26,7 @@ export function GameResult({
       <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 dark:bg-accent-950/40">
         <Trophy className="h-7 w-7 text-accent-600 dark:text-accent-400" />
       </div>
-      <h3 className="font-display text-3xl font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+      <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
       <p className="mt-2 text-lg text-slate-700 dark:text-slate-300">
         Đúng {score}/{total} ({pct}%)
       </p>

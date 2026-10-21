@@ -156,11 +156,11 @@ export function QuizGame({
           <>
             <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">Chọn nghĩa đúng</p>
             <div className="flex items-center gap-3">
-              <h3 className="font-display text-4xl font-semibold text-slate-900 dark:text-slate-50 sm:text-5xl">{q.word.word}</h3>
+              <h3 className="text-4xl font-semibold text-slate-900 dark:text-slate-50 sm:text-5xl">{q.word.word}</h3>
               {isSpeechSupported() && speaker}
             </div>
             <p className="mt-2 text-slate-500 dark:text-slate-400">
-              <span className="font-display italic">{POS_SHORT[q.word.pos]}</span>
+              <span className="italic">{POS_SHORT[q.word.pos]}</span>
               <span className="font-ipa ml-3 text-primary-600 dark:text-primary-400">{q.word.ipa}</span>
             </p>
           </>
@@ -168,7 +168,7 @@ export function QuizGame({
           <>
             <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">Chọn từ tiếng Anh đúng</p>
             <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-50">{q.word.meaning}</h3>
-            <p className="mt-1 font-display italic text-slate-500 dark:text-slate-400">{POS_SHORT[q.word.pos]}</p>
+            <p className="mt-1 italic text-slate-500 dark:text-slate-400">{POS_SHORT[q.word.pos]}</p>
           </>
         )}
       </div>
