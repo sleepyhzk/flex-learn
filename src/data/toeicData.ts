@@ -50,12 +50,12 @@ export interface PartInfo {
 
 export const PARTS: PartInfo[] = [
   { key: 'p1', title: 'Part 1 · Mô tả tranh', skill: 'Nghe', desc: 'Nhìn một bức tranh, nghe bốn câu mô tả và chọn câu mô tả đúng nhất.', tip: 'Xem tranh trước khi nghe: ai đang làm gì, đồ vật ở đâu. Loại câu nhắc đến vật hoặc hành động không có trong tranh, và cẩn thận câu dùng từ gần giống.', perSession: 6 },
-  { key: 'p5', title: 'Part 5 · Điền vào câu', skill: 'Đọc', desc: 'Chọn từ hoặc cụm từ đúng để hoàn thành câu (ngữ pháp, từ loại, từ vựng).', tip: 'Nhìn các đáp án trước: nếu cùng gốc từ thì đây là câu từ loại; xác định chỗ trống cần danh từ, động từ, tính từ hay trạng từ.', perSession: 10 },
-  { key: 'p6', title: 'Part 6 · Hoàn thành đoạn văn', skill: 'Đọc', desc: 'Điền vào chỗ trống trong email, thông báo; có câu chọn nguyên một câu phù hợp.', tip: 'Với câu cần chèn cả câu, đọc câu trước và sau chỗ trống để tìm đại từ, từ nối và ý liên kết.', perSession: 2 },
-  { key: 'p7', title: 'Part 7 · Đọc hiểu', skill: 'Đọc', desc: 'Đọc email, quảng cáo, bài báo, tin nhắn rồi trả lời câu hỏi.', tip: 'Đọc câu hỏi trước, gạch từ khóa (tên, số, ngày) rồi tìm trong bài; đáp án thường được diễn đạt lại, ít khi trùng nguyên văn.', perSession: 2 },
   { key: 'p2', title: 'Part 2 · Hỏi và đáp', skill: 'Nghe', desc: 'Nghe một câu hỏi và ba câu trả lời, chọn câu trả lời phù hợp nhất.', tip: 'Chú ý từ để hỏi (Who, When, Where, Why, How). Cẩn thận bẫy đồng âm và từ lặp lại trong câu hỏi.', perSession: 10 },
   { key: 'p3', title: 'Part 3 · Hội thoại ngắn', skill: 'Nghe', desc: 'Nghe đoạn hội thoại hai người, trả lời 3 câu hỏi.', tip: 'Đọc trước 3 câu hỏi khi chưa nghe; đáp án thường xuất hiện theo đúng thứ tự câu hỏi.', perSession: 3 },
   { key: 'p4', title: 'Part 4 · Bài nói ngắn', skill: 'Nghe', desc: 'Nghe thông báo, tin nhắn thoại, bài giới thiệu của một người, trả lời 3 câu hỏi.', tip: 'Câu đầu thường cho biết người nói là ai và nói để làm gì; phần cuối thường nêu việc người nghe cần làm.', perSession: 2 },
+  { key: 'p5', title: 'Part 5 · Điền vào câu', skill: 'Đọc', desc: 'Chọn từ hoặc cụm từ đúng để hoàn thành câu (ngữ pháp, từ loại, từ vựng).', tip: 'Nhìn các đáp án trước: nếu cùng gốc từ thì đây là câu từ loại; xác định chỗ trống cần danh từ, động từ, tính từ hay trạng từ.', perSession: 10 },
+  { key: 'p6', title: 'Part 6 · Hoàn thành đoạn văn', skill: 'Đọc', desc: 'Điền vào chỗ trống trong email, thông báo; có câu chọn nguyên một câu phù hợp.', tip: 'Với câu cần chèn cả câu, đọc câu trước và sau chỗ trống để tìm đại từ, từ nối và ý liên kết.', perSession: 2 },
+  { key: 'p7', title: 'Part 7 · Đọc hiểu', skill: 'Đọc', desc: 'Đọc email, quảng cáo, bài báo, tin nhắn rồi trả lời câu hỏi.', tip: 'Đọc câu hỏi trước, gạch từ khóa (tên, số, ngày) rồi tìm trong bài; đáp án thường được diễn đạt lại, ít khi trùng nguyên văn.', perSession: 2 },
 ];
 
 const q = (prompt: string | undefined, correct: string, wrongs: string[], why: string): RawQ => ({ prompt, correct, wrongs, why });

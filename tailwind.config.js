@@ -5,10 +5,14 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
         display: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif'],
         script: ['"Dancing Script"', '"Brush Script MT"', 'cursive'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      boxShadow: {
+        soft: '0 8px 30px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 14px 35px -4px rgba(112, 92, 235, 0.16)',
       },
       colors: {
         // Tông giấy kẻ ô trắng xanh lavender (theo ảnh mẫu)

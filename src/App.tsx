@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { AuthModal } from '@/components/AuthModal';
-import { Lanterns } from '@/components/Lanterns';
+import { TopBar } from '@/components/TopBar';
 import type { ViewKey } from '@/components/Sidebar';
 import { HomeView } from '@/views/HomeView';
 import { FlashcardView } from '@/views/FlashcardView';
@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useBrightness } from '@/hooks/useBrightness';
 import { useStudyTracker } from '@/hooks/useStudyTime';
 import { useExtrasSync } from '@/hooks/useExtrasSync';
+import { sfx } from '@/lib/sfx';
 
 export default function App() {
   const { theme, toggle } = useTheme();
@@ -48,28 +49,28 @@ export default function App() {
   };
 
   return (
-    <div className="relative isolate min-h-screen bg-grid-paper">
-      <Lanterns />
-      <p
-        aria-hidden="true"
-        className="bg-quote pointer-events-none fixed right-5 top-28 -z-10 hidden select-none min-[1400px]:block"
-      >
-        WHAT IF I CAN’T DO IT? GO BEYOND.
-      </p>
+    <div className="relative min-h-screen bg-paper dark:bg-paper-dark">
       <Sidebar
         current={view}
         onNavigate={go}
         theme={theme}
-        onToggleTheme={toggle}
+        onToggleTheme={() => {
+          sfx.chime();
+          toggle();
+        }}
         brightness={brightness}
         onBrightness={setBrightness}
         onResetBrightness={resetBrightness}
         open={sidebarOpen}
-        onToggleOpen={() => setSidebarOpen((v) => !v)}
+        onToggleOpen={() => {
+          sfx.chime();
+          setSidebarOpen((v) => !v);
+        }}
       />
       {/* Chừa chỗ cho thanh trên (14) và thanh tab dưới (điện thoại), hoặc thanh bên (máy tính) */}
-      <main className={`pb-24 pt-14 transition-[padding] duration-300 lg:pb-0 lg:pt-0 ${sidebarOpen ? 'lg:pl-60' : 'lg:pl-[4.5rem]'}`}>
-        <div className={`mx-auto px-4 py-6 sm:px-6 lg:px-10 lg:py-10 ${sidebarOpen ? 'max-w-5xl' : 'max-w-6xl'}`}>
+      <main className={`pb-24 pt-14 transition-[padding] duration-300 lg:pb-0 lg:pt-0 ${sidebarOpen ? 'lg:pl-44' : 'lg:pl-16'}`}>
+        <TopBar onNavigate={go} />
+        <div className={`mx-auto p-4 sm:p-6 lg:p-10 ${view === 'home' ? 'max-w-7xl' : !sidebarOpen ? 'max-w-6xl' : 'max-w-5xl'}`}>
           {view === 'home' && <HomeView onNavigate={go} />}
           {view === 'flashcards' && <FlashcardView />}
           {view === 'games' && <GamesView />}

@@ -93,7 +93,7 @@
 @layer base {
   body {
     @apply bg-paper text-slate-900 antialiased dark:bg-paper-dark dark:text-slate-100;
-    font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
   }
 
   /* Viền focus rõ ràng cho người dùng bàn phím */
@@ -197,6 +197,20 @@
   .font-ipa {
     font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Arial Unicode MS', system-ui, sans-serif;
     letter-spacing: 0.01em;
+  }
+  /* Thẻ lật 3D (thẻ ôn nhanh ở Trang chủ) */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
   }
   .scrollbar-thin {
     scrollbar-width: thin;

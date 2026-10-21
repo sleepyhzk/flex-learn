@@ -1,8 +1,10 @@
 import { useId, useState } from 'react';
-import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings, Headphones, Mic, Gamepad2, ClipboardCheck, SunMedium, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings, Headphones, Mic, Gamepad2, ClipboardCheck, SunMedium, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BRIGHTNESS_DEFAULT, BRIGHTNESS_MAX, BRIGHTNESS_MIN } from '@/hooks/useBrightness';
 import { VoiceSettings } from './VoiceSettings';
 import { useAuth } from '@/hooks/useAuth';
+import { useVocabStats } from '@/hooks/useVocabStats';
+import { useDisplayName } from '@/hooks/useDisplayName';
 
 export type ViewKey = 'home' | 'flashcards' | 'games' | 'test' | 'dictionary' | 'lessons' | 'spelling' | 'dictation' | 'shadowing' | 'conversation';
 
@@ -10,20 +12,26 @@ interface NavItem {
   key: ViewKey;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  section: 'learn' | 'practice';
 }
 
 const navItems: NavItem[] = [
-  { key: 'home', label: 'Trang chủ', icon: Home },
-  { key: 'flashcards', label: 'Flashcard', icon: Layers },
-  { key: 'games', label: 'Trò chơi', icon: Gamepad2 },
-  { key: 'test', label: 'Kiểm tra', icon: ClipboardCheck },
-  { key: 'lessons', label: 'Từ vựng', icon: GraduationCap },
-  { key: 'conversation', label: 'Giao tiếp', icon: MessageCircle },
-  { key: 'spelling', label: 'Chính tả', icon: Keyboard },
-  { key: 'dictation', label: 'Nghe chép', icon: Headphones },
-  { key: 'shadowing', label: 'Shadowing', icon: Mic },
-  { key: 'dictionary', label: 'Tra cứu', icon: BookOpen },
+  { key: 'home', label: 'Trang chủ', icon: Home, section: 'learn' },
+  { key: 'flashcards', label: 'Flashcard', icon: Layers, section: 'learn' },
+  { key: 'lessons', label: 'Từ vựng', icon: GraduationCap, section: 'learn' },
+  { key: 'spelling', label: 'Chính tả', icon: Keyboard, section: 'learn' },
+  { key: 'dictation', label: 'Nghe chép', icon: Headphones, section: 'learn' },
+  { key: 'shadowing', label: 'Shadowing', icon: Mic, section: 'learn' },
+  { key: 'games', label: 'Trò chơi', icon: Gamepad2, section: 'practice' },
+  { key: 'test', label: 'Kiểm tra', icon: ClipboardCheck, section: 'practice' },
+  { key: 'conversation', label: 'Giao tiếp', icon: MessageCircle, section: 'practice' },
+  { key: 'dictionary', label: 'Tra cứu', icon: BookOpen, section: 'practice' },
 ];
+
+const SECTIONS = [
+  { id: 'learn', title: 'Học tập' },
+  { id: 'practice', title: 'Thực hành' },
+] as const;
 
 interface SidebarProps {
   current: ViewKey;
@@ -40,11 +48,16 @@ interface SidebarProps {
 
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-100 to-primary-300 font-display text-xl font-bold text-[#4a3fa8] dark:from-primary-700 dark:to-primary-500 dark:text-white shadow-[0_6px_14px_-6px_rgba(90,80,170,0.45),inset_0_1px_0_rgba(255,255,255,0.6)] dark:from-primary-200 dark:to-primary-100 dark:text-primary-300">
+    <div className="flex items-center gap-1.5 overflow-hidden">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-primary-600 to-primary-500 text-xs font-extrabold text-white shadow-sm shadow-primary-500/20">
         F
       </div>
-      {!compact && <span className="font-script text-[28px] font-semibold leading-none text-ink dark:text-slate-100">Flex Learn</span>}
+      {!compact && (
+        <h1 className="flex items-center gap-1 truncate text-xs font-bold leading-none tracking-tight text-slate-900 dark:text-white">
+          Flex Learn
+          <span className="h-1.5 w-1.5 rounded-full bg-success-500" aria-hidden="true" />
+        </h1>
+      )}
     </div>
   );
 }
@@ -233,9 +246,123 @@ function SettingsPanel({
   );
 }
 
+function initials(name: string | null): string {
+  if (!name) return 'KH';
+  const parts = name.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.charAt(0) ?? '';
+  const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : (parts[0]?.charAt(1) ?? '');
+  return (first + last).toUpperCase();
+}
+
+/** Chân thanh bên (máy tính, đang mở rộng): tài khoản, độ sáng, chế độ tối. */
+function SidebarFooter({
+  theme,
+  onToggleTheme,
+  brightness,
+  onBrightness,
+  onResetBrightness,
+}: {
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+  brightness: number;
+  onBrightness: (n: number) => void;
+  onResetBrightness: () => void;
+}) {
+  const auth = useAuth();
+  const name = useDisplayName();
+  const sliderId = useId();
+  const [bOpen, setBOpen] = useState(false);
+  const iconBtn =
+    'flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700';
+
+  return (
+    <div className="border-t border-slate-100 bg-slate-50/50 p-1.5 dark:border-slate-800/80 dark:bg-slate-800/30">
+      {auth.enabled && !auth.loading && !auth.user && (
+        <button
+          onClick={() => auth.openAuth()}
+          className="mb-1.5 flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-primary-700 via-primary-600 to-[#705ceb] px-2 py-2 text-[11px] font-semibold text-white transition hover:brightness-110 dark:from-primary-600 dark:via-primary-600 dark:to-primary-500"
+        >
+          <LogIn className="h-3.5 w-3.5" />
+          Đăng nhập để lưu tiến độ
+        </button>
+      )}
+      <div className="relative flex items-center justify-between gap-1 rounded-xl border border-slate-200/60 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <div className="relative shrink-0">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-tr from-primary-500 to-pink-500 text-[10px] font-bold text-white">
+              {initials(name)}
+            </div>
+            <span
+              className={`absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full border border-white dark:border-slate-800 ${auth.user ? 'bg-success-500' : 'bg-slate-300'}`}
+              aria-hidden="true"
+            />
+          </div>
+          <div className="min-w-0">
+            <h4 className="truncate text-[10.5px] font-bold leading-tight text-slate-900 dark:text-white">{name ?? 'Khách'}</h4>
+            <span className={`block truncate text-[10px] font-medium leading-tight ${auth.user ? 'text-success-600 dark:text-success-400' : 'text-slate-500'}`}>
+              {auth.user ? 'Online' : 'Lưu trên máy'}
+            </span>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center">
+          <button onClick={() => setBOpen((v) => !v)} className={iconBtn} aria-label="Độ sáng" aria-expanded={bOpen} title={`Độ sáng ${brightness}%`}>
+            <SunMedium className="h-3.5 w-3.5" />
+          </button>
+          <button onClick={onToggleTheme} className={iconBtn} role="switch" aria-checked={theme === 'dark'} aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">
+            {theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5 text-amber-400" />}
+          </button>
+        </div>
+        {bOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setBOpen(false)} aria-hidden="true" />
+            <div className="absolute bottom-full left-0 z-50 mb-2 w-52 rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+              <div className="flex items-center justify-between">
+                <label htmlFor={sliderId} className="flex items-center gap-2">
+                  <SunMedium className="h-3.5 w-3.5" />
+                  Độ sáng
+                </label>
+                <span className="flex items-center gap-2">
+                  <span className="tabular-nums text-slate-500">{brightness}%</span>
+                  {brightness !== BRIGHTNESS_DEFAULT && (
+                    <button onClick={onResetBrightness} className="rounded-md px-1.5 py-0.5 text-[11px] font-medium text-primary-700 hover:bg-primary-100/70 dark:text-primary-300 dark:hover:bg-slate-800">
+                      Đặt lại
+                    </button>
+                  )}
+                </span>
+              </div>
+              <input
+                id={sliderId}
+                type="range"
+                min={BRIGHTNESS_MIN}
+                max={BRIGHTNESS_MAX}
+                step={1}
+                value={brightness}
+                onChange={(e) => onBrightness(Number(e.target.value))}
+                onDoubleClick={onResetBrightness}
+                aria-valuetext={`${brightness} phần trăm`}
+                className="mt-2 h-2 w-full cursor-pointer accent-primary-600"
+              />
+            </div>
+          </>
+        )}
+      </div>
+      {auth.user && (
+        <button
+          onClick={() => void auth.signOut()}
+          className="mt-1 flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        >
+          <LogOut className="h-3 w-3" />
+          Đăng xuất
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function Sidebar({ current, onNavigate, theme, onToggleTheme, brightness, onBrightness, onResetBrightness, open, onToggleOpen }: SidebarProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const { due } = useVocabStats();
 
   return (
     <>
@@ -251,71 +378,114 @@ export function Sidebar({ current, onNavigate, theme, onToggleTheme, brightness,
         </button>
       </header>
 
-      {/* Thanh bên (máy tính): mở rộng hoặc thu gọn còn cột biểu tượng */}
+      {/* Thanh bên (máy tính): gọn, thu gọn còn cột biểu tượng kèm tooltip */}
       <aside
-        className={`fixed left-0 top-0 z-30 hidden h-screen flex-col bg-paper-side shadow-[8px_0_30px_-14px_rgba(80,72,150,0.45)] transition-[width] duration-300 ease-out dark:bg-paper-sidedark lg:flex ${open ? 'w-60' : 'w-[4.5rem]'}`}
+        className={`fixed left-0 top-0 z-30 hidden h-screen flex-col justify-between border-r border-slate-200/80 bg-white transition-[width] duration-300 dark:border-slate-800 dark:bg-paper-sidedark lg:flex ${open ? 'w-44' : 'w-16'}`}
       >
-        {open ? (
-          <>
-            <button
-              onClick={onToggleOpen}
-              className="absolute right-3 top-3 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-primary-100/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-              aria-label="Thu gọn thanh bên"
-              title="Thu gọn thanh bên"
-            >
-              <PanelLeftClose className="h-5 w-5" />
-            </button>
-            <div className="px-5 pb-5 pt-6">
+        <div className={`flex min-h-0 flex-1 flex-col p-2 ${open ? 'overflow-y-auto overflow-x-hidden scrollbar-thin' : ''}`}>
+          {open ? (
+            <div className="mb-4 flex items-center justify-between px-1 pt-1">
               <Logo />
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center gap-2 pb-3 pt-5">
-            <Logo compact />
-            <button
-              onClick={onToggleOpen}
-              className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-primary-100/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-              aria-label="Mở rộng thanh bên"
-              title="Mở rộng thanh bên"
-            >
-              <PanelLeftOpen className="h-5 w-5" />
-            </button>
-          </div>
-        )}
-        <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-3 py-2 scrollbar-thin" aria-label="Điều hướng chính">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = current === item.key;
-            return (
               <button
-                key={item.key}
-                onClick={() => onNavigate(item.key)}
-                aria-current={active ? 'page' : undefined}
-                aria-label={open ? undefined : item.label}
-                title={open ? undefined : item.label}
-                className={`relative flex w-full items-center whitespace-nowrap rounded-2xl py-3 text-[15px] lift-nav ${open ? 'gap-3.5 px-4' : 'justify-center px-0'} ${
-                  active
-                    ? "bg-primary-200 font-medium text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] before:absolute before:-left-3 before:top-1/2 before:h-8 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-ink dark:bg-primary-600 dark:text-white dark:shadow-none dark:before:bg-primary-300"
-                    : 'text-slate-700 hover:bg-primary-100/60 dark:text-slate-300 dark:hover:bg-slate-800'
-                }`}
+                onClick={onToggleOpen}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
+                aria-label="Thu gọn thanh bên"
+                title="Thu gọn thanh bên"
               >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {open && item.label}
+                <ChevronLeft className="h-3.5 w-3.5" />
               </button>
-            );
-          })}
-        </nav>
-        <div className="p-3 pb-4">
-          <SettingsPanel
+            </div>
+          ) : (
+            <div className="mb-3 flex flex-col items-center gap-2 pt-1">
+              <Logo compact />
+              <button
+                onClick={onToggleOpen}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
+                aria-label="Mở rộng thanh bên"
+                title="Mở rộng thanh bên"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+          <nav className="flex flex-col gap-3.5" aria-label="Điều hướng chính">
+            {SECTIONS.map((sec, i) => (
+              <div key={sec.id}>
+                {open ? (
+                  <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">{sec.title}</span>
+                ) : (
+                  i > 0 && <div className="mx-2 mb-2 border-t border-slate-100 dark:border-slate-800" />
+                )}
+                <ul className="mt-1 space-y-0.5">
+                  {navItems
+                    .filter((item) => item.section === sec.id)
+                    .map((item) => {
+                      const Icon = item.icon;
+                      const active = current === item.key;
+                      const badge = item.key === 'flashcards' ? due : 0;
+                      const tip = badge > 0 ? `${item.label} (${badge})` : item.label;
+                      return (
+                        <li key={item.key}>
+                          <button
+                            onClick={() => onNavigate(item.key)}
+                            aria-current={active ? 'page' : undefined}
+                            aria-label={open ? undefined : tip}
+                            className={`group relative flex w-full items-center rounded-lg px-2 py-1.5 text-xs transition-colors ${open ? 'gap-2' : 'justify-center'} ${
+                              active
+                                ? 'bg-primary-100 font-semibold text-primary-700 dark:bg-primary-950/60 dark:text-primary-200'
+                                : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white'
+                            }`}
+                          >
+                            <Icon
+                              className={`h-4 w-4 shrink-0 ${active ? '' : 'text-slate-400 group-hover:text-primary-500'}`}
+                            />
+                            {open && <span className="truncate">{item.label}</span>}
+                            {badge > 0 &&
+                              (open ? (
+                                <span className="ml-auto rounded-full bg-primary-100 px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                                  {badge > 999 ? '999+' : badge}
+                                </span>
+                              ) : (
+                                <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-primary-500" aria-hidden="true" />
+                              ))}
+                            {!open && (
+                              <span
+                                role="tooltip"
+                                className="pointer-events-none absolute left-full z-50 ml-3 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                              >
+                                {tip}
+                              </span>
+                            )}
+                          </button>
+                        </li>
+                      );
+                    })}
+                </ul>
+              </div>
+            ))}
+          </nav>
+        </div>
+        {open ? (
+          <SidebarFooter
             theme={theme}
             onToggleTheme={onToggleTheme}
             brightness={brightness}
             onBrightness={onBrightness}
             onResetBrightness={onResetBrightness}
-            onOpenVoice={() => setVoiceOpen(true)}
-            compact={!open}
           />
-        </div>
+        ) : (
+          <div className="border-t border-slate-100 p-2 pb-3 dark:border-slate-800/80">
+            <SettingsPanel
+              theme={theme}
+              onToggleTheme={onToggleTheme}
+              brightness={brightness}
+              onBrightness={onBrightness}
+              onResetBrightness={onResetBrightness}
+              onOpenVoice={() => setVoiceOpen(true)}
+              compact
+            />
+          </div>
+        )}
       </aside>
 
       {/* Thanh tab dưới (điện thoại) */}
