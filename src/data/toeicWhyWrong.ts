@@ -17,6 +17,9 @@ import { WW_P5C } from './whywrong/p5c';
 import { WW_P5D } from './whywrong/p5d';
 import { WW_P6 } from './whywrong/p6';
 import { WW_P7 } from './whywrong/p7';
+import { WW_HARD } from './toeicHardKit';
+// Các file toeicHard*.ts phải được nạp trước để WW_HARD có dữ liệu (toeicData.ts đã nạp chúng).
+import './toeicData';
 
 export const WHY_WRONG: Record<string, string[]> = {
   ...WW_P1,
@@ -31,4 +34,5 @@ export const WHY_WRONG: Record<string, string[]> = {
   ...WW_P5D,
   ...WW_P6,
   ...WW_P7,
+  ...WW_HARD,
 };

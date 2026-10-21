@@ -26,11 +26,11 @@ import {
   Zap,
   ChevronRight,
 } from 'lucide-react';
-import { PARTS, TOEIC_UNITS, questionCount } from '@/data/toeicData';
+import { PARTS, questionCount } from '@/data/toeicData';
 import type { PartKey, Unit } from '@/data/toeicData';
 import { sceneSvg } from '@/data/toeicScenes';
 import { shuffle } from '@/lib/dictItems';
-import { ORDER, autoMinutes, bankSize, buildCustomUnits } from '@/lib/toeicMock';
+import { ORDER, autoMinutes, bankSize, buildCustomUnits, pickUnits } from '@/lib/toeicMock';
 import type { MockConfig } from '@/lib/toeicMock';
 import { explainOptions, resolveLog, speakTexts, UNIT_BY_ID } from '@/lib/toeicExplain';
 import { recordSession, loadReview } from '@/lib/toeicReview';
@@ -71,14 +71,12 @@ function prepare(unit: Unit, only?: number[]): PUnit {
   return { unit, questions, speak: speakTexts(unit, questions[0].options) };
 }
 
-const pick = (part: PartKey, n: number): Unit[] => shuffle(TOEIC_UNITS[part]).slice(0, n);
-
 const MIX: [PartKey, number][] = [['p1', 2], ['p2', 4], ['p3', 1], ['p4', 1], ['p5', 4], ['p6', 1], ['p7', 1]];
 
 function buildSession(key: PartKey | 'mix'): PUnit[] {
-  if (key === 'mix') return MIX.flatMap(([p, n]) => pick(p, n)).map((u) => prepare(u));
+  if (key === 'mix') return MIX.flatMap(([p, n]) => pickUnits(p, n)).map((u) => prepare(u));
   const info = PARTS.find((p) => p.key === key)!;
-  return pick(key, info.perSession).map((u) => prepare(u));
+  return pickUnits(key, info.perSession).map((u) => prepare(u));
 }
 
 // ------------------------------------------------------------------ thi thử tùy chỉnh

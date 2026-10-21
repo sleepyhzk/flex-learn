@@ -1,4 +1,8 @@
 import type { SceneKey } from './toeicScenes';
+import { HARD_P1, HARD_P2 } from './toeicHard1';
+import { HARD_P5 } from './toeicHard2';
+import { HARD_P3, HARD_P4 } from './toeicHard3';
+import { HARD_P6, HARD_P7 } from './toeicHard4';
 import { MORE4_P1, MORE4_P2, MORE4_P3, MORE4_P4, MORE4_P5, MORE4_P6, MORE4_P7 } from './toeicExtra4';
 import { MORE3_P1, MORE3_P2, MORE3_P3, MORE3_P4, MORE3_P5, MORE3_P6, MORE3_P7 } from './toeicExtra3';
 import { MORE_P1, MORE_P2, MORE_P3, MORE_P4, MORE_P5, MORE_P6, MORE_P7 } from './toeicExtra2';
@@ -36,6 +40,8 @@ export interface Unit {
   /** Lời thoại để nghe (Part 2: dòng đầu là câu hỏi; Part 3, 4: toàn bộ hội thoại/bài nói). */
   lines?: ScriptLine[];
   questions: RawQ[];
+  /** Đơn vị đề KHÓ: được chọn kèm với tỉ lệ nhất định trong mỗi lượt làm (xem lib/toeicMock.ts). */
+  hard?: boolean;
 }
 
 export interface PartInfo {
@@ -422,13 +428,13 @@ const PART4: Unit[] = [
 ];
 
 export const TOEIC_UNITS: Record<PartKey, Unit[]> = {
-  p1: [...EXTRA_P1, ...MORE_P1, ...MORE3_P1, ...MORE4_P1],
-  p2: [...PART2, ...EXTRA_P2, ...MORE_P2, ...MORE3_P2, ...MORE4_P2],
-  p3: [...PART3, ...EXTRA_P3, ...MORE_P3, ...MORE3_P3, ...MORE4_P3],
-  p4: [...PART4, ...EXTRA_P4, ...MORE_P4, ...MORE3_P4, ...MORE4_P4],
-  p5: [...PART5, ...EXTRA_P5, ...MORE_P5, ...MORE3_P5, ...MORE4_P5],
-  p6: [...PART6, ...EXTRA_P6, ...MORE_P6, ...MORE3_P6, ...MORE4_P6],
-  p7: [...PART7, ...EXTRA_P7, ...MORE_P7, ...MORE3_P7, ...MORE4_P7],
+  p1: [...EXTRA_P1, ...MORE_P1, ...MORE3_P1, ...MORE4_P1, ...HARD_P1],
+  p2: [...PART2, ...EXTRA_P2, ...MORE_P2, ...MORE3_P2, ...MORE4_P2, ...HARD_P2],
+  p3: [...PART3, ...EXTRA_P3, ...MORE_P3, ...MORE3_P3, ...MORE4_P3, ...HARD_P3],
+  p4: [...PART4, ...EXTRA_P4, ...MORE_P4, ...MORE3_P4, ...MORE4_P4, ...HARD_P4],
+  p5: [...PART5, ...EXTRA_P5, ...MORE_P5, ...MORE3_P5, ...MORE4_P5, ...HARD_P5],
+  p6: [...PART6, ...EXTRA_P6, ...MORE_P6, ...MORE3_P6, ...MORE4_P6, ...HARD_P6],
+  p7: [...PART7, ...EXTRA_P7, ...MORE_P7, ...MORE3_P7, ...MORE4_P7, ...HARD_P7],
 };
 
 /** Số câu hỏi của mỗi Part trong ngân hàng đề. */
