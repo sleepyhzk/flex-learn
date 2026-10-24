@@ -54,3 +54,9 @@ Kiểm tra nhanh:
 - Nút reset tiến độ chỉ xóa bản trên cloud của Flex Learn.
 - Cài đặt giọng đọc và chế độ tối chỉ lưu theo từng thiết bị.
 - Khóa thẻ là `từ#id` (vd `run#278`): đừng bao giờ đổi `id` của một từ đã có trong dữ liệu.
+
+## Đăng ký tài khoản: yêu cầu mật khẩu và thời hạn liên kết
+
+Form đăng ký yêu cầu mật khẩu có chữ hoa, chữ thường, chữ số, ký tự đặc biệt và từ 8 ký tự. Đây mới chỉ là kiểm tra ở giao diện, để máy chủ cũng chặn mật khẩu yếu thì vào Supabase: **Authentication > Policies (hoặc Sign In / Providers) > Password requirements** và bật cùng các yêu cầu đó. Vì project này dùng chung với app Hán Tự, thay đổi này áp dụng cho cả hai app.
+
+Thông báo "Liên kết hết hạn sau ..." sau khi đăng ký lấy số từ hằng `LINK_EXPIRY_MINUTES` trong `src/components/AuthModal.tsx` (mặc định 60 phút, bằng mặc định của Supabase). Muốn đổi, sửa **Authentication > Providers > Email > Email OTP Expiration** (đơn vị giây, ví dụ 600 là 10 phút) rồi sửa hằng số cho khớp.

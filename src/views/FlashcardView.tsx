@@ -50,6 +50,10 @@ function listFor(filter: FlashcardFilter, progressMap: ProgressMap, starred: Set
   return list;
 }
 
+/** Một mặt của thẻ lật: hai mặt xếp chồng trong cùng một ô lưới nên thẻ cao bằng mặt dài hơn. */
+const CARD_FACE =
+  'backface-hidden col-start-1 row-start-1 flex min-h-[24rem] flex-col rounded-2xl border border-slate-200 bg-white px-6 pb-8 pt-5 shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)] dark:border-slate-800 dark:bg-slate-900 sm:min-h-[30rem] sm:px-16';
+
 /** Học thẻ mới / Ôn tập lại thẻ đã chấm "Chưa thuộc" hoặc "Thuộc rồi". */
 type Mode = 'learn' | 'review';
 type ReviewKind = 'hard' | 'good';
@@ -101,6 +105,10 @@ export function FlashcardView() {
   const [index, setIndex] = useState(0);
   const [sessionStats, setSessionStats] = useState<SessionStats>(EMPTY_STATS);
   const [finished, setFinished] = useState(false);
+  // Đang lật thẻ về mặt trước trước khi sang thẻ kế tiếp: tạm khóa chấm điểm và lật.
+  const advanceTimer = useRef<number | undefined>(undefined);
+  const lockRef = useRef(false);
+  useEffect(() => () => window.clearTimeout(advanceTimer.current), []);
 
   // Bộ thẻ được "chụp" lúc bắt đầu phiên (đổi bộ lọc / học lại). Nếu tính lại sau
   // mỗi lần chấm điểm, thứ tự đổi giữa chừng và thẻ kế tiếp sẽ bị nhảy cóc.
@@ -119,6 +127,8 @@ export function FlashcardView() {
   );
 
   const startSession = useCallback((sp: DeckSpec, t: TopicFilter) => {
+    window.clearTimeout(advanceTimer.current);
+    lockRef.current = false;
     setCards(buildDeck(sp, t, progressRef.current, starredRef.current));
     setIndex(0);
     setShowMeaning(false);
@@ -134,7 +144,7 @@ export function FlashcardView() {
 
   // Chỉ còn 2 mức: "Chưa thuộc" -> hard (quên, ôn lại ngày mai), "Thuộc rồi" -> good
   const handleReview = (quality: Extract<ReviewQuality, 'hard' | 'good'>) => {
-    if (!currentCard || finished) return;
+    if (!currentCard || finished || lockRef.current) return;
     // Ôn lại thẻ đã thuộc khi chưa đến hạn: chỉ tính vào thống kê phiên, không đẩy lịch ôn xa thêm.
     // (Nếu quên thì vẫn ghi "Chưa thuộc".)
     const prev = progressRef.current[vocabKey(currentCard)];
@@ -146,13 +156,25 @@ export function FlashcardView() {
       known: prev.known + (quality === 'good' ? 1 : 0),
       unknown: prev.unknown + (quality === 'hard' ? 1 : 0),
     }));
-    if (index + 1 >= cards.length) setFinished(true);
-    else { setIndex((i) => i + 1); setShowMeaning(false); }
+    const advance = () => {
+      lockRef.current = false;
+      if (index + 1 >= cards.length) setFinished(true);
+      else setIndex((i) => i + 1);
+    };
+    if (showMeaning) {
+      // Lật thẻ về mặt trước rồi mới đổi sang từ kế tiếp, để không lộ nghĩa của từ sau trong lúc lật.
+      lockRef.current = true;
+      setShowMeaning(false);
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      advanceTimer.current = window.setTimeout(advance, reduce ? 0 : 320);
+    } else {
+      advance();
+    }
   };
 
   // Lật thẻ: khi hiện nghĩa thì tự phát âm
   const toggleMeaning = () => {
-    if (!currentCard || finished) return;
+    if (!currentCard || finished || lockRef.current) return;
     const next = !showMeaning;
     setShowMeaning(next);
     if (next) speakEnglish(speechText(currentCard));
@@ -206,6 +228,36 @@ export function FlashcardView() {
   const reset = () => startSession(spec, topic);
 
   const isStarredCard = currentCard ? starred.has(vocabKey(currentCard)) : false;
+
+  // Hàng đầu thẻ (số thẻ, đánh dấu sao, ẩn/hiện phiên âm), có mặt ở cả hai mặt; mặt đang ẩn thì không nhận tiêu điểm bàn phím.
+  const cardTop = (active: boolean) => (
+    <div className="flex items-center justify-between">
+      <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">
+        {index + 1} / {cards.length}
+      </span>
+      <div className="-mr-2 flex items-center">
+        <button
+          onClick={toggleCurrentStar}
+          tabIndex={active ? 0 : -1}
+          className={`rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${isStarredCard ? 'text-accent-500' : 'text-slate-400 hover:text-slate-600'}`}
+          title={isStarredCard ? 'Bỏ đánh dấu (phím ↓)' : 'Đánh dấu cần học (phím ↓)'}
+          aria-label={isStarredCard ? 'Bỏ đánh dấu' : 'Đánh dấu cần học'}
+          aria-pressed={isStarredCard}
+        >
+          <Star className={`h-5 w-5 ${isStarredCard ? 'fill-current' : ''}`} />
+        </button>
+        <button
+          onClick={() => setShowIpa(!showIpa)}
+          tabIndex={active ? 0 : -1}
+          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+          title={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
+          aria-label={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
+        >
+          {showIpa ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+        </button>
+      </div>
+    </div>
+  );
 
   const dueCount = INITIAL_VOCAB.filter((w) => {
     const s = progressMap[vocabKey(w)];
@@ -371,160 +423,141 @@ export function FlashcardView() {
         )
       ) : (
         <>
-          <section
-            aria-label="Thẻ từ vựng"
-            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)] dark:border-slate-800 dark:bg-slate-900"
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-primary-100 dark:bg-slate-800"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={cards.length}
+            aria-valuenow={index + 1}
+            aria-label="Tiến độ phiên học"
           >
-            <div
-              className="h-1 bg-primary-100 dark:bg-slate-800"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={cards.length}
-              aria-valuenow={index + 1}
-              aria-label="Tiến độ phiên học"
-            >
-              <div className="h-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
-            </div>
+            <div className="h-full rounded-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
+          </div>
 
-            <div className="flex min-h-[24rem] flex-col px-6 pb-8 pt-5 sm:min-h-[30rem] sm:px-16">
-              <div className="flex items-center justify-between">
-                <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">
-                  {index + 1} / {cards.length}
-                </span>
-                <div className="-mr-2 flex items-center">
-                  <button
-                    onClick={toggleCurrentStar}
-                    className={`rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${isStarredCard ? 'text-accent-500' : 'text-slate-400 hover:text-slate-600'}`}
-                    title={isStarredCard ? 'Bỏ đánh dấu (phím ↓)' : 'Đánh dấu cần học (phím ↓)'}
-                    aria-label={isStarredCard ? 'Bỏ đánh dấu' : 'Đánh dấu cần học'}
-                    aria-pressed={isStarredCard}
-                  >
-                    <Star className={`h-5 w-5 ${isStarredCard ? 'fill-current' : ''}`} />
-                  </button>
-                  <button
-                    onClick={() => setShowIpa(!showIpa)}
-                    className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
-                    title={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
-                    aria-label={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
-                  >
-                    {showIpa ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-                  </button>
+          <section aria-label="Thẻ từ vựng" className="perspective-1000">
+            <div className={`transform-style-3d grid transition-transform duration-500 ease-out motion-reduce:transition-none ${showMeaning ? 'rotate-y-180' : ''}`}>
+              {/* Mặt trước: từ, loại từ, phiên âm */}
+              <div aria-hidden={showMeaning} className={CARD_FACE}>
+                {cardTop(!showMeaning)}
+                <div className="mt-4 flex flex-1 cursor-pointer select-none flex-col items-center justify-center text-center" onClick={toggleMeaning}>
+                  <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-7xl">
+                    {currentCard.word}
+                  </h3>
+                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
+                    <span className="font-display text-xl italic">{POS_SHORT[currentCard.pos]}</span>
+                    {showIpa && <span className="font-ipa text-xl text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
+                    {isSpeechSupported() && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
+                        tabIndex={showMeaning ? -1 : 0}
+                        className="rounded-full bg-primary-50 p-2 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
+                        aria-label="Nghe phát âm"
+                        title="Nghe phát âm"
+                      >
+                        <Volume2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </p>
+                  <p className="mt-8 text-xs text-slate-500 dark:text-slate-400">Bấm vào thẻ hoặc nhấn Space để lật xem nghĩa</p>
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-1 cursor-pointer select-none flex-col justify-center text-center" onClick={toggleMeaning}>
-                <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-7xl">
-                  {currentCard.word}
-                </h3>
-                <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-                  <span className="font-display text-xl italic">{POS_SHORT[currentCard.pos]}</span>
-                  {showIpa && <span className="font-ipa text-xl text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
-                  {isSpeechSupported() && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
-                      className="rounded-full bg-primary-50 p-2 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
-                      aria-label="Nghe phát âm"
-                      title="Nghe phát âm"
-                    >
-                      <Volume2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </p>
-              </div>
-
-              <div
-                className={`grid transition-[grid-template-rows,opacity] duration-300 motion-reduce:transition-none ${
-                  showMeaning ? 'mt-7 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                }`}
-                aria-hidden={!showMeaning}
-              >
-                <div className="overflow-hidden">
-                  <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
-                    {showMeaning && <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} />}
-                    <p className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
-                    <blockquote className="mt-5 border-l-2 border-primary-300 pl-4 dark:border-primary-700">
-                      <div className="flex items-start gap-2">
-                        <p className="flex-1 text-lg leading-relaxed text-slate-800 dark:text-slate-200">{currentCard.example}</p>
-                        {isSpeechSupported() && (
-                          <button
-                            onClick={() => speakEnglish(currentCard.example)}
-                            tabIndex={showMeaning ? 0 : -1}
-                            className="flex-shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
-                            aria-label="Nghe câu ví dụ"
-                            title="Nghe câu ví dụ"
-                          >
-                            <Volume2 className="h-4 w-4" />
-                          </button>
-                        )}
-                      </div>
-                      <p className="mt-1 text-base text-slate-500 dark:text-slate-400">{currentCard.exampleVi}</p>
-                    </blockquote>
-
-                    {currentCard.senses && currentCard.senses.length > 0 && (
-                      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                          Nghĩa khác ({currentCard.senses.length})
-                        </p>
-                        <ul className="mt-3 space-y-4">
-                          {currentCard.senses.map((sense, i) => (
-                            <li key={i}>
-                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span className="text-base font-semibold text-slate-900 dark:text-slate-100">{sense.meaning}</span>
-                                <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-950/60 dark:text-primary-300">
-                                  {sense.context}
-                                </span>
-                              </div>
-                              <div className="mt-1 flex items-start gap-1.5">
-                                <p className="flex-1 text-sm italic leading-relaxed text-slate-700 dark:text-slate-300">{sense.example}</p>
-                                {isSpeechSupported() && (
-                                  <button
-                                    onClick={() => speakEnglish(sense.example)}
-                                    tabIndex={showMeaning ? 0 : -1}
-                                    className="flex-shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
-                                    aria-label="Nghe câu ví dụ của nghĩa này"
-                                    title="Nghe câu ví dụ"
-                                  >
-                                    <Volume2 className="h-3.5 w-3.5" />
-                                  </button>
-                                )}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+              {/* Mặt sau: nghĩa, ví dụ, nghĩa khác */}
+              <div aria-hidden={!showMeaning} className={`${CARD_FACE} rotate-y-180`}>
+                {cardTop(showMeaning)}
+                <div className="mt-3 cursor-pointer select-none text-center" onClick={toggleMeaning} title="Bấm để lật lại">
+                  <h3 className="break-words font-display text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">{currentCard.word}</h3>
+                  <p className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
+                    <span className="font-display text-lg italic">{POS_SHORT[currentCard.pos]}</span>
+                    {showIpa && <span className="font-ipa text-lg text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
+                    {isSpeechSupported() && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
+                        tabIndex={showMeaning ? 0 : -1}
+                        className="rounded-full bg-primary-50 p-1.5 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
+                        aria-label="Nghe phát âm"
+                        title="Nghe phát âm"
+                      >
+                        <Volume2 className="h-4 w-4" />
+                      </button>
                     )}
-                  </div>
+                  </p>
+                </div>
+                <div className="mt-5 flex-1 border-t border-slate-200 pt-6 dark:border-slate-800">
+                  {showMeaning && <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} />}
+                  <p className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
+                  <blockquote className="mt-5 border-l-2 border-primary-300 pl-4 dark:border-primary-700">
+                    <div className="flex items-start gap-2">
+                      <p className="flex-1 text-lg leading-relaxed text-slate-800 dark:text-slate-200">{currentCard.example}</p>
+                      {isSpeechSupported() && (
+                        <button
+                          onClick={() => speakEnglish(currentCard.example)}
+                          tabIndex={showMeaning ? 0 : -1}
+                          className="flex-shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
+                          aria-label="Nghe câu ví dụ"
+                          title="Nghe câu ví dụ"
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="mt-1 text-base text-slate-500 dark:text-slate-400">{currentCard.exampleVi}</p>
+                  </blockquote>
+
+                  {currentCard.senses && currentCard.senses.length > 0 && (
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Nghĩa khác ({currentCard.senses.length})
+                      </p>
+                      <ul className="mt-3 space-y-4">
+                        {currentCard.senses.map((sense, i) => (
+                          <li key={i}>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span className="text-base font-semibold text-slate-900 dark:text-slate-100">{sense.meaning}</span>
+                              <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-950/60 dark:text-primary-300">
+                                {sense.context}
+                              </span>
+                            </div>
+                            <div className="mt-1 flex items-start gap-1.5">
+                              <p className="flex-1 text-sm italic leading-relaxed text-slate-700 dark:text-slate-300">{sense.example}</p>
+                              {isSpeechSupported() && (
+                                <button
+                                  onClick={() => speakEnglish(sense.example)}
+                                  tabIndex={showMeaning ? 0 : -1}
+                                  className="flex-shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
+                                  aria-label="Nghe câu ví dụ của nghĩa này"
+                                  title="Nghe câu ví dụ"
+                                >
+                                  <Volume2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </section>
 
-          {showMeaning ? (
-            <div className="grid grid-cols-2 gap-3">
-              <ReviewButton
-                label="Chưa thuộc"
-                sublabel="Ôn lại ngày mai"
-                hint="←"
-                onClick={() => handleReview('hard')}
-                tone="border-error-200 bg-error-50 text-error-700 hover:bg-error-100 dark:border-error-900 dark:bg-error-950/30 dark:text-error-400 dark:hover:bg-error-950/50"
-              />
-              <ReviewButton
-                label="Thuộc rồi"
-                sublabel="Ôn lại sau vài ngày"
-                hint="→"
-                onClick={() => handleReview('good')}
-                tone="border-success-200 bg-success-50 text-success-700 hover:bg-success-100 dark:border-success-900 dark:bg-success-950/30 dark:text-success-400 dark:hover:bg-success-950/50"
-              />
-            </div>
-          ) : (
-            <button
-              onClick={toggleMeaning}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-5 text-lg font-semibold text-white shadow-[0_8px_20px_-8px_rgba(26,34,69,0.7)] transition-colors hover:bg-primary-700"
-            >
-              Xem nghĩa
-              <kbd className="hidden rounded border border-white/40 px-1.5 py-0.5 font-sans text-xs font-normal text-white/80 sm:inline">Space</kbd>
-            </button>
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            <ReviewButton
+              label="Chưa thuộc"
+              sublabel="Ôn lại ngày mai"
+              hint="←"
+              onClick={() => handleReview('hard')}
+              tone="border-error-200 bg-error-50 text-error-700 hover:bg-error-100 dark:border-error-900 dark:bg-error-950/30 dark:text-error-400 dark:hover:bg-error-950/50"
+            />
+            <ReviewButton
+              label="Thuộc rồi"
+              sublabel="Ôn lại sau vài ngày"
+              hint="→"
+              onClick={() => handleReview('good')}
+              tone="border-success-200 bg-success-50 text-success-700 hover:bg-success-100 dark:border-success-900 dark:bg-success-950/30 dark:text-success-400 dark:hover:bg-success-950/50"
+            />
+          </div>
 
           <p className="hidden text-center text-xs text-slate-400 sm:block">
             Phím tắt: Space lật thẻ, ← chưa thuộc, → thuộc rồi, ↓ đánh dấu

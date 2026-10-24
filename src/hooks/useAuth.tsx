@@ -51,7 +51,7 @@ function viMessage(err: { message?: string; code?: string }): string {
     return 'Email này đã được đăng ký. Hãy đăng nhập.';
   }
   if (code === 'weak_password' || msg.includes('password should be')) {
-    return 'Mật khẩu quá yếu. Hãy dùng ít nhất 8 ký tự.';
+    return 'Mật khẩu chưa đủ mạnh. Hãy dùng chữ hoa, chữ thường, chữ số, ký tự đặc biệt và ít nhất 8 ký tự.';
   }
   if (code === 'same_password') return 'Mật khẩu mới phải khác mật khẩu cũ.';
   if (code === 'over_email_send_rate_limit' || msg.includes('rate limit')) {
