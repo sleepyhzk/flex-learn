@@ -1,11 +1,11 @@
 # Flex Learn
 
-Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh mạng). Vite + React + TypeScript + Tailwind, đăng nhập và đồng bộ bằng Supabase (chung project và tài khoản với Hán Tự, bảng riêng `flex_progress`, `flex_starred`, `flex_study_days`, `flex_games`, `flex_toeic`), deploy Vercel. Dựng từ khung của Hán Tự.
+Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh mạng). Vite + React + TypeScript + Tailwind, đăng nhập và đồng bộ bằng Supabase 
 
 ## Trạng thái
 
 Đã có:
-- SRS (SM-2), tiến độ, dấu sao, đăng nhập, đồng bộ Supabase, chế độ tối: giữ nguyên từ Hán Tự, đổi tên khóa lưu.
+- SRS (SM-2), tiến độ, dấu sao, đăng nhập, đồng bộ Supabase, chế độ tối
 - Flashcard (menu "Flashcard"): mặt trước từ + loại từ + phiên âm IPA, mặt sau nghĩa + câu ví dụ; lọc theo cấp A1/A2/B1/B2/C1/Bổ sung và theo chủ đề; có "Nghĩa khác", hình động minh họa và chế độ Ôn tập.
 - Từ vựng (menu "Từ vựng"): danh sách từ theo cấp và chủ đề, trắc nghiệm chọn nghĩa / chọn từ.
 - Giao tiếp: 486 câu theo 14 chủ đề và 5 cấp (A1 đến C1), có phát âm.
@@ -20,7 +20,6 @@ Web tự học tiếng Anh (giao tiếp hằng ngày, TOEIC, từ vựng an ninh
 - Giọng đọc tiếng Anh (Web Speech API, ưu tiên giọng Natural/Neural), script tạo mp3 bằng `npm run audio`.
 - Giao diện giấy kẻ ô tông trắng xanh lavender (nền `#f4f2fb`, chữ `#1d1a30`, chủ đạo indigo `#3b2a9c` và `#705ceb`, đèn lồng san hô viền vàng), màu lấy theo web học tiếng Nhật, có dòng chữ lớn chạy dọc ở nền bên phải (màn hình từ 1400px, sửa chữ ở `src/App.tsx`, kiểu ở `.bg-quote` trong `src/index.css`); chế độ tối nền gần đen ngả tím, thẻ tím than, màu chủ đạo violet, nhấn hồng, đèn lồng đỏ viền vàng (biến màu ở `src/index.css`, khối `.dark`).
 
-Đã bỏ: luyện viết Hán tự, luyện gõ pinyin, bộ tách từ và phân tích câu tiếng Trung.
 
 **Dữ liệu (giai đoạn 2, lô 8):** 5.570 từ, nghĩa tiếng Việt là bản nháp cần rà. Cấp đã được chuyển theo danh sách Oxford 3000 (American, theo cấp CEFR): số từ từng cấp xem bằng `npm run check:data` (TOEIC 700+ và an ninh mạng chuyên sâu, không có trong Oxford). Từ nào không có trong Oxford thì giữ cấp tự gán. Bảng chuyển cấp nằm ở `src/data/vocab/levelOverrides.ts`: id và khóa tiến độ giữ nguyên, chỉ trường `level` đổi. Câu giao tiếp: 486 câu (14 chủ đề, A1 đến C1), tự soạn; nghĩa khác (senses) cho 170 từ cũng do AI soạn, nghĩa là bản nháp cần rà.
 
