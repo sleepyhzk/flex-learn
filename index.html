@@ -7,6 +7,21 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ==================== CẤU HÌNH PHÒNG THỦ CSP ==================== -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        connect-src 'self' https://*.supabase.co;
+        script-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' data: https://fonts.gstatic.com;
+        img-src 'self' data: https: blob:;
+      "
+    />
+    <!-- =============================================================== -->
+
+
     <meta name="theme-color" content="#f4f2fb" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0e0c18" media="(prefers-color-scheme: dark)" />
     <title>Flex Learn — Tự học tiếng Anh</title>
