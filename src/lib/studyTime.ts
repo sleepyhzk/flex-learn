@@ -1,4 +1,5 @@
 import { toLocalDateString } from './srs';
+import { sanitizeStudy } from './sanitize';
 
 /** Mục tiêu mỗi ngày: 15 phút. */
 export const GOAL_SECONDS = 15 * 60;
@@ -14,8 +15,7 @@ export type StudyMap = Record<string, number>;
 function load(): StudyMap {
   try {
     const raw = localStorage.getItem(KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === 'object' ? (parsed as StudyMap) : {};
+    return raw ? sanitizeStudy(JSON.parse(raw)) : {};
   } catch {
     return {};
   }

@@ -9,18 +9,7 @@ import { EXTRA_ROWS } from './vocab/extra.ts';
 import { LEVEL_OVERRIDES } from './vocab/levelOverrides.ts';
 import { SENSES } from './vocab/senses.ts';
 
-/** Nhãn hiển thị của từng cấp. 'extra' = từ ngoài danh sách chuẩn A1-B1 (TOEIC nâng cao, an ninh mạng...). */
-export const LEVEL_LABEL: Record<Level, string> = {
-  A1: 'A1',
-  A2: 'A2',
-  B1: 'B1',
-  B2: 'B2',
-  C1: 'C1',
-  extra: 'Bổ sung',
-};
-
-/** Thứ tự các cấp khi hiển thị. */
-export const LEVEL_ORDER: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'extra'];
+export { LEVEL_LABEL, LEVEL_ORDER } from './vocabLevels.ts';
 
 /**
  * Dữ liệu từ vựng, mỗi cấp một file trong src/data/vocab/ (khoảng id: A1 1-999, A2 1001-1999 và 6001-6999,
@@ -34,7 +23,8 @@ export const LEVEL_ORDER: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'extra'];
  *  - Thêm từ mới: thêm vào CUỐI file của cấp đó với id kế tiếp, không chèn giữa, không dùng lại id cũ.
  *  - Muốn đổi chữ của một từ đã có người học: ghi vào bảng RENAMED trong lib/vocabKey.ts.
  *  - Nghĩa tiếng Việt là bản nháp, cần rà lại.
- *  - Chạy `npm run check:data` sau mỗi lần sửa dữ liệu.
+ *  - Chạy `npm run gen:vocab` rồi `npm run check:data` sau mỗi lần thêm/xóa từ hoặc đổi cấp: trang chủ đếm tiến độ bằng bảng tra
+ *    src/data/vocabIndex.ts (sinh tự động), không phải bằng kho từ vựng này.
  */
 const RAW_VOCAB: VocabItem[] = [
   ...rowsToItems(A1_ROWS, 'A1'),

@@ -4,13 +4,15 @@ import { ORDER } from '@/lib/toeicMock';
 import { UNIT_BY_ID, resolveLog } from '@/lib/toeicExplain';
 import { loadReview } from '@/lib/toeicReview';
 import type { AnswerLog } from '@/lib/toeicReview';
+import { TOEIC_STATS_KEY as KEY, clearToeicStats } from '@/lib/toeicStatsStore';
+
+export { clearToeicStats };
 
 /**
  * Thống kê "đã làm bao nhiêu câu, đúng bao nhiêu %" cho từng Part, trên máy (localStorage).
  * Mỗi câu chỉ tính một lần (theo lần làm gần nhất): khóa `đơnVị:viTriCau` -> 1 nếu lần gần nhất đúng, 0 nếu sai.
  * Lần đầu chưa có dữ liệu thì lấy từ các lượt làm gần đây trong mục Ôn tập.
  */
-const KEY = 'flex_toeic_stats_v1';
 type Seen = Record<string, 0 | 1>;
 
 function read(): Seen | null {
@@ -54,14 +56,6 @@ export function recordAnswers(items: AnswerLog[]) {
   const seen = loadSeen();
   apply(seen, items);
   write(seen);
-}
-
-export function clearToeicStats() {
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    // ignore
-  }
 }
 
 export interface PartStat {

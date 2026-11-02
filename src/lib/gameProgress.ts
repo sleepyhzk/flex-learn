@@ -1,3 +1,5 @@
+import { sanitizeGames } from './sanitize';
+
 export type GameKey = 'quiz' | 'listen' | 'match' | 'scramble';
 
 export interface TopicGameProgress {
@@ -27,7 +29,7 @@ export function clearGameProgress() {
 export function loadGameProgress(): GameProgress {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as GameProgress) : {};
+    return raw ? sanitizeGames(JSON.parse(raw)) : {};
   } catch {
     return {};
   }

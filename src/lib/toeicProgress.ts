@@ -1,3 +1,5 @@
+import { sanitizeToeic } from './sanitize';
+
 /** Kết quả luyện TOEIC, lưu trên máy (localStorage) và đồng bộ lên Supabase khi đã đăng nhập. */
 export interface ToeicRecord {
   /** Điểm cao nhất, phần trăm 0-100. */
@@ -20,8 +22,7 @@ export const TOEIC_CHANGED_EVENT = 'flexlearn:toeic-changed';
 export function loadToeicProgress(): ToeicProgress {
   try {
     const raw = localStorage.getItem(KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === 'object' ? (parsed as ToeicProgress) : {};
+    return raw ? sanitizeToeic(JSON.parse(raw)) : {};
   } catch {
     return {};
   }

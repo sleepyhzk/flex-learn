@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Check, ClipboardCheck, Flame, Gamepad2, Headphones, Hourglass, Lightbulb, Play, RotateCcw, Sparkles, Volume2, X, Zap } from 'lucide-react';
-import { LEVEL_LABEL } from '@/data/vocabData';
+import { LEVEL_LABEL } from '@/data/vocabLevels';
 import { useSrsProgress } from '@/hooks/useSrsProgress';
 import { useStudyStats } from '@/hooks/useStudyTime';
 import { useVocabStats } from '@/hooks/useVocabStats';
@@ -11,6 +11,7 @@ import { POS_SHORT } from '@/lib/pos';
 import { isSpeechSupported, speakEnglish } from '@/lib/speech';
 import { sfx } from '@/lib/sfx';
 import { speechText, vocabKey } from '@/lib/vocabKey';
+import { useVocabItem } from '@/lib/vocabLoader';
 import type { LevelStat } from '@/hooks/useVocabStats';
 import type { Level, ReviewQuality, VocabItem } from '@/lib/types';
 import type { ViewKey } from '@/components/Sidebar';
@@ -134,7 +135,7 @@ function StatCard({
 
 function levelNote(learned: number, total: number): string {
   if (learned === 0) return 'Chưa bắt đầu';
-  const ratio = learned / total;
+  const ratio = total > 0 ? learned / total : 0;
   return ratio < 0.1 ? 'Đã mở bài học' : ratio < 0.5 ? 'Đang tiến bộ' : 'Nâng cao';
 }
 
@@ -190,8 +191,8 @@ function LevelCard({ stat, active }: { stat: LevelStat; active: boolean }) {
         role="img"
         aria-label={`Cấp ${LEVEL_LABEL[level]}: ${known} từ thuộc rồi, ${hard} từ chưa thuộc, ${fresh} từ chưa học`}
       >
-        <div className="h-full bg-success-500 transition-all duration-500" style={{ width: `${(known / total) * 100}%`, minWidth: known > 0 ? 4 : 0 }} title={`Thuộc rồi: ${known}`} />
-        <div className="h-full bg-warning-500 transition-all duration-500" style={{ width: `${(hard / total) * 100}%`, minWidth: hard > 0 ? 4 : 0 }} title={`Chưa thuộc: ${hard}`} />
+        <div className="h-full bg-success-500 transition-all duration-500" style={{ width: `${total > 0 ? (known / total) * 100 : 0}%`, minWidth: known > 0 ? 4 : 0 }} title={`Thuộc rồi: ${known}`} />
+        <div className="h-full bg-warning-500 transition-all duration-500" style={{ width: `${total > 0 ? (hard / total) * 100 : 0}%`, minWidth: hard > 0 ? 4 : 0 }} title={`Chưa thuộc: ${hard}`} />
       </div>
 
       <p className="flex items-center justify-between gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -383,7 +384,35 @@ function StreakCard() {
 
 // ---------------------------------------------------------------- ôn nhanh 1 thẻ (thẻ lật 3D)
 
-function QuickReview({ cardWord, due }: { cardWord: VocabItem | null; due: number }) {
+/**
+ * Thẻ ôn nhanh. Số liệu ở trang chủ hiện ngay từ bảng tra nhỏ; nội dung thẻ (từ, nghĩa, ví dụ) nằm trong kho từ vựng
+ * được tải riêng ở nền nên ở đây chờ nó xong mới vẽ thẻ.
+ */
+function QuickReview({ cardId, due }: { cardId: number | null; due: number }) {
+  const { item, loading, failed } = useVocabItem(cardId);
+  if (loading) {
+    return (
+      <section aria-labelledby="quick" aria-busy="true" className={`${panel} rounded-3xl p-6`}>
+        <h2 id="quick" className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-white">
+          <span className="h-2.5 w-2.5 rounded-full bg-primary-500" aria-hidden="true" />
+          Ôn nhanh 1 thẻ ngay
+        </h2>
+        <div className="min-h-[190px] animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+      </section>
+    );
+  }
+  if (failed && cardId !== null) {
+    return (
+      <section aria-labelledby="quick" className={`${panel} rounded-3xl p-6`}>
+        <h2 id="quick" className="mb-2 text-sm font-bold text-slate-800 dark:text-white">Ôn nhanh 1 thẻ ngay</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Chưa tải được kho từ vựng. Kiểm tra mạng rồi tải lại trang nhé.</p>
+      </section>
+    );
+  }
+  return <QuickReviewCard cardWord={item} due={due} />;
+}
+
+function QuickReviewCard({ cardWord, due }: { cardWord: VocabItem | null; due: number }) {
   const { upsert } = useSrsProgress();
   const [flippedId, setFlippedId] = useState<number | null>(null);
   const [done, setDone] = useState(0);
@@ -553,7 +582,7 @@ export function HomeView({ onNavigate }: { onNavigate: (view: ViewKey) => void }
       </div>
       <div className="flex min-w-0 flex-col gap-6 lg:col-span-4">
         <StreakCard />
-        <QuickReview cardWord={stats.nextCard} due={stats.due} />
+        <QuickReview cardId={stats.nextId} due={stats.due} />
         <SrsTip />
       </div>
     </div>

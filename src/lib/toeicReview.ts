@@ -1,3 +1,5 @@
+import { sanitizeReview } from './sanitize';
+
 /**
  * Lưu bài làm TOEIC để ôn tập, trên máy (localStorage):
  * - `sessions`: các lượt làm gần đây, giữ lại từng câu với đáp án đã chọn, để xem lại câu nào đúng, câu nào sai.
@@ -51,14 +53,7 @@ export const qKey = (u: string, q: number) => `${u}:${q}`;
 export function loadReview(): ReviewStore {
   try {
     const raw = localStorage.getItem(KEY);
-    const p = raw ? JSON.parse(raw) : null;
-    if (p && typeof p === 'object') {
-      return {
-        sessions: Array.isArray(p.sessions) ? p.sessions : [],
-        wrong: p.wrong && typeof p.wrong === 'object' ? p.wrong : {},
-        gone: p.gone && typeof p.gone === 'object' ? p.gone : {},
-      };
-    }
+    if (raw) return sanitizeReview(JSON.parse(raw));
   } catch {
     // ignore
   }

@@ -220,13 +220,20 @@ function speakWithBrowser(text: string, opts: SpeakOptions = {}, token = playTok
   utterance.onend = () => {
     if (token === playToken) opts.onEnd?.();
   };
+  // Lỗi đọc (giọng bị gỡ, tab nền...) cũng phải báo xong, nếu không các bài đọc nối tiếp nhau sẽ đứng im.
+  utterance.onerror = (e) => {
+    if (e.error !== 'canceled' && e.error !== 'interrupted' && token === playToken) opts.onEnd?.();
+  };
   utterance.pitch = 1;
   utterance.volume = 1;
 
   // Chrome đôi khi im lặng nếu speak() ngay sau cancel()
   if (synth.speaking || synth.pending) {
     synth.cancel();
-    setTimeout(() => synth.speak(utterance), 60);
+    // Nếu trong 60ms này người dùng đã dừng hoặc bấm đọc câu khác thì không đọc nữa.
+    setTimeout(() => {
+      if (token === playToken) synth.speak(utterance);
+    }, 60);
   } else {
     synth.resume();
     synth.speak(utterance);
@@ -257,7 +264,8 @@ export function speakEnglish(text: string, opts: SpeakOptions = {}): void {
   if (typeof window === 'undefined') return;
   stopSpeaking();
   const token = playToken;
-  const file = manifest?.[text];
+  // hasOwnProperty: tránh các khóa có sẵn của Object (vd. "constructor") bị tưởng là tên file âm thanh.
+  const file = manifest && Object.prototype.hasOwnProperty.call(manifest, text) ? manifest[text] : undefined;
   if (file) {
     playFile(text, file, opts, token);
   } else {

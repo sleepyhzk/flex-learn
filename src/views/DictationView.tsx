@@ -12,6 +12,7 @@ import { isDictationCorrect, diffWords, maskWordCount, normalizeSentence } from 
 import { useStarred } from '@/hooks/useStarred';
 import type { Level } from '@/lib/types';
 import type { Topic } from '@/data/vocabTopics';
+import { inDialog } from '@/lib/keys';
 
 type LevelFilter = 'all' | Level | 'starred';
 type AnswerState = 'idle' | 'correct' | 'wrong';
@@ -278,6 +279,7 @@ export function DictationView() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' || e.isComposing) return;
+      if (inDialog(e)) return; // đang gõ trong hộp thoại (vd. đăng nhập): để form tự xử lý Enter
       const target = e.target as HTMLElement | null;
       if (target?.closest('button, select, a, textarea')) return;
       e.preventDefault();

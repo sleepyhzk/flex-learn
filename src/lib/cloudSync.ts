@@ -4,6 +4,16 @@ import type { StudyMap } from './studyTime';
 import type { GameProgress, TopicGameProgress } from './gameProgress';
 import type { ToeicProgress, ToeicRecord } from './toeicProgress';
 import type { ReviewStore, SessionLog, WrongEntry } from './toeicReview';
+import {
+  MAX_SKEW_MS,
+  sanitizeGames,
+  sanitizeSession,
+  sanitizeSrs,
+  sanitizeStudy,
+  sanitizeToeic,
+  sanitizeWrongEntry,
+  stable,
+} from './sanitize';
 
 export type ProgressMap = Record<string, SrsState>;
 export type StarEntry = { on: boolean; at: string };
@@ -12,10 +22,30 @@ export type StarMeta = Record<string, StarEntry>;
 const EPOCH = '1970-01-01T00:00:00.000Z';
 export const LEGACY_STAR_TIME = EPOCH;
 
+/** Giờ ISO -> mili giây. Giờ ở tương lai quá 5 phút bị kéo về hiện tại, để một mốc giờ giả (vd. năm 2099) không thắng mọi lần gộp. */
 const time = (iso: string | undefined) => {
   const t = iso ? Date.parse(iso) : NaN;
-  return Number.isNaN(t) ? 0 : t;
+  return Number.isNaN(t) ? 0 : Math.min(t, Date.now() + MAX_SKEW_MS);
 };
+
+/**
+ * Upsert theo lô, nhưng nếu server từ chối (lỗi 23514 = vi phạm luật kiểm tra trong schema.sql) thì chia đôi lô để tìm đúng dòng xấu
+ * và bỏ riêng dòng đó. Nếu không, một dòng bị từ chối sẽ làm cả lô (tối đa 500 dòng) thất bại và bị đẩy lại mãi.
+ * Lỗi khác (mất mạng, hết phiên...) vẫn được ném ra để lần sau thử lại.
+ */
+async function upsertRows(table: string, rows: Record<string, unknown>[], onConflict: string): Promise<void> {
+  if (!supabase || rows.length === 0) return;
+  const { error } = await supabase.from(table).upsert(rows, { onConflict });
+  if (!error) return;
+  if (error.code === '23514' && rows.length > 1) {
+    const mid = Math.ceil(rows.length / 2);
+    await upsertRows(table, rows.slice(0, mid), onConflict);
+    await upsertRows(table, rows.slice(mid), onConflict);
+    return;
+  }
+  if (error.code === '23514') return; // dòng duy nhất bị từ chối: bỏ, không thử lại
+  throw error;
+}
 
 /** Gộp tiến độ: với mỗi thẻ lấy bản được ôn gần nhất. toPush = thẻ chỉ có ở máy hoặc mới hơn trên cloud. */
 export function mergeProgress(local: ProgressMap, cloud: ProgressMap) {
@@ -62,7 +92,7 @@ export async function fetchProgress(): Promise<ProgressMap> {
     for (const r of data ?? []) out[r.card_key as string] = r.state as SrsState;
     if (!data || data.length < PAGE) break;
   }
-  return out;
+  return sanitizeSrs(out);
 }
 
 export async function pushProgress(userId: string, map: ProgressMap, keys: string[]) {
@@ -76,10 +106,7 @@ export async function pushProgress(userId: string, map: ProgressMap, keys: strin
       reviewed_at: map[k].lastReviewed,
     }));
   for (let i = 0; i < rows.length; i += 500) {
-    const { error } = await supabase
-      .from('flex_progress')
-      .upsert(rows.slice(i, i + 500), { onConflict: 'user_id,card_key' });
-    if (error) throw error;
+    await upsertRows('flex_progress', rows.slice(i, i + 500), 'user_id,card_key');
   }
 }
 
@@ -118,10 +145,7 @@ export async function pushStars(userId: string, meta: StarMeta, keys: string[]) 
       updated_at: meta[k].at === EPOCH ? new Date().toISOString() : meta[k].at,
     }));
   for (let i = 0; i < rows.length; i += 500) {
-    const { error } = await supabase
-      .from('flex_starred')
-      .upsert(rows.slice(i, i + 500), { onConflict: 'user_id,card_key' });
-    if (error) throw error;
+    await upsertRows('flex_starred', rows.slice(i, i + 500), 'user_id,card_key');
   }
 }
 
@@ -153,7 +177,7 @@ export async function fetchStudyDays(): Promise<StudyMap> {
     for (const r of data ?? []) out[r.day as string] = r.seconds as number;
     if (!data || data.length < PAGE) break;
   }
-  return out;
+  return sanitizeStudy(out);
 }
 
 export async function pushStudyDays(userId: string, map: StudyMap, days: string[]) {
@@ -163,10 +187,7 @@ export async function pushStudyDays(userId: string, map: StudyMap, days: string[
     .filter((d) => map[d] != null)
     .map((d) => ({ user_id: userId, day: d, seconds: Math.round(map[d]), updated_at: now }));
   for (let i = 0; i < rows.length; i += 500) {
-    const { error } = await supabase
-      .from('flex_study_days')
-      .upsert(rows.slice(i, i + 500), { onConflict: 'user_id,day' });
-    if (error) throw error;
+    await upsertRows('flex_study_days', rows.slice(i, i + 500), 'user_id,day');
   }
 }
 
@@ -193,7 +214,7 @@ export function mergeGames(local: GameProgress, cloud: GameProgress) {
   for (const topic of Object.keys(local)) {
     const m = mergeTopic(local[topic], cloud[topic]);
     merged[topic] = m;
-    if (JSON.stringify(m) !== JSON.stringify(cloud[topic])) toPush.push(topic);
+    if (stable(m) !== stable(cloud[topic])) toPush.push(topic);
   }
   return { merged, toPush };
 }
@@ -204,7 +225,7 @@ export async function fetchGames(): Promise<GameProgress> {
   if (error) throw error;
   const out: GameProgress = {};
   for (const r of data ?? []) out[r.topic_key as string] = r.data as TopicGameProgress;
-  return out;
+  return sanitizeGames(out);
 }
 
 export async function pushGames(userId: string, map: GameProgress, topics: string[]) {
@@ -213,8 +234,7 @@ export async function pushGames(userId: string, map: GameProgress, topics: strin
   const rows = topics
     .filter((t) => map[t])
     .map((t) => ({ user_id: userId, topic_key: t, data: map[t], updated_at: now }));
-  const { error } = await supabase.from('flex_games').upsert(rows, { onConflict: 'user_id,topic_key' });
-  if (error) throw error;
+  await upsertRows('flex_games', rows, 'user_id,topic_key');
 }
 
 // ------------------------------------------------------------------ điểm TOEIC (mỗi Part một dòng)
@@ -238,7 +258,7 @@ export function mergeToeic(local: ToeicProgress, cloud: ToeicProgress) {
   for (const key of Object.keys(local)) {
     const m = mergeToeicRecord(local[key], cloud[key]);
     merged[key] = m;
-    if (JSON.stringify(m) !== JSON.stringify(cloud[key])) toPush.push(key);
+    if (stable(m) !== stable(cloud[key])) toPush.push(key);
   }
   return { merged, toPush };
 }
@@ -249,7 +269,7 @@ export async function fetchToeic(): Promise<ToeicProgress> {
   if (error) throw error;
   const out: ToeicProgress = {};
   for (const r of data ?? []) out[r.part_key as string] = r.data as ToeicRecord;
-  return out;
+  return sanitizeToeic(out);
 }
 
 export async function pushToeic(userId: string, map: ToeicProgress, keys: string[]) {
@@ -258,8 +278,7 @@ export async function pushToeic(userId: string, map: ToeicProgress, keys: string
   const rows = keys
     .filter((k) => map[k])
     .map((k) => ({ user_id: userId, part_key: k, data: map[k], updated_at: now }));
-  const { error } = await supabase.from('flex_toeic').upsert(rows, { onConflict: 'user_id,part_key' });
-  if (error) throw error;
+  await upsertRows('flex_toeic', rows, 'user_id,part_key');
 }
 
 // ------------------------------------------------------------------ ôn tập TOEIC (câu đã sai + lịch sử làm bài)
@@ -303,7 +322,10 @@ export async function fetchReview(): Promise<ReviewStore> {
     for (const r of data ?? []) {
       const k = (r.item_key as string).slice(2);
       if (r.deleted) out.gone[k] = r.updated_at as string;
-      else out.wrong[k] = r.data as WrongEntry;
+      else {
+        const e = sanitizeWrongEntry(r.data);
+        if (e) out.wrong[k] = e;
+      }
     }
     if (!data || data.length < REVIEW_PAGE) break;
   }
@@ -315,7 +337,7 @@ export async function fetchReview(): Promise<ReviewStore> {
     .order('updated_at', { ascending: false })
     .limit(MAX_SESSIONS);
   if (e2) throw e2;
-  out.sessions = (ses ?? []).map((r) => r.data as SessionLog);
+  out.sessions = (ses ?? []).map((r) => sanitizeSession(r.data)).filter((x): x is SessionLog => x !== null);
   return out;
 }
 
@@ -348,8 +370,7 @@ export async function pushReview(userId: string, rows: ReviewRow[]) {
   if (!supabase || rows.length === 0) return;
   for (let i = 0; i < rows.length; i += 200) {
     const batch = rows.slice(i, i + 200).map((r) => ({ ...r, user_id: userId }));
-    const { error } = await supabase.from('flex_toeic_review').upsert(batch, { onConflict: 'user_id,item_key' });
-    if (error) throw error;
+    await upsertRows('flex_toeic_review', batch, 'user_id,item_key');
   }
 }
 

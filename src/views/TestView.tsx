@@ -963,7 +963,7 @@ export function TestView() {
           onExit={() => setScreen(screen.key === 'review' ? { kind: 'review' } : cfg ? { kind: 'setup' } : { kind: 'hub' })}
           onFinish={(correct, total, log, elapsed) => {
             // Lượt luyện lại câu sai không tính vào điểm các Part
-            if (screen.key !== 'review') setProgress(recordToeicResult(screen.key, Math.round((correct / total) * 100)));
+            if (screen.key !== 'review') setProgress(recordToeicResult(screen.key, total > 0 ? Math.round((correct / total) * 100) : 0));
             recordSession({ key: screen.key, title: titleOfKey(screen.key), correct, total, items: log }, (a) => resolveLog(a)?.ok ?? false);
             recordAnswers(log);
             window.scrollTo({ top: 0 });
@@ -975,7 +975,7 @@ export function TestView() {
   }
 
   if (screen.kind === 'result') {
-    const pct = Math.round((screen.correct / screen.total) * 100);
+    const pct = screen.total > 0 ? Math.round((screen.correct / screen.total) * 100) : 0;
     const title = titleOfKey(screen.key);
     const wrongCount = screen.total - screen.correct;
     const hasWrongBank = Object.keys(loadReview().wrong).length > 0;

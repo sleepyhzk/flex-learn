@@ -207,7 +207,6 @@ export function AuthModal() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const mail = email.trim();
-   
     // Bấm gửi khi còn ô sai: hiện lỗi của mọi ô và đưa con trỏ về ô sai đầu tiên, không gọi máy chủ.
     setTouched({ email: true, password: true });
     if (emailError) return void document.getElementById(emailId)?.focus();

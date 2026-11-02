@@ -31,7 +31,8 @@ import {
   saveToeicProgress,
 } from '@/lib/toeicProgress';
 import { REVIEW_SAVED_EVENT, clearReview, loadReview, saveReview } from '@/lib/toeicReview';
-import { clearToeicStats } from '@/lib/toeicStats';
+import { clearToeicStats } from '@/lib/toeicStatsStore';
+import { stable } from '@/lib/sanitize';
 import { clearStudy, getStudySnapshot, markTouchedDays, replaceStudyMap, takeTouchedDays } from '@/lib/studyTime';
 
 /**
@@ -53,7 +54,7 @@ export function useExtrasSync() {
     ready.current = false;
     if (!userId) return;
     let cancelled = false;
-    (async () => {
+    const run = async () => {
       try {
         const [cloudStudy, cloudGames, cloudToeic, cloudReview] = await Promise.all([fetchStudyDays(), fetchGames(), fetchToeic(), fetchReview()]);
         if (cancelled) return;
@@ -63,16 +64,16 @@ export function useExtrasSync() {
         // Chủ đề nào cloud đã có đúng bản này thì không cần đẩy lại.
         lastGames.current = {};
         for (const k of Object.keys(g.merged)) {
-          if (!g.toPush.includes(k)) lastGames.current[k] = JSON.stringify(g.merged[k]);
+          if (!g.toPush.includes(k)) lastGames.current[k] = stable(g.merged[k]);
         }
         const t = mergeToeic(loadToeicProgress(), cloudToeic);
         lastToeic.current = {};
         for (const k of Object.keys(t.merged)) {
-          if (!t.toPush.includes(k)) lastToeic.current[k] = JSON.stringify(t.merged[k]);
+          if (!t.toPush.includes(k)) lastToeic.current[k] = stable(t.merged[k]);
         }
         // Ôn tập: gộp từng câu; chỗ nào khác với cloud sẽ được đẩy lên ngay sau đó
         lastReview.current = {};
-        for (const r of reviewRows(cloudReview)) lastReview.current[r.item_key] = JSON.stringify(r);
+        for (const r of reviewRows(cloudReview)) lastReview.current[r.item_key] = stable(r);
         const rv = mergeReview(loadReview(), cloudReview);
         ready.current = true;
         saveGameProgress(g.merged);
@@ -82,11 +83,18 @@ export function useExtrasSync() {
         saveReview(rv);
         window.dispatchEvent(new Event(REVIEW_SAVED_EVENT));
       } catch {
-        // Mất mạng: giữ dữ liệu trên máy, lần đăng nhập/mở app sau sẽ gộp lại.
+        // Mất mạng: giữ dữ liệu trên máy; khi có mạng lại (sự kiện 'online') sẽ gộp lại, nếu không thì lần mở app sau.
       }
-    })();
+    };
+    void run();
+    // Phiên mở lúc mất mạng: không có bước này thì cả phiên sẽ không bao giờ đẩy được gì lên cloud.
+    const onOnline = () => {
+      if (!ready.current && !cancelled) void run();
+    };
+    window.addEventListener('online', onOnline);
     return () => {
       cancelled = true;
+      window.removeEventListener('online', onOnline);
     };
   }, [userId]);
 
@@ -125,11 +133,11 @@ export function useExtrasSync() {
     const run = async () => {
       if (!ready.current) return;
       const cur = loadGameProgress();
-      const changed = Object.keys(cur).filter((k) => JSON.stringify(cur[k]) !== lastGames.current[k]);
+      const changed = Object.keys(cur).filter((k) => stable(cur[k]) !== lastGames.current[k]);
       if (changed.length === 0) return;
       try {
         await pushGames(userId, cur, changed);
-        for (const k of changed) lastGames.current[k] = JSON.stringify(cur[k]);
+        for (const k of changed) lastGames.current[k] = stable(cur[k]);
       } catch {
         // Thử lại ở lần lưu sau hoặc khi có mạng.
       }
@@ -155,11 +163,11 @@ export function useExtrasSync() {
     const run = async () => {
       if (!ready.current) return;
       const cur = loadToeicProgress();
-      const changed = Object.keys(cur).filter((k) => JSON.stringify(cur[k]) !== lastToeic.current[k]);
+      const changed = Object.keys(cur).filter((k) => stable(cur[k]) !== lastToeic.current[k]);
       if (changed.length === 0) return;
       try {
         await pushToeic(userId, cur, changed);
-        for (const k of changed) lastToeic.current[k] = JSON.stringify(cur[k]);
+        for (const k of changed) lastToeic.current[k] = stable(cur[k]);
       } catch {
         // Thử lại ở lần lưu sau hoặc khi có mạng.
       }
@@ -186,11 +194,11 @@ export function useExtrasSync() {
       if (!ready.current) return;
       const store = loadReview();
       const rows = reviewRows(store);
-      const changed = rows.filter((r) => JSON.stringify(r) !== lastReview.current[r.item_key]);
+      const changed = rows.filter((r) => stable(r) !== lastReview.current[r.item_key]);
       if (changed.length === 0) return;
       try {
         await pushReview(userId, changed);
-        for (const r of changed) lastReview.current[r.item_key] = JSON.stringify(r);
+        for (const r of changed) lastReview.current[r.item_key] = stable(r);
         // Đủ 10 lượt thì dọn các lượt cũ hơn trên cloud
         if (store.sessions.length >= 10) void pruneReviewSessions(store.sessions[store.sessions.length - 1].at).catch(() => undefined);
       } catch {

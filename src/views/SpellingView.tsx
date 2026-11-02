@@ -10,6 +10,7 @@ import { isSpellingCorrect, maskWord } from '@/lib/spelling';
 import { POS_LABEL } from '@/lib/pos';
 import { useStarred } from '@/hooks/useStarred';
 import type { VocabItem, Level } from '@/lib/types';
+import { inDialog } from '@/lib/keys';
 
 type LevelFilter = 'all' | Level | 'starred';
 type AnswerState = 'idle' | 'correct' | 'wrong';
@@ -136,6 +137,7 @@ export function SpellingView() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' || e.isComposing) return;
+      if (inDialog(e)) return; // đang gõ trong hộp thoại (vd. đăng nhập): để form tự xử lý Enter
       const target = e.target as HTMLElement | null;
       if (target?.closest('button, select, a, textarea')) return; // để nút tự xử lý Enter
       e.preventDefault();

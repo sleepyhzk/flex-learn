@@ -105,6 +105,8 @@ export function ShadowingView() {
   const transcriptRef = useRef('');
   const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finishedRef = useRef(false);
+  const startingRef = useRef(false);
+  const mountedRef = useRef(true);
   const playerRef = useRef<HTMLAudioElement | null>(null);
 
   const recognitionSupported = useMemo(() => getRecognitionCtor() !== null, []);
@@ -177,7 +179,9 @@ export function ShadowingView() {
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       releaseMic();
       stopSpeaking();
     };
@@ -261,7 +265,7 @@ export function ShadowingView() {
   );
 
   const startRecording = useCallback(async () => {
-    if (!current) return;
+    if (!current || startingRef.current) return;
     finishedRef.current = false;
     transcriptRef.current = '';
     setTranscript('');
@@ -274,8 +278,14 @@ export function ShadowingView() {
       setPhase('idle');
       return;
     }
+    startingRef.current = true;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Đã rời trang trong lúc chờ cấp quyền: tắt micro ngay, nếu không đèn micro sẽ sáng mãi.
+      if (!mountedRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       streamRef.current = stream;
       chunksRef.current = [];
       const recorder = new MediaRecorder(stream);
@@ -312,6 +322,8 @@ export function ShadowingView() {
       releaseMic();
       setError(ERROR_TEXT['not-allowed']);
       setPhase('idle');
+    } finally {
+      startingRef.current = false;
     }
   }, [current, recordSupported, finish, releaseMic]);
 

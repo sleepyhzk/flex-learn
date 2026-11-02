@@ -6,6 +6,7 @@ import { speechText } from '@/lib/vocabKey';
 import { POS_SHORT } from '@/lib/pos';
 import { pickN, shuffle } from './gameUtils';
 import { GameResult } from './GameResult';
+import { isTypingTarget } from '@/lib/keys';
 
 const QUESTIONS = 10;
 type Tile = { id: number; ch: string };
@@ -128,7 +129,7 @@ export function ScrambleGame({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || finished || !item) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || finished || !item || isTypingTarget(e)) return;
       if (e.key === 'Backspace') {
         e.preventDefault();
         if (placed.length > 0) removeAt(placed.length - 1);

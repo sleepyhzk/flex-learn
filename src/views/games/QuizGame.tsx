@@ -6,6 +6,7 @@ import { speechText } from '@/lib/vocabKey';
 import { POS_SHORT } from '@/lib/pos';
 import { makeOptions, pickN } from './gameUtils';
 import { GameResult } from './GameResult';
+import { isTypingTarget } from '@/lib/keys';
 
 const QUESTIONS = 10;
 
@@ -89,7 +90,7 @@ export function QuizGame({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || finished || !q) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || finished || !q || isTypingTarget(e)) return;
       const n = Number(e.key);
       if (n >= 1 && n <= q.options.length) {
         choose(q.options[n - 1]);

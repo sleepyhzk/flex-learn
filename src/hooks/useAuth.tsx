@@ -14,6 +14,9 @@ import { supabase, cloudEnabled } from '@/lib/supabase';
 /** Phát ra sau khi người dùng chủ động đăng xuất, để xóa dữ liệu học lưu trên máy này. */
 export const SIGNED_OUT_EVENT = 'flexlearn:signed-out';
 
+/** Id người dùng đăng nhập gần nhất trên máy này, để biết khi nào có người khác đăng nhập. */
+const LAST_USER_KEY = 'flex_last_user_v1';
+
 export interface AuthResult {
   error?: string;
   /** Đã gửi thư xác nhận / thư đặt lại mật khẩu. */
@@ -82,7 +85,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => active && setLoading(false));
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      if (u) {
+        // Phiên cũ hết hạn (không bấm Đăng xuất) rồi tài khoản KHÁC đăng nhập: dữ liệu học còn trên máy là của người trước.
+        // Xóa nó trước khi gộp, nếu không sẽ bị đẩy lẫn vào tài khoản mới. Lần đầu đăng nhập (chưa có id cũ) thì giữ,
+        // vì đó là tiến độ học khi chưa đăng nhập và cần được gộp vào tài khoản.
+        try {
+          const last = localStorage.getItem(LAST_USER_KEY);
+          if (last && last !== u.id) window.dispatchEvent(new Event(SIGNED_OUT_EVENT));
+          localStorage.setItem(LAST_USER_KEY, u.id);
+        } catch {
+          // ignore
+        }
+      }
+      setUser(u);
       if (event === 'PASSWORD_RECOVERY') setRecovering(true);
       if (event === 'SIGNED_IN') setModalOpen(false);
     });

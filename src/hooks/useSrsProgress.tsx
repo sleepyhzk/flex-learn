@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import type { SrsState, ReviewQuality } from '@/lib/types';
 import { applyReview } from '@/lib/srs';
 import { migrateKeys } from '@/lib/vocabKey';
+import { sanitizeSrs } from '@/lib/sanitize';
 import { useAuth, SIGNED_OUT_EVENT } from '@/hooks/useAuth';
 import {
   deleteAllProgress,
@@ -34,7 +35,7 @@ function loadProgress(): ProgressMap {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
-    return migrateKeys(JSON.parse(raw) as ProgressMap);
+    return migrateKeys(sanitizeSrs(JSON.parse(raw)));
   } catch {
     return {};
   }

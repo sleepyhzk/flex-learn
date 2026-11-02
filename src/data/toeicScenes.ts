@@ -34,7 +34,7 @@ const arm = (x1: number, y1: number, x2: number, y2: number, sleeve: string) =>
   line(x1, y1, x2, y2, sleeve, 9) + circle(x2, y2, 5, SKIN);
 
 const wrap = (body: string, label: string) =>
-  `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${label}" style="width:100%;height:auto;display:block">${body}</svg>`;
+  `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${label}" class="block h-auto w-full">${body}</svg>`;
 
 // ---------------------------------------------------------------- các cảnh
 const deskLaptop = () =>

@@ -6,6 +6,7 @@ import { speakEnglish, isSpeechSupported } from '@/lib/speech';
 import { speechText } from '@/lib/vocabKey';
 import { POS_SHORT } from '@/lib/pos';
 import { WordVisual } from '@/components/WordVisual';
+import { isTypingTarget } from '@/lib/keys';
 
 /** Học một bài (10 từ): xem từng thẻ có nghĩa, ví dụ, hình minh họa; cuối bài có tổng kết. */
 export function LearnLesson({
@@ -25,11 +26,19 @@ export function LearnLesson({
   const done = idx >= words.length;
   const w = words[idx];
   const completed = useRef(false);
+  const startedAt = useRef(Date.now());
+  /** Lướt qua cả bài quá nhanh (vd. giữ phím mũi tên) thì chưa tính là đã học: tối thiểu 1 giây mỗi từ. */
+  const [tooFast, setTooFast] = useState(false);
 
   useEffect(() => {
     if (done && !completed.current) {
-      completed.current = true;
-      onComplete();
+      if (Date.now() - startedAt.current >= words.length * 1000) {
+        completed.current = true;
+        setTooFast(false);
+        onComplete();
+      } else {
+        setTooFast(true);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -42,7 +51,7 @@ export function LearnLesson({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e)) return;
       if (e.key === 'ArrowRight') setIdx((i) => Math.min(words.length, i + 1));
       else if (e.key === 'ArrowLeft') setIdx((i) => Math.max(0, i - 1));
     };
@@ -59,6 +68,11 @@ export function LearnLesson({
           </div>
           <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Xong bài {lessonNo}</h3>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Xem lại {words.length} từ vừa học, rồi làm bài kiểm tra nhanh để nhớ chắc hơn.</p>
+          {tooFast && (
+            <p role="status" className="mx-auto mt-3 max-w-md rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+              Bạn lướt qua hơi nhanh nên bài này chưa được tính là đã học. Bấm "Học lại bài" và xem từng từ nhé.
+            </p>
+          )}
         </div>
         <ul className="mx-auto mt-5 max-w-md divide-y divide-slate-200 dark:divide-slate-800">
           {words.map((x) => (
@@ -80,7 +94,7 @@ export function LearnLesson({
             <ListChecks className="h-4 w-4" />
             Kiểm tra nhanh bài này
           </button>
-          <button onClick={() => setIdx(0)} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+          <button onClick={() => { startedAt.current = Date.now(); setIdx(0); }} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
             <RotateCcw className="h-4 w-4" />
             Học lại bài
           </button>
