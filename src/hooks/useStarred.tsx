@@ -18,6 +18,7 @@ import {
   pushStars,
 } from '@/lib/cloudSync';
 import type { StarMeta } from '@/lib/cloudSync';
+import { CLOUD_PUSH_DELAY_MS, FLUSH_SYNC_EVENT } from '@/lib/syncEvents';
 
 /** Danh sách khóa đang có sao (định dạng cũ, vẫn ghi để tương thích). */
 const STORAGE_KEY = 'flex_starred_words_v1';
@@ -74,6 +75,8 @@ export function StarredProvider({ children }: { children: ReactNode }) {
   }, [meta]);
 
   const flush = useCallback(async () => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = undefined;
     if (!userId || dirtyRef.current.size === 0) return;
     const keys = [...dirtyRef.current];
     dirtyRef.current.clear();
@@ -104,13 +107,18 @@ export function StarredProvider({ children }: { children: ReactNode }) {
     };
   }, [userId]);
 
+  // Đẩy ngay khi: có mạng lại, ẩn tab, đóng trang / tắt trình duyệt, hoặc chuyển sang mục khác.
   useEffect(() => {
-    const retry = () => void flush();
+    const now = () => void flush();
     const onHide = () => document.visibilityState === 'hidden' && void flush();
-    window.addEventListener('online', retry);
+    window.addEventListener('online', now);
+    window.addEventListener('pagehide', now);
+    window.addEventListener(FLUSH_SYNC_EVENT, now);
     document.addEventListener('visibilitychange', onHide);
     return () => {
-      window.removeEventListener('online', retry);
+      window.removeEventListener('online', now);
+      window.removeEventListener('pagehide', now);
+      window.removeEventListener(FLUSH_SYNC_EVENT, now);
       document.removeEventListener('visibilitychange', onHide);
     };
   }, [flush]);
@@ -118,6 +126,7 @@ export function StarredProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onSignedOut = () => {
       window.clearTimeout(timerRef.current);
+      timerRef.current = undefined;
       dirtyRef.current.clear();
       setMeta({});
     };
@@ -138,8 +147,10 @@ export function StarredProvider({ children }: { children: ReactNode }) {
       }));
       if (userId) {
         dirtyRef.current.add(key);
-        window.clearTimeout(timerRef.current);
-        timerRef.current = window.setTimeout(() => void flush(), 800);
+        // Tối đa CLOUD_PUSH_DELAY_MS kể từ thay đổi đầu tiên chưa đẩy (xem useSrsProgress).
+        if (timerRef.current === undefined) {
+          timerRef.current = window.setTimeout(() => void flush(), CLOUD_PUSH_DELAY_MS);
+        }
       }
     },
     [userId, flush]

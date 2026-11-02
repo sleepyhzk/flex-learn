@@ -10,6 +10,7 @@ import { useBrightness } from '@/hooks/useBrightness';
 import { useStudyTracker } from '@/hooks/useStudyTime';
 import { useExtrasSync } from '@/hooks/useExtrasSync';
 import { sfx } from '@/lib/sfx';
+import { requestFlushSync } from '@/lib/syncEvents';
 
 /**
  * Mỗi mục tải riêng khi mở (code splitting): file JS đầu tiên chỉ còn trang chủ, thanh bên và dữ liệu từ vựng;
@@ -87,6 +88,8 @@ export default function App() {
   }, []);
 
   const go = (v: ViewKey) => {
+    // Rời mục đang học (vd. Flashcard -> Chính tả): đẩy ngay phần tiến độ đang chờ lên Supabase.
+    if (v !== view) requestFlushSync();
     setView(v);
     window.scrollTo({ top: 0 });
   };

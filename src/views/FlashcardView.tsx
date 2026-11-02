@@ -18,6 +18,11 @@ type ProgressMap = Record<string, SrsState>;
 type SessionStats = { reviewed: number; known: number; unknown: number };
 const EMPTY_STATS: SessionStats = { reviewed: 0, known: 0, unknown: 0 };
 
+/** Thời gian lật thẻ (ms). Phải khớp lớp `duration-500` ở thẻ bên dưới. */
+const FLIP_MS = 500;
+/** Chờ thẻ xoay qua khung đầu rồi mới đọc, để việc gọi giọng đọc không rơi vào khung hình đầu tiên của hiệu ứng lật. */
+const SPEAK_DELAY_MS = 200;
+
 /**
  * Thứ tự ôn: thẻ đến hạn (cũ nhất trước) -> thẻ mới chưa học -> thẻ chưa đến hạn.
  */
@@ -107,8 +112,27 @@ export function FlashcardView() {
   const [finished, setFinished] = useState(false);
   // Đang lật thẻ về mặt trước trước khi sang thẻ kế tiếp: tạm khóa chấm điểm và lật.
   const advanceTimer = useRef<number | undefined>(undefined);
+  const speakTimer = useRef<number | undefined>(undefined);
   const lockRef = useRef(false);
-  useEffect(() => () => window.clearTimeout(advanceTimer.current), []);
+  useEffect(
+    () => () => {
+      window.clearTimeout(advanceTimer.current);
+      window.clearTimeout(speakTimer.current);
+    },
+    []
+  );
+
+  // Hình minh họa chỉ chạy sau khi thẻ lật xong (xem ghi chú ở WordVisual).
+  const [visualPlay, setVisualPlay] = useState(false);
+  useEffect(() => {
+    if (!showMeaning) {
+      setVisualPlay(false);
+      return;
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const id = window.setTimeout(() => setVisualPlay(true), reduce ? 0 : FLIP_MS);
+    return () => window.clearTimeout(id);
+  }, [showMeaning]);
 
   // Bộ thẻ được "chụp" lúc bắt đầu phiên (đổi bộ lọc / học lại). Nếu tính lại sau
   // mỗi lần chấm điểm, thứ tự đổi giữa chừng và thẻ kế tiếp sẽ bị nhảy cóc.
@@ -128,6 +152,7 @@ export function FlashcardView() {
 
   const startSession = useCallback((sp: DeckSpec, t: TopicFilter) => {
     window.clearTimeout(advanceTimer.current);
+    window.clearTimeout(speakTimer.current);
     lockRef.current = false;
     setCards(buildDeck(sp, t, progressRef.current, starredRef.current));
     setIndex(0);
@@ -145,6 +170,7 @@ export function FlashcardView() {
   // Chỉ còn 2 mức: "Chưa thuộc" -> hard (quên, ôn lại ngày mai), "Thuộc rồi" -> good
   const handleReview = (quality: Extract<ReviewQuality, 'hard' | 'good'>) => {
     if (!currentCard || finished || lockRef.current) return;
+    window.clearTimeout(speakTimer.current); // chấm nhanh thì bỏ lượt đọc đang chờ của thẻ cũ
     // Ôn lại thẻ đã thuộc khi chưa đến hạn: chỉ tính vào thống kê phiên, không đẩy lịch ôn xa thêm.
     // (Nếu quên thì vẫn ghi "Chưa thuộc".)
     const prev = progressRef.current[vocabKey(currentCard)];
@@ -177,7 +203,11 @@ export function FlashcardView() {
     if (!currentCard || finished || lockRef.current) return;
     const next = !showMeaning;
     setShowMeaning(next);
-    if (next) speakEnglish(speechText(currentCard));
+    window.clearTimeout(speakTimer.current);
+    if (next) {
+      const text = speechText(currentCard);
+      speakTimer.current = window.setTimeout(() => speakEnglish(text), SPEAK_DELAY_MS);
+    }
   };
 
   const toggleCurrentStar = () => {
@@ -259,32 +289,45 @@ export function FlashcardView() {
     </div>
   );
 
-  const dueCount = INITIAL_VOCAB.filter((w) => {
-    const s = progressMap[vocabKey(w)];
-    return s && isDue(s.nextReview);
-  }).length;
-  const hardCount = INITIAL_VOCAB.filter((w) => progressMap[vocabKey(w)]?.lastQuality === 'hard').length;
-  const goodCount = INITIAL_VOCAB.filter((w) => {
-    const s = progressMap[vocabKey(w)];
-    return s && (s.lastQuality === 'good' || s.lastQuality === 'easy');
-  }).length;
+  // Các phép đếm dưới đây quét cả kho ~5.600 thẻ. Lật thẻ chỉ đổi `showMeaning` nên không được tính lại
+  // mỗi lần render (trước đây chúng chạy ngay ở khung hình đầu tiên của hiệu ứng lật, gây giật).
+  // Chỉ tính lại khi tiến độ, dấu sao hoặc bộ lọc thay đổi.
+  const { dueCount, hardCount, goodCount } = useMemo(() => {
+    let due = 0;
+    let hard = 0;
+    let good = 0;
+    for (const w of INITIAL_VOCAB) {
+      const st = progressMap[vocabKey(w)];
+      if (!st) continue;
+      if (isDue(st.nextReview)) due++;
+      if (st.lastQuality === 'hard') hard++;
+      else if (st.lastQuality === 'good' || st.lastQuality === 'easy') good++;
+    }
+    return { dueCount: due, hardCount: hard, goodCount: good };
+  }, [progressMap]);
 
   // Số từ của từng chủ đề trong bộ lọc đang chọn (A1/A2/B1, Đã đánh dấu...)
-  const baseList = baseListFor(spec, progressMap, starred);
+  const baseList = useMemo(() => baseListFor(spec, progressMap, starred), [spec, progressMap, starred]);
   const topicCounts = useMemo(() => countByTopic(baseList), [baseList]);
 
-  const filterTabs: { key: FlashcardFilter; label: string; count: number }[] = [
-    { key: 'all', label: 'Tất cả', count: INITIAL_VOCAB.length },
-    ...LEVEL_ORDER.map((l) => ({ key: l as FlashcardFilter, label: LEVEL_LABEL[l], count: VOCAB_BY_LEVEL[l].length })),
-    { key: 'starred', label: 'Đã đánh dấu', count: starred.size },
-  ];
+  const filterTabs = useMemo<{ key: FlashcardFilter; label: string; count: number }[]>(
+    () => [
+      { key: 'all', label: 'Tất cả', count: INITIAL_VOCAB.length },
+      ...LEVEL_ORDER.map((l) => ({ key: l as FlashcardFilter, label: LEVEL_LABEL[l], count: VOCAB_BY_LEVEL[l].length })),
+      { key: 'starred', label: 'Đã đánh dấu', count: starred.size },
+    ],
+    [starred.size]
+  );
 
   // Chế độ Ôn tập: số thẻ theo từng cấp của nhóm đang chọn
-  const kindList = listFor(reviewKind, progressMap, starred);
-  const reviewLevelTabs: { key: 'all' | Level; label: string; count: number }[] = [
-    { key: 'all', label: 'Tất cả', count: kindList.length },
-    ...LEVEL_ORDER.map((l) => ({ key: l as 'all' | Level, label: LEVEL_LABEL[l], count: kindList.filter((w) => w.level === l).length })),
-  ];
+  const reviewLevelTabs = useMemo<{ key: 'all' | Level; label: string; count: number }[]>(() => {
+    if (mode !== 'review') return [];
+    const kindList = listFor(reviewKind, progressMap, starred);
+    return [
+      { key: 'all', label: 'Tất cả', count: kindList.length },
+      ...LEVEL_ORDER.map((l) => ({ key: l as 'all' | Level, label: LEVEL_LABEL[l], count: kindList.filter((w) => w.level === l).length })),
+    ];
+  }, [mode, reviewKind, progressMap, starred]);
   const kindCard = (kind: ReviewKind, active: boolean) =>
     kind === 'hard'
       ? `border-error-200 bg-error-50 text-error-700 dark:border-error-900 dark:bg-error-950/30 dark:text-error-400 ${active ? 'ring-2 ring-error-500/60' : 'opacity-70 hover:opacity-100'}`
@@ -435,7 +478,7 @@ export function FlashcardView() {
           </div>
 
           <section aria-label="Thẻ từ vựng" className="perspective-1000">
-            <div className={`transform-style-3d grid transition-transform duration-500 ease-out motion-reduce:transition-none ${showMeaning ? 'rotate-y-180' : ''}`}>
+            <div className={`transform-style-3d grid will-change-transform transition-transform duration-500 ease-out motion-reduce:transition-none ${showMeaning ? 'rotate-y-180' : ''}`}>
               {/* Mặt trước: từ, loại từ, phiên âm */}
               <div aria-hidden={showMeaning} className={CARD_FACE}>
                 {cardTop(!showMeaning)}
@@ -484,7 +527,9 @@ export function FlashcardView() {
                   </p>
                 </div>
                 <div className="mt-5 flex-1 border-t border-slate-200 pt-6 dark:border-slate-800">
-                  {showMeaning && <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} />}
+                  {/* Luôn có mặt để giữ chiều cao thẻ cố định lúc lật (nếu gắn vào đúng lúc lật thì thẻ bị dãn cao giữa chừng).
+                      Hình đứng yên ở khung đầu và chỉ chạy sau khi thẻ lật xong. */}
+                  <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} play={visualPlay} />
                   <p className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
                   <blockquote className="mt-5 border-l-2 border-primary-300 pl-4 dark:border-primary-700">
                     <div className="flex items-start gap-2">

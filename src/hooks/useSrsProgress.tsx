@@ -20,8 +20,16 @@ import {
   mergeProgress,
   pushProgress,
 } from '@/lib/cloudSync';
+import { CLOUD_PUSH_DELAY_MS, FLUSH_SYNC_EVENT } from '@/lib/syncEvents';
 
 const STORAGE_KEY = 'flex_srs_progress_v1';
+
+/**
+ * Ghi localStorage trễ 0,5 giây kể từ lần đổi cuối. saveProgress phải biến cả bảng (tới ~5.600 thẻ)
+ * thành chuỗi JSON rồi ghi xuống đĩa trên luồng chính; nếu ghi ngay mỗi lần chấm thẻ thì nó trùng
+ * với hiệu ứng lật thẻ về mặt trước và gây giật. Chấm liên tục thì các lần ghi gộp thành một.
+ */
+const SAVE_DELAY_MS = 500;
 
 type ProgressMap = Record<string, SrsState>;
 
@@ -68,11 +76,38 @@ export function SrsProgressProvider({ children }: { children: ReactNode }) {
   const dirtyRef = useRef(new Set<string>());
   const timerRef = useRef<number | undefined>(undefined);
 
+  // Có thay đổi chưa ghi xuống localStorage (đang chờ hết SAVE_DELAY_MS)
+  const savePending = useRef(false);
+
   useEffect(() => {
-    saveProgress(progressMap);
+    savePending.current = true;
+    const id = window.setTimeout(() => {
+      savePending.current = false;
+      saveProgress(progressMap);
+    }, SAVE_DELAY_MS);
+    return () => window.clearTimeout(id);
   }, [progressMap]);
 
+  // Ẩn tab, đóng trang hoặc rời app: ghi ngay phần đang chờ để không mất thẻ vừa chấm.
+  useEffect(() => {
+    const saveNow = () => {
+      if (!savePending.current) return;
+      savePending.current = false;
+      saveProgress(progressRef.current);
+    };
+    const onHide = () => document.visibilityState === 'hidden' && saveNow();
+    document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('pagehide', saveNow);
+    return () => {
+      document.removeEventListener('visibilitychange', onHide);
+      window.removeEventListener('pagehide', saveNow);
+      saveNow();
+    };
+  }, []);
+
   const flush = useCallback(async () => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = undefined;
     if (!userId || dirtyRef.current.size === 0) return;
     const keys = [...dirtyRef.current];
     dirtyRef.current.clear();
@@ -104,14 +139,19 @@ export function SrsProgressProvider({ children }: { children: ReactNode }) {
     };
   }, [userId]);
 
-  // Thử đẩy lại khi có mạng / khi chuyển tab.
+  // Đẩy ngay (không đợi hết thời gian gom) khi: có mạng lại, ẩn tab, đóng trang / tắt trình duyệt,
+  // hoặc người dùng chuyển sang mục khác (App phát FLUSH_SYNC_EVENT).
   useEffect(() => {
-    const retry = () => void flush();
+    const now = () => void flush();
     const onHide = () => document.visibilityState === 'hidden' && void flush();
-    window.addEventListener('online', retry);
+    window.addEventListener('online', now);
+    window.addEventListener('pagehide', now);
+    window.addEventListener(FLUSH_SYNC_EVENT, now);
     document.addEventListener('visibilitychange', onHide);
     return () => {
-      window.removeEventListener('online', retry);
+      window.removeEventListener('online', now);
+      window.removeEventListener('pagehide', now);
+      window.removeEventListener(FLUSH_SYNC_EVENT, now);
       document.removeEventListener('visibilitychange', onHide);
     };
   }, [flush]);
@@ -120,6 +160,7 @@ export function SrsProgressProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onSignedOut = () => {
       window.clearTimeout(timerRef.current);
+      timerRef.current = undefined;
       dirtyRef.current.clear();
       setProgressMap({});
     };
@@ -135,8 +176,11 @@ export function SrsProgressProvider({ children }: { children: ReactNode }) {
       }));
       if (userId) {
         dirtyRef.current.add(word);
-        window.clearTimeout(timerRef.current);
-        timerRef.current = window.setTimeout(() => void flush(), 800);
+        // Hẹn đẩy sau tối đa CLOUD_PUSH_DELAY_MS kể từ thay đổi đầu tiên chưa đẩy (không reset ở các lần chấm sau),
+        // để học liên tục cũng không bị hoãn vô hạn.
+        if (timerRef.current === undefined) {
+          timerRef.current = window.setTimeout(() => void flush(), CLOUD_PUSH_DELAY_MS);
+        }
       }
     },
     [userId, flush]
