@@ -198,6 +198,20 @@
     font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Arial Unicode MS', system-ui, sans-serif;
     letter-spacing: 0.01em;
   }
+  /* Nội dung nghĩa hiện ra bên dưới đường kẻ ở thẻ Flashcard: mờ dần và trượt nhẹ xuống (chỉ opacity/transform nên nhẹ) */
+  @keyframes reveal-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .reveal-in {
+    animation: reveal-in 0.18s ease-out;
+  }
   /* Thẻ lật 3D (thẻ ôn nhanh ở Trang chủ) */
   .perspective-1000 {
     perspective: 1000px;

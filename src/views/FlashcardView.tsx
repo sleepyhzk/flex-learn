@@ -18,10 +18,8 @@ type ProgressMap = Record<string, SrsState>;
 type SessionStats = { reviewed: number; known: number; unknown: number };
 const EMPTY_STATS: SessionStats = { reviewed: 0, known: 0, unknown: 0 };
 
-/** Thời gian lật thẻ (ms). Phải khớp lớp `duration-500` ở thẻ bên dưới. */
-const FLIP_MS = 500;
-/** Chờ thẻ xoay qua khung đầu rồi mới đọc, để việc gọi giọng đọc không rơi vào khung hình đầu tiên của hiệu ứng lật. */
-const SPEAK_DELAY_MS = 200;
+/** Chờ một nhịp ngắn rồi mới đọc, để nội dung nghĩa hiện ra trước, việc gọi giọng đọc không làm trễ khung hình đó. */
+const SPEAK_DELAY_MS = 80;
 
 /**
  * Thứ tự ôn: thẻ đến hạn (cũ nhất trước) -> thẻ mới chưa học -> thẻ chưa đến hạn.
@@ -55,15 +53,9 @@ function listFor(filter: FlashcardFilter, progressMap: ProgressMap, starred: Set
   return list;
 }
 
-/**
- * Bóng đổ của thẻ. Đặt ở khung đứng yên bên ngoài chứ không đặt trên hai mặt thẻ: mặt thẻ đang xoay 3D mà
- * mang bóng mờ lớn thì mỗi mặt là một ảnh nền lớn hơn và tốn công vẽ hơn cho GPU.
- */
-const CARD_SHADOW = 'shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)]';
-
-/** Một mặt của thẻ lật: hai mặt xếp chồng trong cùng một ô lưới nên thẻ cao bằng mặt dài hơn. */
-const CARD_FACE =
-  'backface-hidden [will-change:transform] col-start-1 row-start-1 flex min-h-[24rem] flex-col rounded-2xl border border-slate-200 bg-white px-6 pb-8 pt-5 dark:border-slate-800 dark:bg-slate-900 sm:min-h-[30rem] sm:px-16';
+/** Thẻ từ vựng: mặt từ ở trên, bấm hoặc nhấn Space thì nghĩa và ví dụ hiện ra bên dưới đường kẻ trong cùng một thẻ. */
+const CARD =
+  'flex min-h-[22rem] flex-col rounded-2xl border border-slate-200 bg-white px-6 pb-8 pt-5 shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)] dark:border-slate-800 dark:bg-slate-900 sm:min-h-[26rem] sm:px-16';
 
 /** Học thẻ mới / Ôn tập lại thẻ đã chấm "Chưa thuộc" hoặc "Thuộc rồi". */
 type Mode = 'learn' | 'review';
@@ -116,29 +108,9 @@ export function FlashcardView() {
   const [index, setIndex] = useState(0);
   const [sessionStats, setSessionStats] = useState<SessionStats>(EMPTY_STATS);
   const [finished, setFinished] = useState(false);
-  // Đang lật thẻ về mặt trước trước khi sang thẻ kế tiếp: tạm khóa chấm điểm và lật.
-  const advanceTimer = useRef<number | undefined>(undefined);
+  // Lượt đọc đang chờ (hẹn sau SPEAK_DELAY_MS kể từ lúc hiện nghĩa)
   const speakTimer = useRef<number | undefined>(undefined);
-  const lockRef = useRef(false);
-  useEffect(
-    () => () => {
-      window.clearTimeout(advanceTimer.current);
-      window.clearTimeout(speakTimer.current);
-    },
-    []
-  );
-
-  // Hình minh họa chỉ chạy sau khi thẻ lật xong (xem ghi chú ở WordVisual).
-  const [visualPlay, setVisualPlay] = useState(false);
-  useEffect(() => {
-    if (!showMeaning) {
-      setVisualPlay(false);
-      return;
-    }
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const id = window.setTimeout(() => setVisualPlay(true), reduce ? 0 : FLIP_MS);
-    return () => window.clearTimeout(id);
-  }, [showMeaning]);
+  useEffect(() => () => window.clearTimeout(speakTimer.current), []);
 
   // Bộ thẻ được "chụp" lúc bắt đầu phiên (đổi bộ lọc / học lại). Nếu tính lại sau
   // mỗi lần chấm điểm, thứ tự đổi giữa chừng và thẻ kế tiếp sẽ bị nhảy cóc.
@@ -157,9 +129,7 @@ export function FlashcardView() {
   );
 
   const startSession = useCallback((sp: DeckSpec, t: TopicFilter) => {
-    window.clearTimeout(advanceTimer.current);
     window.clearTimeout(speakTimer.current);
-    lockRef.current = false;
     setCards(buildDeck(sp, t, progressRef.current, starredRef.current));
     setIndex(0);
     setShowMeaning(false);
@@ -175,7 +145,7 @@ export function FlashcardView() {
 
   // Chỉ còn 2 mức: "Chưa thuộc" -> hard (quên, ôn lại ngày mai), "Thuộc rồi" -> good
   const handleReview = (quality: Extract<ReviewQuality, 'hard' | 'good'>) => {
-    if (!currentCard || finished || lockRef.current) return;
+    if (!currentCard || finished) return;
     window.clearTimeout(speakTimer.current); // chấm nhanh thì bỏ lượt đọc đang chờ của thẻ cũ
     // Ôn lại thẻ đã thuộc khi chưa đến hạn: chỉ tính vào thống kê phiên, không đẩy lịch ôn xa thêm.
     // (Nếu quên thì vẫn ghi "Chưa thuộc".)
@@ -188,25 +158,15 @@ export function FlashcardView() {
       known: prev.known + (quality === 'good' ? 1 : 0),
       unknown: prev.unknown + (quality === 'hard' ? 1 : 0),
     }));
-    const advance = () => {
-      lockRef.current = false;
-      if (index + 1 >= cards.length) setFinished(true);
-      else setIndex((i) => i + 1);
-    };
-    if (showMeaning) {
-      // Lật thẻ về mặt trước rồi mới đổi sang từ kế tiếp, để không lộ nghĩa của từ sau trong lúc lật.
-      lockRef.current = true;
-      setShowMeaning(false);
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      advanceTimer.current = window.setTimeout(advance, reduce ? 0 : 320);
-    } else {
-      advance();
-    }
+    // Úp nghĩa lại và sang thẻ kế tiếp ngay (không còn hiệu ứng lật nên không phải chờ).
+    setShowMeaning(false);
+    if (index + 1 >= cards.length) setFinished(true);
+    else setIndex((i) => i + 1);
   };
 
-  // Lật thẻ: khi hiện nghĩa thì tự phát âm
+  // Hiện / ẩn nghĩa: khi hiện nghĩa thì tự phát âm
   const toggleMeaning = () => {
-    if (!currentCard || finished || lockRef.current) return;
+    if (!currentCard || finished) return;
     const next = !showMeaning;
     setShowMeaning(next);
     window.clearTimeout(speakTimer.current);
@@ -220,7 +180,7 @@ export function FlashcardView() {
     if (currentCard && !finished) toggleStar(vocabKey(currentCard));
   };
 
-  // Phím tắt: Space lật thẻ, ← chưa thuộc, → thuộc rồi, ↓ đánh dấu sao.
+  // Phím tắt: Space xem/ẩn nghĩa, ← chưa thuộc, → thuộc rồi, ↓ đánh dấu sao.
   // Dùng ref để một listener duy nhất luôn gọi bản xử lý mới nhất.
   const actionsRef = useRef({ flip: toggleMeaning, known: () => {}, unknown: () => {}, star: toggleCurrentStar });
   actionsRef.current = {
@@ -265,8 +225,8 @@ export function FlashcardView() {
 
   const isStarredCard = currentCard ? starred.has(vocabKey(currentCard)) : false;
 
-  // Hàng đầu thẻ (số thẻ, đánh dấu sao, ẩn/hiện phiên âm), có mặt ở cả hai mặt; mặt đang ẩn thì không nhận tiêu điểm bàn phím.
-  const cardTop = (active: boolean) => (
+  // Hàng đầu thẻ: số thẻ, đánh dấu sao, ẩn/hiện phiên âm
+  const cardTop = (
     <div className="flex items-center justify-between">
       <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">
         {index + 1} / {cards.length}
@@ -274,7 +234,6 @@ export function FlashcardView() {
       <div className="-mr-2 flex items-center">
         <button
           onClick={toggleCurrentStar}
-          tabIndex={active ? 0 : -1}
           className={`rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${isStarredCard ? 'text-accent-500' : 'text-slate-400 hover:text-slate-600'}`}
           title={isStarredCard ? 'Bỏ đánh dấu (phím ↓)' : 'Đánh dấu cần học (phím ↓)'}
           aria-label={isStarredCard ? 'Bỏ đánh dấu' : 'Đánh dấu cần học'}
@@ -284,7 +243,6 @@ export function FlashcardView() {
         </button>
         <button
           onClick={() => setShowIpa(!showIpa)}
-          tabIndex={active ? 0 : -1}
           className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
           title={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
           aria-label={showIpa ? 'Ẩn phiên âm' : 'Hiện phiên âm'}
@@ -295,8 +253,8 @@ export function FlashcardView() {
     </div>
   );
 
-  // Các phép đếm dưới đây quét cả kho ~5.600 thẻ. Lật thẻ chỉ đổi `showMeaning` nên không được tính lại
-  // mỗi lần render (trước đây chúng chạy ngay ở khung hình đầu tiên của hiệu ứng lật, gây giật).
+  // Các phép đếm dưới đây quét cả kho ~5.600 thẻ. Hiện/ẩn nghĩa chỉ đổi `showMeaning` nên không được tính lại
+  // mỗi lần render (nếu tính lại thì mỗi lần bấm xem nghĩa bị khựng một nhịp).
   // Chỉ tính lại khi tiến độ, dấu sao hoặc bộ lọc thay đổi.
   const { dueCount, hardCount, goodCount } = useMemo(() => {
     let due = 0;
@@ -483,67 +441,47 @@ export function FlashcardView() {
             <div className="h-full rounded-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
           </div>
 
-          <section aria-label="Thẻ từ vựng" className={`perspective-1000 rounded-2xl ${CARD_SHADOW}`}>
-            <div className={`transform-style-3d grid will-change-transform transition-transform duration-500 ease-out motion-reduce:transition-none ${showMeaning ? 'rotate-y-180' : ''}`}>
-              {/* Mặt trước: từ, loại từ, phiên âm */}
-              <div aria-hidden={showMeaning} className={CARD_FACE}>
-                {cardTop(!showMeaning)}
-                <div className="mt-4 flex flex-1 cursor-pointer select-none flex-col items-center justify-center text-center" onClick={toggleMeaning}>
-                  <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-7xl">
-                    {currentCard.word}
-                  </h3>
-                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-                    <span className="font-display text-xl italic">{POS_SHORT[currentCard.pos]}</span>
-                    {showIpa && <span className="font-ipa text-xl text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
-                    {isSpeechSupported() && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
-                        tabIndex={showMeaning ? -1 : 0}
-                        className="rounded-full bg-primary-50 p-2 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
-                        aria-label="Nghe phát âm"
-                        title="Nghe phát âm"
-                      >
-                        <Volume2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </p>
-                  <p className="mt-8 text-xs text-slate-500 dark:text-slate-400">Bấm vào thẻ hoặc nhấn Space để lật xem nghĩa</p>
-                </div>
+          <section aria-label="Thẻ từ vựng" className={CARD}>
+            {cardTop}
+            <div className="flex flex-1 flex-col justify-center">
+              {/* Mặt từ: từ, loại từ, phiên âm. Bấm vào để hiện / ẩn nghĩa. */}
+              <div
+                className={`flex cursor-pointer select-none flex-col items-center text-center ${showMeaning ? 'pb-6 pt-2' : 'py-6'}`}
+                onClick={toggleMeaning}
+              >
+                <h3 className="break-words font-display text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-7xl">
+                  {currentCard.word}
+                </h3>
+                <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
+                  <span className="font-display text-xl italic">{POS_SHORT[currentCard.pos]}</span>
+                  {showIpa && <span className="font-ipa text-xl text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
+                  {isSpeechSupported() && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
+                      className="rounded-full bg-primary-50 p-2 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
+                      aria-label="Nghe phát âm"
+                      title="Nghe phát âm"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </p>
+                {!showMeaning && <p className="mt-8 text-xs text-slate-500 dark:text-slate-400">Bấm vào thẻ hoặc nhấn Space để xem nghĩa</p>}
               </div>
 
-              {/* Mặt sau: nghĩa, ví dụ, nghĩa khác */}
-              <div aria-hidden={!showMeaning} className={`${CARD_FACE} rotate-y-180`}>
-                {cardTop(showMeaning)}
-                <div className="mt-3 cursor-pointer select-none text-center" onClick={toggleMeaning} title="Bấm để lật lại">
-                  <h3 className="break-words font-display text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">{currentCard.word}</h3>
-                  <p className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-                    <span className="font-display text-lg italic">{POS_SHORT[currentCard.pos]}</span>
-                    {showIpa && <span className="font-ipa text-lg text-primary-600 dark:text-primary-400">{currentCard.ipa}</span>}
-                    {isSpeechSupported() && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); speakEnglish(speechText(currentCard)); }}
-                        tabIndex={showMeaning ? 0 : -1}
-                        className="rounded-full bg-primary-50 p-1.5 text-primary-600 transition-colors hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-300 dark:hover:bg-primary-900/60"
-                        aria-label="Nghe phát âm"
-                        title="Nghe phát âm"
-                      >
-                        <Volume2 className="h-4 w-4" />
-                      </button>
-                    )}
+              {/* Nghĩa, ví dụ, nghĩa khác: đổ ra bên dưới đường kẻ khi bấm xem nghĩa */}
+              {showMeaning && (
+                <div className="reveal-in border-t border-slate-200 pt-6 dark:border-slate-800">
+                  <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} />
+                  <p className="cursor-pointer select-none text-center text-2xl font-semibold text-slate-900 dark:text-slate-100" onClick={toggleMeaning}>
+                    {currentCard.meaning}
                   </p>
-                </div>
-                <div className="mt-5 flex-1 border-t border-slate-200 pt-6 dark:border-slate-800">
-                  {/* Luôn có mặt để giữ chiều cao thẻ cố định lúc lật (nếu gắn vào đúng lúc lật thì thẻ bị dãn cao giữa chừng).
-                      Hình đứng yên ở khung đầu và chỉ chạy sau khi thẻ lật xong. */}
-                  <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} play={visualPlay} />
-                  <p className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentCard.meaning}</p>
                   <blockquote className="mt-5 border-l-2 border-primary-300 pl-4 dark:border-primary-700">
                     <div className="flex items-start gap-2">
                       <p className="flex-1 text-lg leading-relaxed text-slate-800 dark:text-slate-200">{currentCard.example}</p>
                       {isSpeechSupported() && (
                         <button
                           onClick={() => speakEnglish(currentCard.example)}
-                          tabIndex={showMeaning ? 0 : -1}
                           className="flex-shrink-0 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
                           aria-label="Nghe câu ví dụ"
                           title="Nghe câu ví dụ"
@@ -574,7 +512,6 @@ export function FlashcardView() {
                               {isSpeechSupported() && (
                                 <button
                                   onClick={() => speakEnglish(sense.example)}
-                                  tabIndex={showMeaning ? 0 : -1}
                                   className="flex-shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary-600 dark:hover:bg-slate-800"
                                   aria-label="Nghe câu ví dụ của nghĩa này"
                                   title="Nghe câu ví dụ"
@@ -588,8 +525,12 @@ export function FlashcardView() {
                       </ul>
                     </div>
                   )}
+
+                  <p className="mt-6 cursor-pointer select-none text-center text-xs text-slate-500 dark:text-slate-400" onClick={toggleMeaning}>
+                    Nhấn Space hoặc chạm vào thẻ để ẩn nghĩa
+                  </p>
                 </div>
-              </div>
+              )}
             </div>
           </section>
 
@@ -611,7 +552,7 @@ export function FlashcardView() {
           </div>
 
           <p className="hidden text-center text-xs text-slate-400 sm:block">
-            Phím tắt: Space lật thẻ, ← chưa thuộc, → thuộc rồi, ↓ đánh dấu
+            Phím tắt: Space xem/ẩn nghĩa, ← chưa thuộc, → thuộc rồi, ↓ đánh dấu
           </p>
         </>
       )}
