@@ -55,9 +55,15 @@ function listFor(filter: FlashcardFilter, progressMap: ProgressMap, starred: Set
   return list;
 }
 
+/**
+ * Bóng đổ của thẻ. Đặt ở khung đứng yên bên ngoài chứ không đặt trên hai mặt thẻ: mặt thẻ đang xoay 3D mà
+ * mang bóng mờ lớn thì mỗi mặt là một ảnh nền lớn hơn và tốn công vẽ hơn cho GPU.
+ */
+const CARD_SHADOW = 'shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)]';
+
 /** Một mặt của thẻ lật: hai mặt xếp chồng trong cùng một ô lưới nên thẻ cao bằng mặt dài hơn. */
 const CARD_FACE =
-  'backface-hidden col-start-1 row-start-1 flex min-h-[24rem] flex-col rounded-2xl border border-slate-200 bg-white px-6 pb-8 pt-5 shadow-[0_1px_0_rgba(15,27,47,0.04),0_16px_40px_-16px_rgba(80,72,150,0.28)] dark:border-slate-800 dark:bg-slate-900 sm:min-h-[30rem] sm:px-16';
+  'backface-hidden [will-change:transform] col-start-1 row-start-1 flex min-h-[24rem] flex-col rounded-2xl border border-slate-200 bg-white px-6 pb-8 pt-5 dark:border-slate-800 dark:bg-slate-900 sm:min-h-[30rem] sm:px-16';
 
 /** Học thẻ mới / Ôn tập lại thẻ đã chấm "Chưa thuộc" hoặc "Thuộc rồi". */
 type Mode = 'learn' | 'review';
@@ -477,7 +483,7 @@ export function FlashcardView() {
             <div className="h-full rounded-full bg-primary-600 transition-[width] duration-300" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
           </div>
 
-          <section aria-label="Thẻ từ vựng" className="perspective-1000">
+          <section aria-label="Thẻ từ vựng" className={`perspective-1000 rounded-2xl ${CARD_SHADOW}`}>
             <div className={`transform-style-3d grid will-change-transform transition-transform duration-500 ease-out motion-reduce:transition-none ${showMeaning ? 'rotate-y-180' : ''}`}>
               {/* Mặt trước: từ, loại từ, phiên âm */}
               <div aria-hidden={showMeaning} className={CARD_FACE}>
