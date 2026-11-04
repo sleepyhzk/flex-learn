@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Gamepad2, ArrowLeft, BookOpen, Check, ChevronRight, Headphones, ListChecks, Link2, Puzzle, PlayCircle, Star } from 'lucide-react';
+import { Gamepad2, ArrowLeft, BookOpen, Check, ChevronRight, LayoutGrid, Headphones, ListChecks, Link2, Puzzle, PlayCircle, Star } from 'lucide-react';
 import { INITIAL_VOCAB } from '@/data/vocabData';
 import { TOPICS, TOPIC_LABEL } from '@/data/vocabTopics';
 import type { Topic } from '@/data/vocabTopics';
@@ -13,6 +13,7 @@ import { LearnLesson } from './games/LearnLesson';
 import { QuizGame } from './games/QuizGame';
 import { MatchGame } from './games/MatchGame';
 import { ScrambleGame } from './games/ScrambleGame';
+import { ConnectGame } from './games/ConnectGame';
 
 const TOPIC_EMOJI: Record<Topic, string> = {
   greet: '👋', time: '⏰', people: '👨‍👩‍👧', food: '🍜', shop: '🛍️', travel: '🚌', place: '📍', home: '🏠',
@@ -25,6 +26,7 @@ const GAMES: { key: GameKey; title: string; desc: string; tone: string; icon: Re
   { key: 'match', title: 'Ghép cặp', desc: 'Nối từ tiếng Anh với nghĩa', tone: 'bg-pink-50 text-pink-600 dark:bg-pink-950 dark:text-pink-400', icon: Link2 },
   { key: 'listen', title: 'Nghe và chọn', desc: 'Nghe phát âm, chọn đúng từ', tone: 'bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-400', icon: Headphones },
   { key: 'scramble', title: 'Xếp chữ', desc: 'Sắp xếp chữ cái thành từ', tone: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400', icon: Puzzle },
+  { key: 'connect', title: 'Nối thẻ (kiểu Pikachu)', desc: 'Nối từ với nghĩa bằng đường đi qua ô trống', tone: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400', icon: LayoutGrid },
 ];
 
 /** Màu nền ô biểu tượng chủ đề, xoay vòng theo thứ tự trong nhóm. */
@@ -267,6 +269,7 @@ export function GamesView() {
         {screen === 'listen' && <QuizGame words={lesson} pool={data.words} mode="listen" onExit={toLesson} onFinish={fin} />}
         {screen === 'match' && <MatchGame words={lesson} onExit={toLesson} onFinish={fin} />}
         {screen === 'scramble' && <ScrambleGame words={lesson} onExit={toLesson} onFinish={fin} />}
+        {screen === 'connect' && <ConnectGame words={lesson} onExit={toLesson} onFinish={fin} />}
       </div>
     );
   }

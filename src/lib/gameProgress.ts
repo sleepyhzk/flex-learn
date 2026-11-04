@@ -1,6 +1,6 @@
 import { sanitizeGames } from './sanitize';
 
-export type GameKey = 'quiz' | 'listen' | 'match' | 'scramble';
+export type GameKey = 'quiz' | 'listen' | 'match' | 'scramble' | 'connect';
 
 export interface TopicGameProgress {
   /** Số thứ tự các bài (bắt đầu từ 0) đã học xong. */

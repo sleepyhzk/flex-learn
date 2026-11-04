@@ -69,7 +69,7 @@ export function sanitizeStudy(raw: unknown): StudyMap {
   return out;
 }
 
-const GAME_KEYS: GameKey[] = ['quiz', 'listen', 'match', 'scramble'];
+const GAME_KEYS: GameKey[] = ['quiz', 'listen', 'match', 'scramble', 'connect'];
 
 export function sanitizeTopicGame(raw: unknown): TopicGameProgress | null {
   if (!isObj(raw)) return null;

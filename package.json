@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "check:data": "node --experimental-strip-types scripts/check_data.mjs && node --experimental-strip-types scripts/gen_vocab_index.mjs --check",
     "gen:vocab": "node --experimental-strip-types scripts/gen_vocab_index.mjs",
+    "check:connect": "node --experimental-strip-types scripts/check_connect.mjs",
     "check:grammar": "node --experimental-strip-types scripts/check_grammar.mjs",
     "check:why": "npx tsx scripts/check_why.mjs",
     "audio": "python scripts/generate_audio.py"
