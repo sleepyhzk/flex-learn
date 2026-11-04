@@ -21,7 +21,7 @@ const loaders = {
   games: () => import('@/views/GamesView').then((m) => ({ default: m.GamesView })),
   test: () => import('@/views/TestView').then((m) => ({ default: m.TestView })),
   lessons: () => import('@/views/LessonsView').then((m) => ({ default: m.LessonsView })),
-  conversation: () => import('@/views/ConversationView').then((m) => ({ default: m.ConversationView })),
+  grammar: () => import('@/views/GrammarView').then((m) => ({ default: m.GrammarView })),
   spelling: () => import('@/views/SpellingView').then((m) => ({ default: m.SpellingView })),
   shadowing: () => import('@/views/ShadowingView').then((m) => ({ default: m.ShadowingView })),
   dictation: () => import('@/views/DictationView').then((m) => ({ default: m.DictationView })),
@@ -31,7 +31,7 @@ const FlashcardView = lazy(loaders.flashcards);
 const GamesView = lazy(loaders.games);
 const TestView = lazy(loaders.test);
 const LessonsView = lazy(loaders.lessons);
-const ConversationView = lazy(loaders.conversation);
+const GrammarView = lazy(loaders.grammar);
 const SpellingView = lazy(loaders.spelling);
 const ShadowingView = lazy(loaders.shadowing);
 const DictationView = lazy(loaders.dictation);
@@ -123,7 +123,7 @@ export default function App() {
             {view === 'games' && <GamesView />}
             {view === 'test' && <TestView />}
             {view === 'lessons' && <LessonsView />}
-            {view === 'conversation' && <ConversationView />}
+            {view === 'grammar' && <GrammarView />}
             {view === 'spelling' && <SpellingView />}
             {view === 'shadowing' && <ShadowingView />}
             {view === 'dictation' && <DictationView />}

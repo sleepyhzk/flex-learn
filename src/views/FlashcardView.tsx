@@ -469,9 +469,9 @@ export function FlashcardView() {
                 {!showMeaning && <p className="mt-8 text-xs text-slate-500 dark:text-slate-400">Bấm vào thẻ hoặc nhấn Space để xem nghĩa</p>}
               </div>
 
-              {/* Nghĩa, ví dụ, nghĩa khác: đổ ra bên dưới đường kẻ khi bấm xem nghĩa */}
+              {/* Nghĩa, ví dụ, nghĩa khác: hiện ngay bên dưới đường kẻ khi bấm xem nghĩa (không có hiệu ứng mờ dần để không bị trễ) */}
               {showMeaning && (
-                <div className="reveal-in border-t border-slate-200 pt-6 dark:border-slate-800">
+                <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
                   <WordVisual key={`${currentCard.word}|${currentCard.pos}`} word={currentCard.word} pos={currentCard.pos} />
                   <p className="cursor-pointer select-none text-center text-2xl font-semibold text-slate-900 dark:text-slate-100" onClick={toggleMeaning}>
                     {currentCard.meaning}

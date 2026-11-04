@@ -1,12 +1,12 @@
 import { useId, useState } from 'react';
-import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, MessageCircle, Volume2, LogIn, LogOut, Settings, Headphones, Mic, Gamepad2, ClipboardCheck, SunMedium, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Layers, BookOpen, GraduationCap, Sun, Moon, Keyboard, BookMarked, Volume2, LogIn, LogOut, Settings, Headphones, Mic, Gamepad2, ClipboardCheck, SunMedium, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BRIGHTNESS_DEFAULT, BRIGHTNESS_MAX, BRIGHTNESS_MIN } from '@/hooks/useBrightness';
 import { VoiceSettings } from './VoiceSettings';
 import { useAuth } from '@/hooks/useAuth';
 import { useVocabStats } from '@/hooks/useVocabStats';
 import { useDisplayName } from '@/hooks/useDisplayName';
 
-export type ViewKey = 'home' | 'flashcards' | 'games' | 'test' | 'dictionary' | 'lessons' | 'spelling' | 'dictation' | 'shadowing' | 'conversation';
+export type ViewKey = 'home' | 'flashcards' | 'games' | 'test' | 'dictionary' | 'lessons' | 'spelling' | 'dictation' | 'shadowing' | 'grammar';
 
 interface NavItem {
   key: ViewKey;
@@ -19,12 +19,12 @@ const navItems: NavItem[] = [
   { key: 'home', label: 'Trang chủ', icon: Home, section: 'learn' },
   { key: 'flashcards', label: 'Flashcard', icon: Layers, section: 'learn' },
   { key: 'lessons', label: 'Từ vựng', icon: GraduationCap, section: 'learn' },
+  { key: 'grammar', label: 'Ngữ pháp', icon: BookMarked, section: 'learn' },
   { key: 'spelling', label: 'Chính tả', icon: Keyboard, section: 'learn' },
   { key: 'dictation', label: 'Nghe chép', icon: Headphones, section: 'learn' },
   { key: 'shadowing', label: 'Shadowing', icon: Mic, section: 'learn' },
   { key: 'games', label: 'Trò chơi', icon: Gamepad2, section: 'practice' },
   { key: 'test', label: 'Kiểm tra', icon: ClipboardCheck, section: 'practice' },
-  { key: 'conversation', label: 'Giao tiếp', icon: MessageCircle, section: 'practice' },
   { key: 'dictionary', label: 'Tra cứu', icon: BookOpen, section: 'practice' },
 ];
 

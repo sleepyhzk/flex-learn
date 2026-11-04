@@ -1,0 +1,86 @@
+import type { GrammarQuestion } from '../types.ts';
+import { mc } from './util.ts';
+
+/** Bài tập ngữ pháp cấp A2. Khóa là id của điểm ngữ pháp trong ../a2.ts. */
+export const A2_EXERCISES: Record<string, GrammarQuestion[]> = {
+  'a2-past-simple': [
+    mc('I ___ to the market yesterday.', 'went', ['go', 'goed', 'was go'], 'go là động từ bất quy tắc, quá khứ là went.', ["go là hiện tại; có yesterday nên cần quá khứ.", "go là động từ bất quy tắc, không thêm ed.", "was go sai cấu trúc."]),
+    mc('She ___ study last night.', "didn't", ["doesn't", "don't", 'not'], "Phủ định quá khứ đơn: didn't + động từ nguyên mẫu.", ["doesn't là hiện tại.", "don't là hiện tại.", "not không đứng một mình; cần didn't."]),
+    mc('___ you see the film last week?', 'Did', ['Do', 'Were', 'Have'], 'Câu hỏi quá khứ đơn: Did + chủ ngữ + động từ nguyên mẫu.', ["Do là hiện tại; có last week nên cần Did.", "Were đi với to be, không đi với see.", "Have dùng cho hiện tại hoàn thành, không đi với last week."]),
+    mc('They ___ a new car in 2020.', 'bought', ['buyed', 'buy', 'boughted'], 'buy là động từ bất quy tắc, quá khứ là bought.', ["buy bất quy tắc, không thêm ed.", "buy là hiện tại; có in 2020 nên cần quá khứ.", "Chỉ cần bought, không thêm ed nữa."]),
+    mc("He didn't ___ the door.", 'open', ['opened', 'opens', 'opening'], "Sau didn't dùng động từ nguyên mẫu, không chia lại.", ["Sau didn't động từ trở về nguyên mẫu, không chia quá khứ.", "Sau didn't không thêm s.", "Sau didn't không dùng V-ing."]),
+    mc('We ___ at home last Sunday.', 'were', ['was', 'are', 'be'], 'Quá khứ của to be: we đi với were.', ["was chỉ đi với I/he/she/it.", "are là hiện tại; có last Sunday nên cần quá khứ.", "be là nguyên mẫu, chưa chia."]),
+  ],
+  'a2-past-continuous': [
+    mc('I ___ TV when the phone rang.', 'was watching', ['watched', 'am watching', 'were watching'], 'Hành động đang diễn ra thì bị hành động khác xen vào: was/were + V-ing.', ["watched là hành động hoàn tất, không diễn tả hành động đang diễn ra bị xen ngang.", "am watching là hiện tại tiếp diễn.", "were không đi với I."]),
+    mc('They ___ dinner at 7 p.m. yesterday.', 'were having', ['had', 'are having', 'was having'], 'Hành động đang diễn ra tại một thời điểm xác định trong quá khứ.', ["had là quá khứ đơn, không nhấn mạnh hành động đang diễn ra lúc 7 giờ.", "are having là hiện tại tiếp diễn.", "was không đi với They."]),
+    mc('While she ___, I was cooking.', 'was reading', ['read', 'reads', 'were reading'], 'Hai hành động diễn ra song song trong quá khứ: cả hai dùng quá khứ tiếp diễn.', ["read là quá khứ đơn; hai hành động song song cần quá khứ tiếp diễn.", "reads là hiện tại đơn.", "were không đi với she."]),
+    mc('He ___ when the teacher came in.', 'was sleeping', ['slept', 'sleeps', 'is sleeping'], 'Hành động nền đang diễn ra (was sleeping) thì hành động ngắn (came in) xen vào.', ["slept là hành động hoàn tất, không hợp với hành động đang diễn ra khi cô giáo vào.", "sleeps là hiện tại đơn.", "is sleeping là hiện tại tiếp diễn."]),
+    mc('What ___ you doing at 9 last night?', 'were', ['was', 'did', 'are'], 'you đi với were trong quá khứ tiếp diễn.', ["was không đi với you.", "did cần động từ nguyên mẫu, không đi với doing.", "are là hiện tại; đề nói về quá khứ."]),
+    mc('The children ___ in the garden when it started to rain.', 'were playing', ['played', 'was playing', 'are playing'], 'Hành động nền trong quá khứ: were + V-ing.', ["played là hành động hoàn tất, không phải hành động nền đang diễn ra.", "was không đi với the children (số nhiều).", "are playing là hiện tại tiếp diễn."]),
+  ],
+  'a2-future-will-going-to': [
+    mc('Look at those clouds! It ___ rain.', 'is going to', ['will', 'is', 'does'], 'Dự đoán dựa trên bằng chứng đang thấy dùng be going to.', ["will dùng cho quyết định tức thời hoặc dự đoán không có bằng chứng; ở đây có bằng chứng (mây).", "is thiếu going to.", "does không dùng để nói về tương lai."]),
+    mc("A: I'm thirsty. B: I ___ get you some water.", "'ll", ['am going to', 'going to', 'do'], 'Quyết định đưa ra ngay lúc nói dùng will.', ["be going to dùng cho kế hoạch có sẵn; đây là quyết định tức thời.", "going to thiếu be.", "do không dùng để nói về tương lai."]),
+    mc("I ___ visit my grandparents this weekend. I've already bought the ticket.", 'am going to', ['will', 'shall', 'do'], 'Kế hoạch đã có từ trước dùng be going to.', ["will dùng cho quyết định tức thời; đây là kế hoạch có sẵn (đã mua vé).", "shall thường dùng để đề nghị, không hợp ở đây.", "do không dùng để nói về tương lai."]),
+    mc('I think she ___ pass the exam.', 'will', ['is going', 'does', 'has'], 'Ý kiến, dự đoán cá nhân sau I think dùng will.', ["is going thiếu to.", "does không dùng để nói về tương lai.", "has không dùng để nói về tương lai."]),
+    mc('We ___ move to Da Nang next year. (kế hoạch đã định)', 'are going to', ['will to', 'are going', 'shall to'], 'be going to + động từ nguyên mẫu, đủ be, going và to.', ["will không đi với to.", "are going thiếu to.", "shall không đi với to."]),
+    mc('___ you going to buy a new phone?', 'Are', ['Will', 'Do', 'Is'], 'Câu hỏi be going to: Are + you + going to + V.', ["Will không đi với going to.", "Do không dùng với be going to.", "Is không đi với you."]),
+  ],
+  'a2-comparatives-superlatives': [
+    mc('This bag is ___ than that one.', 'cheaper', ['cheap', 'more cheap', 'cheapest'], 'Tính từ ngắn: thêm er + than.', ["Câu có than nên cần so sánh hơn, không dùng nguyên cấp.", "Tính từ ngắn thêm er, không dùng more.", "cheapest là so sánh nhất, không đi với than."]),
+    mc('She is the ___ student in our class.', 'smartest', ['smarter', 'most smart', 'smart'], 'So sánh nhất của tính từ ngắn: the + adj-est.', ["smarter là so sánh hơn, mà đề cần so sánh nhất (the ...).", "Tính từ ngắn thêm est, không dùng most.", "smart là nguyên cấp, không có nghĩa so sánh."]),
+    mc('This film is ___ than the last one.', 'more interesting', ['interestinger', 'most interesting', 'interesting'], 'Tính từ dài: more + adj + than.', ["Tính từ dài dùng more, không thêm er.", "most interesting là so sánh nhất, mà câu có than.", "interesting là nguyên cấp."]),
+    mc('Today is ___ day of the year. (nóng nhất)', 'the hottest', ['the hotest', 'hottest', 'the most hot'], 'hot gấp đôi phụ âm cuối: hottest.', ["hot phải gấp đôi phụ âm: hottest, không phải hotest.", "So sánh nhất cần có the.", "hot là tính từ ngắn, không dùng most."]),
+    mc('He runs ___ than me.', 'faster', ['more fast', 'fastest', 'fast'], 'fast là tính từ/trạng từ ngắn: faster.', ["fast là tính từ ngắn, thêm er, không dùng more.", "fastest là so sánh nhất, mà câu có than.", "fast là nguyên cấp."]),
+    mc('This is ___ book I have ever read. (hay nhất)', 'the best', ['the better', 'the most good', 'the goodest'], 'good là bất quy tắc: better, the best.', ["better là so sánh hơn; 'tốt nhất' là the best.", "good bất quy tắc, không dùng most.", "good bất quy tắc, không thêm est."]),
+  ],
+  'a2-adverbs': [
+    mc('He is ___ late for school. He is always on time.', 'never', ['always', 'usually', 'often'], 'always on time nghĩa là không bao giờ trễ: never.', ["always on time là lúc nào cũng đúng giờ, không phải lúc nào cũng trễ.", "usually late mâu thuẫn với 'always on time'.", "often late mâu thuẫn với 'always on time'."]),
+    mc('She speaks English very ___.', 'well', ['good', 'goodly', 'best'], 'Trạng từ của good là well, bổ nghĩa cho động từ speaks.', ["good là tính từ; bổ nghĩa cho động từ cần trạng từ well.", "goodly không phải trạng từ của good.", "best là so sánh nhất."]),
+    mc('He drove ___ and had an accident.', 'carelessly', ['careless', 'carefully', 'careful'], 'Bổ nghĩa cho động từ cần trạng từ; có tai nạn nên là carelessly.', ["careless là tính từ; bổ nghĩa cho động từ cần trạng từ.", "carefully trái nghĩa, không hợp với việc xảy ra tai nạn.", "careful là tính từ."]),
+    mc('Chọn câu đúng:', 'I often eat breakfast at home.', ['I eat often breakfast at home.', 'I eat breakfast often at home.', 'Often eat I breakfast at home.'], 'Trạng từ tần suất đứng trước động từ thường.', ["Trạng từ tần suất không đứng giữa động từ và tân ngữ.", "Trạng từ tần suất thường đứng trước động từ chính, không đứng sau tân ngữ.", "Sai trật tự từ: chủ ngữ phải đứng trước động từ."]),
+    mc('She works very ___.', 'hard', ['hardly', 'harder', 'hard-ly'], 'hard vừa là tính từ vừa là trạng từ. hardly có nghĩa khác (hầu như không).', ["hardly nghĩa là hầu như không, khác nghĩa với 'chăm chỉ'.", "harder là so sánh hơn.", "hard-ly không tồn tại."]),
+    mc('They ___ go to the cinema. Only once a year.', 'rarely', ['always', 'usually', 'often'], 'Chỉ một lần mỗi năm nghĩa là hiếm khi: rarely.', ["always nghĩa là luôn luôn, không hợp với 'chỉ một lần mỗi năm'.", "usually nghĩa là thường xuyên.", "often nghĩa là thường xuyên."]),
+  ],
+  'a2-quantifiers': [
+    mc('How ___ water do you drink a day?', 'much', ['many', 'few', 'a few'], 'water không đếm được nên dùng How much.', ["many dùng với danh từ đếm được; water không đếm được.", "few dùng với danh từ đếm được.", "a few dùng với danh từ đếm được."]),
+    mc("There aren't ___ chairs in the room.", 'many', ['much', 'little', 'a little'], 'chairs đếm được số nhiều nên dùng many.', ["much dùng với danh từ không đếm được; chairs đếm được.", "little dùng với danh từ không đếm được.", "a little dùng với danh từ không đếm được."]),
+    mc("I'd like ___ coffee, please.", 'some', ['many', 'few', 'a few'], 'Lời đề nghị, yêu cầu lịch sự dùng some; coffee không đếm được.', ["many cần danh từ đếm được số nhiều; coffee không đếm được.", "few dùng với danh từ đếm được.", "a few dùng với danh từ đếm được."]),
+    mc('Do you have ___ brothers or sisters?', 'any', ['some', 'a', 'much'], 'Câu hỏi thường dùng any.', ["some thường dùng trong câu khẳng định.", "a không đi với danh từ số nhiều brothers.", "much dùng với danh từ không đếm được."]),
+    mc('We have ___ time. Let us hurry. (rất ít)', 'little', ['few', 'a few', 'many'], 'time không đếm được; little = rất ít.', ["few dùng với danh từ đếm được; time không đếm được.", "a few dùng với danh từ đếm được và mang nghĩa một vài (đủ dùng).", "many nghĩa là nhiều, trái với 'rất ít'."]),
+    mc('Chọn danh từ không đếm được:', 'advice', ['idea', 'friend', 'book'], 'advice là danh từ không đếm được, không có số nhiều.', ["idea đếm được (an idea, two ideas).", "friend đếm được.", "book đếm được."]),
+  ],
+  'a2-must-have-to-should': [
+    mc('You ___ wear a seat belt. It is the law.', 'must', ['should', 'can', 'may'], 'Quy định, luật lệ: must (bắt buộc).', ["should chỉ là lời khuyên, không bắt buộc như luật.", "can chỉ khả năng hoặc được phép.", "may chỉ khả năng hoặc xin phép."]),
+    mc('You look tired. You ___ go to bed early.', 'should', ['must to', 'had', 'shall'], 'Lời khuyên dùng should + động từ nguyên mẫu.', ["must không đi với to.", "had không dùng để đưa lời khuyên.", "shall không dùng để đưa lời khuyên ở đây."]),
+    mc('Yesterday I ___ work late. (bắt buộc)', 'had to', ['must', 'have to', 'should'], 'must không có quá khứ; dùng had to.', ["must không có dạng quá khứ.", "have to là hiện tại; có yesterday nên cần had to.", "should chỉ là lời khuyên, không phải bắt buộc."]),
+    mc('You ___ park here. It is forbidden.', "mustn't", ["don't have to", "doesn't have to", "haven't to"], "mustn't = cấm. don't have to = không cần thiết.", ["don't have to nghĩa là không cần, khác với bị cấm.", "doesn't have to cũng là không cần, và không đi với you.", "haven't to không đúng cấu trúc."]),
+    mc('Tomorrow is Sunday. I ___ get up early.', "don't have to", ["mustn't", "can't to", "shouldn't"], "don't have to = không bắt buộc.", ["mustn't nghĩa là cấm, mà đề nói không bắt buộc.", "can't không đi với to.", "shouldn't nghĩa là không nên, không phải không cần."]),
+    mc('She ___ finish the report today.', 'has to', ['have to', 'must to', 'haves to'], 'Ngôi thứ ba số ít: has to.', ["have to đi với I/you/we/they, không đi với She.", "must không đi với to.", "haves to không tồn tại."]),
+  ],
+  'a2-present-perfect': [
+    mc('I ___ this film three times.', 'have seen', ['saw', 'have saw', 'am seeing'], 'Trải nghiệm không nói rõ thời điểm: have + V3 (seen).', ["saw là quá khứ đơn, không dùng khi nói trải nghiệm không rõ thời điểm.", "Sau have phải dùng V3 (seen).", "am seeing là hiện tại tiếp diễn."]),
+    mc('She ___ her keys. She cannot get in.', 'has lost', ['lost', 'have lost', 'loses'], 'Hành động quá khứ còn ảnh hưởng hiện tại: has lost.', ["lost là quá khứ đơn, không nhấn mạnh kết quả ở hiện tại.", "have không đi với She.", "loses là hiện tại đơn."]),
+    mc('___ you ever been to Japan?', 'Have', ['Did', 'Do', 'Are'], 'Hỏi trải nghiệm: Have you ever + V3?', ["Did không đi với ever been trong mẫu này.", "Do không đi với been.", "Are không đi với been."]),
+    mc('Hurry! The film has already ___.', 'started', ['start', 'starting', 'starts'], 'has + V3; started là phân từ quá khứ.', ["Sau has phải dùng V3, không dùng nguyên mẫu.", "starting không phải V3.", "starts không phải V3."]),
+    mc('I have never ___ sushi.', 'eaten', ['ate', 'eat', 'eating'], 'have never + V3; eat – ate – eaten.', ["ate là quá khứ đơn; sau have phải dùng V3.", "eat là nguyên mẫu; sau have phải dùng V3.", "eating là V-ing; sau have phải dùng V3."]),
+    mc('Chọn câu đúng:', 'I have finished my homework.', ['I have finished my homework yesterday.', 'I has finished my homework.', 'I have finish my homework.'], 'Hiện tại hoàn thành không đi với mốc quá khứ như yesterday; I đi với have + V3.', ["Hiện tại hoàn thành không đi với mốc thời gian xác định như yesterday.", "has không đi với I.", "Sau have phải dùng V3 (finished)."]),
+  ],
+  'a2-verb-patterns': [
+    mc('I want ___ a new phone.', 'to buy', ['buying', 'buy', 'bought'], 'want + to + động từ nguyên mẫu.', ["Sau want không dùng V-ing.", "Sau want cần to.", "bought không dùng sau want."]),
+    mc('She enjoys ___ to music.', 'listening', ['to listen', 'listen', 'listens'], 'enjoy + V-ing.', ["Sau enjoy dùng V-ing, không dùng to V.", "Sau enjoy không dùng nguyên mẫu.", "listens không đúng sau enjoy."]),
+    mc("I'd like ___ a cup of tea.", 'to have', ['having', 'have', 'had'], "would like + to + động từ nguyên mẫu.", ["Sau would like dùng to V, không dùng V-ing.", "Sau would like thiếu to.", "had không đúng sau would like."]),
+    mc('He likes ___ football on Sundays.', 'playing', ['play', 'to played', 'plays'], 'like + V-ing (hoặc to V). Các phương án còn lại sai dạng.', ["Sau like cần V-ing hoặc to V, không dùng nguyên mẫu trần.", "to played sai dạng: sau to dùng nguyên mẫu.", "plays không đúng sau like."]),
+    mc("They don't want ___ home early.", 'to go', ['going', 'go', 'goes'], 'want + to + động từ nguyên mẫu.', ["Sau want không dùng V-ing.", "Sau want thiếu to.", "goes không đúng sau want."]),
+    mc('Would you like ___ with us?', 'to come', ['coming', 'come', 'came'], 'Would you like + to + động từ nguyên mẫu (lời mời).', ["Sau would like dùng to V, không dùng V-ing.", "Sau would like thiếu to.", "came không đúng sau would like."]),
+  ],
+  'a2-conditionals-0-1': [
+    mc('If you heat ice, it ___.', 'melts', ['will melt', 'melted', 'would melt'], 'Sự thật khoa học (loại 0): if + hiện tại đơn, hiện tại đơn.', ["will melt dùng cho tương lai; sự thật khoa học dùng hiện tại đơn.", "melted là quá khứ.", "would melt thuộc điều kiện loại 2."]),
+    mc('If it rains tomorrow, we ___ at home.', 'will stay', ['would stay', 'stayed', 'had stayed'], 'Điều kiện có thể xảy ra ở tương lai (loại 1): if + hiện tại đơn, will + V.', ["would stay thuộc điều kiện loại 2 (không có thật).", "stayed là quá khứ.", "had stayed thuộc điều kiện loại 3."]),
+    mc('If she ___ hard, she will pass the exam.', 'studies', ['will study', 'studied', 'would study'], 'Mệnh đề if dùng hiện tại đơn, không dùng will.', ["Mệnh đề if không dùng will.", "studied là quá khứ, thuộc loại 2.", "would study không dùng trong mệnh đề if."]),
+    mc("If I ___ time, I'll call you.", 'have', ['will have', 'would have', 'had'], 'Mệnh đề if dùng hiện tại đơn.', ["Mệnh đề if không dùng will.", "would không dùng trong mệnh đề if.", "had là quá khứ, thuộc loại 2."]),
+    mc("I'll go out if it ___ raining.", 'stops', ['will stop', 'would stop', 'stopped'], 'Mệnh đề if dùng hiện tại đơn; it đi với stops.', ["Mệnh đề if không dùng will.", "would không dùng trong mệnh đề if.", "stopped là quá khứ, thuộc loại 2."]),
+    mc('If you mix red and blue, you ___ purple.', 'get', ['getting', 'would get', 'got'], 'Sự thật hiển nhiên (loại 0): hiện tại đơn ở cả hai vế.', ["getting không phải dạng đúng của hiện tại đơn.", "would get thuộc điều kiện loại 2.", "got là quá khứ."]),
+  ],
+};

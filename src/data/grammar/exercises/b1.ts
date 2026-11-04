@@ -1,0 +1,86 @@
+import type { GrammarQuestion } from '../types.ts';
+import { mc } from './util.ts';
+
+/** Bài tập ngữ pháp cấp B1. Khóa là id của điểm ngữ pháp trong ../b1.ts. */
+export const B1_EXERCISES: Record<string, GrammarQuestion[]> = {
+  'b1-present-perfect-vs-past-simple': [
+    mc('I have lived here ___ 2015.', 'since', ['for', 'ago', 'in'], 'since + mốc thời gian (2015).', ["for đi với khoảng thời gian, không đi với mốc thời gian 2015.", "ago đi với quá khứ đơn, không đi với have lived.", "in không dùng với hiện tại hoàn thành theo cách này."]),
+    mc('She has worked here ___ three years.', 'for', ['since', 'ago', 'from'], 'for + khoảng thời gian (three years).', ["since đi với mốc thời gian, không đi với khoảng three years.", "ago đi với quá khứ đơn.", "from cần đi kèm to hoặc until."]),
+    mc('We moved to this city five years ___.', 'ago', ['before', 'since', 'for'], 'ago dùng với quá khứ đơn: moved ... five years ago.', ["before không đi với số + năm theo cách này.", "since cần mốc thời gian, không phải 'five years'.", "for dùng với hiện tại hoàn thành, mà câu này ở quá khứ đơn (moved)."]),
+    mc('I ___ him last week.', 'saw', ['have seen', 'had seen', 'see'], 'Có mốc thời gian đã qua (last week) dùng quá khứ đơn.', ["last week là mốc quá khứ, không dùng hiện tại hoàn thành.", "had seen là quá khứ hoàn thành, cần một mốc quá khứ khác.", "see là hiện tại."]),
+    mc('She ___ in London for two years, then moved to Paris.', 'lived', ['has lived', 'lives', 'is living'], 'Việc đã chấm dứt hẳn trong quá khứ (đã chuyển đi) dùng quá khứ đơn.', ["has lived nghĩa là vẫn còn sống ở đó, mà câu nói đã chuyển đi.", "lives là hiện tại.", "is living là hiện tại tiếp diễn."]),
+    mc('How long ___ you known him?', 'have', ['did', 'do', 'are'], 'Hỏi khoảng thời gian kéo dài đến hiện tại: How long have you known?', ["did dùng với quá khứ đơn; How long ... known cần have.", "do không đi với known.", "are không đi với known."]),
+  ],
+  'b1-present-perfect-continuous': [
+    mc('I am tired. I ___ all day.', 'have been working', ['have worked', 'am working', 'work'], 'Nhấn mạnh quá trình kéo dài đến hiện tại: have been + V-ing.', ["have worked nhấn mạnh kết quả, không nhấn mạnh quá trình kéo dài cả ngày.", "am working là hiện tại tiếp diễn, không có ý đã kéo dài.", "work là hiện tại đơn."]),
+    mc('She ___ for the bus for 20 minutes.', 'has been waiting', ['is waiting', 'waits', 'waited'], 'Hành động bắt đầu trong quá khứ, vẫn tiếp diễn: has been + V-ing.', ["is waiting không cho thấy đã kéo dài 20 phút.", "waits là hiện tại đơn.", "waited là quá khứ, hành động đã kết thúc."]),
+    mc('Your eyes are red. ___ you been crying?', 'Have', ['Did', 'Are', 'Do'], 'Câu hỏi: Have + you + been + V-ing.', ["Did không đi với been.", "Are không đi với been trong cấu trúc này.", "Do không đi với been."]),
+    mc('It ___ since this morning.', 'has been raining', ['is raining', 'rained', 'has rain'], 'since + mốc thời gian đi với hiện tại hoàn thành tiếp diễn.', ["is raining không nối được với since.", "rained là quá khứ đơn.", "has rained nhấn mạnh kết quả, không nhấn mạnh quá trình kéo dài."]),
+    mc('How long ___ they been living here?', 'have', ['do', 'did', 'are'], 'They đi với have trong hiện tại hoàn thành tiếp diễn.', ["do không đi với been living.", "did không đi với been.", "are không đi với been."]),
+    mc('I ___ three emails this morning. (nhấn mạnh số lượng)', 'have written', ['have been writing', 'wrote', 'am writing'], 'Nói về kết quả, số lượng thì dùng hiện tại hoàn thành đơn.', ["have been writing nhấn mạnh quá trình, không nhấn mạnh số lượng.", "wrote là quá khứ đơn, không nối với hiện tại.", "am writing là hiện tại tiếp diễn."]),
+  ],
+  'b1-past-perfect': [
+    mc('When I arrived, the film ___.', 'had started', ['started', 'has started', 'was starting'], 'Hành động xảy ra trước một mốc quá khứ khác: had + V3.', ["started không cho thấy việc bắt đầu xảy ra trước khi tôi đến.", "has started là hiện tại hoàn thành.", "was starting là quá khứ tiếp diễn."]),
+    mc('She was sad because she ___ her keys.', 'had lost', ['lost', 'has lost', 'loses'], 'Nguyên nhân xảy ra trước: had lost.', ["lost không cho thấy việc mất chìa khóa xảy ra trước khi buồn.", "has lost là hiện tại hoàn thành.", "loses là hiện tại đơn."]),
+    mc('They ___ already eaten when I got there.', 'had', ['have', 'were', 'did'], 'had + V3 (eaten).', ["have là hiện tại hoàn thành, mà câu ở quá khứ.", "were không đi với V3 eaten theo cách này.", "did không đi với V3."]),
+    mc('I could not get in because I ___ my key at home.', 'had left', ['left', 'have left', 'leave'], 'Hành động để quên chìa khóa xảy ra trước lúc không vào được nhà.', ["left không cho thấy việc để quên xảy ra trước.", "have left là hiện tại hoàn thành.", "leave là hiện tại."]),
+    mc('By the time we got to the station, the train ___.', 'had left', ['left', 'has left', 'leaves'], 'By the time + quá khứ đơn, vế kia dùng quá khứ hoàn thành.', ["left không cho thấy tàu đã đi trước khi chúng tôi đến.", "has left là hiện tại hoàn thành.", "leaves là hiện tại đơn."]),
+    mc('She said she ___ him before.', 'had met', ['has met', 'meets', 'meet'], 'Câu tường thuật lùi thì: has met / met chuyển thành had met.', ["has met không lùi thì sau said.", "meets là hiện tại đơn.", "meet là nguyên mẫu."]),
+  ],
+  'b1-passive': [
+    mc('English ___ all over the world.', 'is spoken', ['speaks', 'is speaking', 'spoken'], 'Bị động hiện tại đơn: is/are + V3.', ["speaks là câu chủ động.", "is speaking là chủ động ở thì tiếp diễn.", "spoken thiếu to be (is)."]),
+    mc('This house ___ in 1990.', 'was built', ['is built', 'built', 'has built'], 'Bị động quá khứ đơn: was/were + V3.', ["is built là hiện tại, mà có mốc in 1990.", "built thiếu was.", "has built là chủ động."]),
+    mc('The windows ___ every week.', 'are cleaned', ['clean', 'are cleaning', 'cleaned'], 'Cửa sổ được lau: are + V3.', ["clean là câu chủ động.", "are cleaning là chủ động ở thì tiếp diễn.", "cleaned thiếu to be (are)."]),
+    mc('The thief ___ by the police yesterday.', 'was caught', ['caught', 'is caught', 'was catch'], 'Bị động quá khứ đơn: was + caught (V3 của catch).', ["caught thiếu was.", "is caught là hiện tại, mà có yesterday.", "Sau was phải dùng V3 (caught), không dùng catch."]),
+    mc('A new bridge ___ next year.', 'will be built', ['will build', 'is built', 'will built'], 'Bị động tương lai: will be + V3.', ["will build là câu chủ động.", "is built là hiện tại.", "Sau will cần be + V3 (will be built)."]),
+    mc('Chọn câu bị động đúng:', 'The cake was made by my mom.', ['The cake made by my mom.', 'The cake was make by my mom.', 'The cake is making by my mom.'], 'Bị động quá khứ đơn: was + V3 (made).', ["Thiếu to be (was) trước made.", "Sau was phải dùng V3 (made), không dùng make.", "is making là chủ động tiếp diễn, không phải bị động."]),
+  ],
+  'b1-second-conditional': [
+    mc('If I ___ rich, I would travel the world.', 'were', ['am', 'will be', 'would be'], 'Điều kiện không có thật ở hiện tại: if + quá khứ đơn (were).', ["am là hiện tại; loại 2 dùng quá khứ trong mệnh đề if.", "will be thuộc loại 1.", "would be không dùng trong mệnh đề if."]),
+    mc('If she ___ more time, she would learn piano.', 'had', ['has', 'will have', 'would have'], 'Mệnh đề if dùng quá khứ đơn.', ["has là hiện tại; loại 2 dùng quá khứ trong mệnh đề if.", "will have thuộc loại 1.", "would have không dùng trong mệnh đề if."]),
+    mc('I ___ help you if I knew the answer.', 'would', ['will', 'had', 'am'], 'Mệnh đề chính của loại 2: would + động từ nguyên mẫu.', ["will thuộc điều kiện loại 1; loại 2 dùng would ở vế chính.", "had không dùng ở vế chính của loại 2.", "am không đi với help."]),
+    mc('What would you do if you ___ a million dollars?', 'won', ['win', 'will win', 'would win'], 'Mệnh đề if dùng quá khứ đơn: won.', ["win là hiện tại; loại 2 dùng quá khứ trong mệnh đề if.", "will win thuộc loại 1.", "would win không dùng trong mệnh đề if."]),
+    mc('If I ___ you, I would take the job.', 'were', ['am', 'will be', 'had been'], 'If I were you: lời khuyên theo loại 2.', ["am là hiện tại; loại 2 dùng were.", "will be thuộc loại 1.", "had been thuộc loại 3."]),
+    mc('If it ___ so cold, we would go to the beach.', "weren't", ["isn't", "won't be", "wouldn't be"], "Mệnh đề if dùng quá khứ đơn, phủ định: weren't.", ["isn't là hiện tại; loại 2 dùng quá khứ.", "won't be thuộc loại 1.", "wouldn't be không dùng trong mệnh đề if."]),
+  ],
+  'b1-defining-relative-clauses': [
+    mc('The man ___ lives next door is a doctor.', 'who', ['which', 'whose', 'where'], 'Thay cho người, làm chủ ngữ: who.', ["which dùng cho vật, không dùng cho người.", "whose chỉ sở hữu.", "where chỉ nơi chốn."]),
+    mc('This is the book ___ I told you about.', 'that', ['who', 'whose', 'where'], 'Thay cho vật: that (hoặc which).', ["who dùng cho người, mà book là vật.", "whose chỉ sở hữu.", "where chỉ nơi chốn."]),
+    mc('That is the restaurant ___ we had dinner.', 'where', ['who', 'which', 'whose'], 'Thay cho nơi chốn: where.', ["who dùng cho người, mà restaurant là nơi chốn.", "which sẽ cần thêm giới từ (at which).", "whose chỉ sở hữu."]),
+    mc('She is the girl ___ bike was stolen.', 'whose', ['who', 'which', 'that'], 'whose chỉ sở hữu: cô gái có chiếc xe đạp bị lấy cắp.', ["who không chỉ sở hữu.", "which dùng cho vật.", "that không dùng để chỉ sở hữu."]),
+    mc('The woman ___ I met yesterday is a teacher.', 'who', ['whose', 'where', 'what'], 'Thay cho người, làm tân ngữ: who (hoặc that).', ["whose chỉ sở hữu.", "where chỉ nơi chốn.", "what không dùng làm đại từ quan hệ ở đây."]),
+    mc('I like the shoes ___ you bought last week.', 'that', ['who', 'whose', 'where'], 'Thay cho vật: that (hoặc which).', ["who dùng cho người, mà shoes là vật.", "whose chỉ sở hữu.", "where chỉ nơi chốn."]),
+  ],
+  'b1-reported-speech': [
+    mc('"I am tired," she said. → She said that she ___ tired.', 'was', ['is', 'were', 'has been'], 'Tường thuật lùi một thì: am → was.', ["is chưa lùi thì sau said.", "were không đi với she.", "has been không phải dạng lùi của am."]),
+    mc('He said, "I will call you." → He said he ___ call me.', 'would', ['will', 'had', 'does'], 'will lùi thành would.', ["will chưa lùi thì sau said.", "had không phải dạng lùi của will.", "does là hiện tại đơn."]),
+    mc('She asked, "Where do you live?" → She asked me where I ___.', 'lived', ['live', 'do live', 'did live'], 'Câu hỏi tường thuật dùng trật tự câu kể và lùi thì: live → lived.', ["live chưa lùi thì.", "do live không dùng trong câu hỏi tường thuật.", "did live sai trật tự câu tường thuật."]),
+    mc('They said, "We have finished." → They said they ___ finished.', 'had', ['have', 'were', 'did'], 'Hiện tại hoàn thành lùi thành quá khứ hoàn thành: had finished.', ["have chưa lùi thì.", "were không đi với finished theo cách này.", "did không đi với V3."]),
+    mc('"Are you hungry?" he asked. → He asked ___ I was hungry.', 'if', ['that', 'what', 'do'], 'Câu hỏi Yes/No tường thuật dùng if hoặc whether.', ["that dùng cho câu kể, không dùng cho câu hỏi Yes/No.", "what dùng cho câu hỏi Wh-.", "do không dùng trong câu tường thuật này."]),
+    mc('"Don\'t be late," she told me. → She told me ___ late.', 'not to be', ["don't be", 'not be', "to don't be"], 'Câu mệnh lệnh phủ định tường thuật: told + O + not to + V.', ["don't be vẫn giữ nguyên câu trực tiếp.", "not be thiếu to.", "to don't be sai cấu trúc."]),
+  ],
+  'b1-gerund-infinitive': [
+    mc('I enjoy ___ to music.', 'listening', ['to listen', 'listen', 'listened'], 'enjoy + V-ing.', ["Sau enjoy dùng V-ing, không dùng to V.", "Sau enjoy không dùng nguyên mẫu.", "listened là quá khứ, không đúng sau enjoy."]),
+    mc('She decided ___ a new job.', 'to find', ['finding', 'find', 'found'], 'decide + to V.', ["Sau decide dùng to V, không dùng V-ing.", "Sau decide thiếu to.", "found là quá khứ, không đúng sau decide."]),
+    mc('He avoided ___ the question.', 'answering', ['to answer', 'answer', 'answered'], 'avoid + V-ing.', ["Sau avoid dùng V-ing, không dùng to V.", "Sau avoid không dùng nguyên mẫu.", "answered là quá khứ, không đúng sau avoid."]),
+    mc('We hope ___ you soon.', 'to see', ['seeing', 'see', 'saw'], 'hope + to V.', ["Sau hope dùng to V, không dùng V-ing.", "Sau hope thiếu to.", "saw là quá khứ, không đúng sau hope."]),
+    mc('He stopped ___ last year. (bỏ hút thuốc)', 'smoking', ['to smoke', 'smoke', 'smoked'], 'stop + V-ing = ngừng hẳn việc đó. stop + to V = dừng lại để làm việc khác.', ["stop to smoke nghĩa là dừng lại để hút thuốc, ngược nghĩa với bỏ thuốc.", "Sau stop không dùng nguyên mẫu trần.", "smoked là quá khứ, không đúng sau stop."]),
+    mc('Do you mind ___ the window?', 'opening', ['to open', 'open', 'opened'], 'mind + V-ing.', ["Sau mind dùng V-ing, không dùng to V.", "Sau mind không dùng nguyên mẫu.", "opened là quá khứ, không đúng sau mind."]),
+  ],
+  'b1-used-to': [
+    mc('I ___ play football when I was a child.', 'used to', ['am used to', 'use to', 'was used to'], 'Thói quen trong quá khứ nay không còn: used to + V.', ["am used to nghĩa là quen với, không phải thói quen trong quá khứ.", "use to sai trong câu khẳng định; phải là used to.", "was used to nghĩa là đã quen với, và cần V-ing phía sau."]),
+    mc('She is used to ___ up early.', 'getting', ['get', 'got', 'gets'], 'be used to + V-ing: quen với việc gì.', ["Sau be used to dùng V-ing, không dùng nguyên mẫu.", "got không đúng sau used to.", "gets không đúng sau used to."]),
+    mc('Did you ___ live in Hanoi?', 'use to', ['used to', 'using to', 'be used to'], 'Câu hỏi và phủ định mượn did nên dùng use to (không có d).', ["Câu hỏi với Did dùng use to (không có d), không dùng used to.", "using to không phải cấu trúc này.", "be used to có nghĩa khác (quen với)."]),
+    mc('He did not ___ like coffee, but now he loves it.', 'use to', ['used to', 'be used to', 'get used to'], 'Sau did not dùng use to.', ["Sau did not dùng use to (không có d).", "be used to có nghĩa là quen với.", "get used to có nghĩa là dần quen với."]),
+    mc('It took me a while to get used ___ the noise.', 'to', ['for', 'with', 'at'], 'get used to + danh từ/V-ing: dần quen với.', ["get used to đi với to, không đi với for.", "get used to đi với to, không đi với with.", "get used to đi với to, không đi với at."]),
+    mc('We ___ in a small village. Now we live in a city.', 'used to live', ['are used to live', 'use to living', 'were used to live'], 'Trạng thái trong quá khứ nay đã khác: used to + V.', ["are used to + V-ing nghĩa là quen với; đề nói thói quen trong quá khứ.", "use to sai: phải là used to.", "were used to + V-ing nghĩa là đã quen với."]),
+  ],
+  'b1-modals-deduction': [
+    mc('The lights are on. He ___ be at home.', 'must', ['can\'t', 'shouldn\'t', 'mustn\'t'], 'Suy đoán chắc chắn là đúng (có bằng chứng): must.', ["can't nghĩa là chắc chắn không phải, mà đèn sáng cho thấy anh ấy ở nhà.", "shouldn't không dùng để suy đoán.", "mustn't nghĩa là cấm, không dùng để suy đoán."]),
+    mc('That ___ be Tom. He is in Paris this week.', "can't", ['must', 'might', 'should'], 'Suy đoán chắc chắn là không đúng: can\'t.', ["must nghĩa là chắc chắn đúng, mà đề cho thấy không thể là Tom.", "might chỉ là có thể, chưa đủ mạnh vì có bằng chứng.", "should không dùng để suy đoán chắc chắn."]),
+    mc('I am not sure, but it ___ rain later.', 'might', ['must', "can't", 'has to'], 'Không chắc chắn, có khả năng: might.', ["must nghĩa là chắc chắn, mà người nói không chắc.", "can't nghĩa là chắc chắn không.", "has to nghĩa là bắt buộc, không dùng để suy đoán."]),
+    mc('She has been working all day. She ___ be exhausted.', 'must', ["can't", 'might not', "couldn't"], 'Suy đoán gần như chắc chắn: must.', ["can't nghĩa là chắc chắn không mệt, trái với bằng chứng.", "might not nghĩa là có thể không, quá yếu.", "couldn't nghĩa là chắc chắn không."]),
+    mc('He ___ be the thief. He was with me all night.', "can't", ['must', 'may', 'should'], 'Có bằng chứng ngược lại nên chắc chắn không phải: can\'t.', ["must nghĩa là chắc chắn đúng, mà bằng chứng cho thấy ngược lại.", "may chỉ là có thể, chưa đủ mạnh vì có bằng chứng.", "should không dùng để suy đoán chắc chắn."]),
+    mc('Where is Ann? – I am not sure. She ___ be in the library.', 'could', ["can't", "mustn't", "needn't"], 'Khả năng không chắc chắn: could / might / may.', ["can't nghĩa là chắc chắn không, mà người nói chỉ đoán.", "mustn't nghĩa là cấm.", "needn't nghĩa là không cần."]),
+  ],
+};

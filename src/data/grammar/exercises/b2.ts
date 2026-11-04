@@ -1,0 +1,86 @@
+import type { GrammarQuestion } from '../types.ts';
+import { mc } from './util.ts';
+
+/** Bài tập ngữ pháp cấp B2. Khóa là id của điểm ngữ pháp trong ../b2.ts. */
+export const B2_EXERCISES: Record<string, GrammarQuestion[]> = {
+  'b2-conditionals-3-mixed': [
+    mc('If I ___ harder, I would have passed.', 'had studied', ['studied', 'would study', 'have studied'], 'Điều kiện loại 3 (trái với quá khứ): if + quá khứ hoàn thành.', ["studied là loại 2, mà đề nói về quá khứ.", "would study không dùng trong mệnh đề if.", "have studied là hiện tại hoàn thành."]),
+    mc('If she had left earlier, she ___ the train.', 'would have caught', ['would catch', 'will catch', 'had caught'], 'Vế chính loại 3: would have + V3.', ["would catch thuộc loại 2, mà đề nói về quá khứ.", "will catch thuộc loại 1.", "had caught không dùng ở vế chính."]),
+    mc("If we ___ the map, we wouldn't have got lost.", 'had taken', ['took', 'would take', 'have taken'], 'Mệnh đề if loại 3 dùng had + V3.', ["took là loại 2, mà đề nói về quá khứ.", "would take không dùng trong mệnh đề if.", "have taken là hiện tại hoàn thành."]),
+    mc('If I had taken the job, I ___ rich now.', 'would be', ['would have been', 'will be', 'am'], 'Điều kiện hỗn hợp: if + quá khứ hoàn thành, kết quả ở hiện tại dùng would + V.', ["would have been chỉ quá khứ, mà now là hiện tại.", "will be là tương lai.", "am không dùng ở vế chính của câu điều kiện."]),
+    mc('He would not have been late if he ___ the bus.', "hadn't missed", ["didn't miss", "wouldn't miss", "hasn't missed"], 'Mệnh đề if loại 3 phủ định: hadn\'t + V3.', ["didn't miss là loại 2, mà đề nói về quá khứ.", "wouldn't miss không dùng trong mệnh đề if.", "hasn't missed là hiện tại hoàn thành."]),
+    mc('If I were not so shy, I ___ her out yesterday.', 'would have asked', ['would ask', 'will ask', 'had asked'], 'Hỗn hợp: if hiện tại (tính cách), kết quả ở quá khứ dùng would have + V3.', ["would ask chỉ hiện tại, mà có yesterday là quá khứ.", "will ask là tương lai.", "had asked không dùng ở vế chính."]),
+  ],
+  'b2-wish-if-only': [
+    mc('I wish I ___ more money. (hiện tại)', 'had', ['have', 'would have', 'had had'], 'Ước điều trái với hiện tại: wish + quá khứ đơn.', ["have là hiện tại; ước điều trái hiện tại dùng quá khứ.", "would have không đi với wish theo nghĩa này.", "had had là quá khứ hoàn thành, dùng cho quá khứ."]),
+    mc('She wishes she ___ to the party last night.', 'had gone', ['went', 'would go', 'has gone'], 'Tiếc nuối về quá khứ: wish + quá khứ hoàn thành.', ["went chỉ hiện tại; tiếc nuối quá khứ cần quá khứ hoàn thành.", "would go chỉ tương lai.", "has gone là hiện tại hoàn thành."]),
+    mc('It is raining again. I wish it ___ raining!', 'would stop', ['stopped', 'stops', 'had stopped'], 'Phàn nàn về điều đang gây khó chịu: wish + would + V.', ["stopped là điều ước về hiện tại, không phải phàn nàn về hành động.", "stops là hiện tại đơn.", "had stopped là tiếc nuối quá khứ."]),
+    mc('If only I ___ the answer! (hiện tại)', 'knew', ['know', 'would know', 'had known'], 'If only + quá khứ đơn cho điều trái với hiện tại.', ["know là hiện tại; ước điều trái hiện tại dùng quá khứ.", "would know không đi với if only trong nghĩa này.", "had known là tiếc nuối quá khứ."]),
+    mc('He wishes he ___ taller. (hiện tại)', 'were', ['is', 'will be', 'had been'], 'Ước về hiện tại: wish + were / quá khứ đơn.', ["is là hiện tại; ước điều trái hiện tại dùng quá khứ (were).", "will be là tương lai.", "had been là tiếc nuối quá khứ."]),
+    mc('If only I ___ so much yesterday!', "hadn't eaten", ["didn't eat", "wouldn't eat", "haven't eaten"], 'Hối tiếc về quá khứ: if only + had + V3.', ["didn't eat chỉ hiện tại; tiếc nuối quá khứ cần quá khứ hoàn thành.", "wouldn't eat chỉ tương lai.", "haven't eaten là hiện tại hoàn thành."]),
+  ],
+  'b2-passive-causative': [
+    mc('I had my car ___ yesterday.', 'repaired', ['repair', 'repairing', 'to repair'], 'have + vật + V3: nhờ người khác làm.', ["Cấu trúc have + vật + V3; repair là nguyên mẫu.", "repairing không đúng trong cấu trúc này.", "to repair không đúng trong cấu trúc này."]),
+    mc('She is going to have her hair ___.', 'cut', ['cutting', 'cuts', 'to cut'], 'have + vật + V3.', ["Cấu trúc have + vật + V3; cutting là V-ing.", "cuts không đúng trong cấu trúc này.", "to cut không đúng trong cấu trúc này."]),
+    mc('It is said that he is rich. → He is said ___ rich.', 'to be', ['being', 'is', 'to being'], 'Bị động với động từ tường thuật: S + is said + to V.', ["being không đi sau is said.", "is bị thừa, không có trong cấu trúc is said to be.", "to being sai cấu trúc."]),
+    mc('The patient ___ at the moment.', 'is being examined', ['is examined', 'examines', 'has examined'], 'Bị động hiện tại tiếp diễn: is being + V3.', ["is examined là hiện tại đơn, không nhấn mạnh đang diễn ra.", "examines là câu chủ động.", "has examined là chủ động."]),
+    mc('We got the house ___ last month.', 'painted', ['paint', 'painting', 'to paint'], 'get + vật + V3 (nhờ làm hộ).', ["Cấu trúc get + vật + V3; paint là nguyên mẫu.", "painting không đúng trong cấu trúc này.", "to paint không đúng trong cấu trúc này."]),
+    mc('The report ___ by the time we arrive.', 'will have been finished', ['will finish', 'is finished', 'has been finishing'], 'Bị động tương lai hoàn thành: will have been + V3.', ["will finish là câu chủ động.", "is finished là hiện tại, không có nghĩa hoàn thành trước mốc tương lai.", "has been finishing là chủ động, hiện tại hoàn thành tiếp diễn."]),
+  ],
+  'b2-non-defining-relative-clauses': [
+    mc('My brother, ___ lives in Canada, is a chef.', 'who', ['that', 'which', 'whose'], 'Mệnh đề không xác định có dấu phẩy, thay cho người: who (không dùng that).', ["that không dùng trong mệnh đề có dấu phẩy.", "which dùng cho vật, không dùng cho người.", "whose chỉ sở hữu."]),
+    mc('Hue, ___ is famous for its food, is in central Vietnam.', 'which', ['that', 'who', 'where'], 'Thay cho vật/địa danh, có dấu phẩy: which.', ["that không dùng trong mệnh đề có dấu phẩy.", "who dùng cho người, mà Hue là địa danh.", "where không làm chủ ngữ của mệnh đề."]),
+    mc('My teacher, ___ book was published last year, is great.', 'whose', ["who's", 'which', 'that'], 'whose chỉ sở hữu: quyển sách của cô ấy.', ["who's là viết tắt của who is, không chỉ sở hữu.", "which không chỉ sở hữu.", "that không chỉ sở hữu và không dùng sau dấu phẩy."]),
+    mc('We visited Da Lat, ___ the weather is cool.', 'where', ['which', 'that', 'who'], 'where thay cho nơi chốn.', ["which không thay trực tiếp cho nơi chốn ở đây.", "that không dùng sau dấu phẩy.", "who dùng cho người."]),
+    mc('I love my phone, ___ I bought last week.', 'which', ['that', 'who', 'what'], 'Có dấu phẩy nên không dùng that; vật dùng which.', ["that không dùng trong mệnh đề có dấu phẩy.", "who dùng cho người.", "what không làm đại từ quan hệ."]),
+    mc('He passed the exam, ___ surprised everyone.', 'which', ['that', 'what', 'who'], 'which thay cho cả mệnh đề phía trước.', ["that không dùng thay cả mệnh đề sau dấu phẩy.", "what không làm đại từ quan hệ ở đây.", "who dùng cho người."]),
+  ],
+  'b2-reporting-verbs': [
+    mc('She admitted ___ the vase.', 'breaking', ['to break', 'break', 'that break'], 'admit + V-ing.', ["admit không đi với to V.", "admit không đi với nguyên mẫu trần.", "that break sai ngữ pháp."]),
+    mc('He suggested ___ to the cinema.', 'going', ['to go', 'go', 'that going'], 'suggest + V-ing.', ["suggest không đi với to V.", "suggest không đi với nguyên mẫu trần ở cấu trúc này.", "that going sai ngữ pháp."]),
+    mc('They promised ___ on time.', 'to arrive', ['arriving', 'arrive', 'that arrive'], 'promise + to V.', ["promise không đi với V-ing.", "promise cần to trước động từ.", "that arrive sai ngữ pháp."]),
+    mc('She denied ___ the money.', 'taking', ['to take', 'take', 'took'], 'deny + V-ing.', ["deny không đi với to V.", "deny không đi với nguyên mẫu trần.", "took là quá khứ, không đúng sau deny."]),
+    mc('He warned me ___ in the river.', 'not to swim', ['not swim', 'to swim', "don't swim"], 'warn + O + (not) to V.', ["not swim thiếu to.", "to swim thiếu not, nghĩa ngược lại.", "don't swim vẫn giữ nguyên câu trực tiếp."]),
+    mc('The teacher advised us ___ more.', 'to read', ['reading', 'read', 'that read'], 'advise + O + to V.', ["advise + O không đi với V-ing.", "advise + O cần to trước động từ.", "that read sai ngữ pháp."]),
+  ],
+  'b2-future-continuous-perfect': [
+    mc('This time tomorrow, I ___ on a beach.', 'will be lying', ['will lie', 'am lying', 'would lie'], 'Hành động đang diễn ra tại một thời điểm ở tương lai: will be + V-ing.', ["will lie không nhấn mạnh hành động đang diễn ra vào thời điểm đó.", "am lying là hiện tại tiếp diễn.", "would lie là câu giả định."]),
+    mc('Please do not call me at 9. I ___ a meeting.', 'will be having', ['am having', 'have had', 'was having'], 'Đang diễn ra tại thời điểm 9 giờ: will be + V-ing.', ["will have không nhấn mạnh việc đang diễn ra lúc 9 giờ.", "am having là hiện tại tiếp diễn.", "was having là quá khứ tiếp diễn; đề nói về tương lai."]),
+    mc('By the time you arrive, I ___ the cooking.', 'will have finished', ['will finish', 'finish', 'will be finish'], 'Hoàn tất trước một mốc tương lai: will have + V3.', ["will finish không nhấn mạnh việc hoàn tất trước mốc.", "finish là hiện tại đơn.", "will be finish sai cấu trúc."]),
+    mc('Next month, he ___ here for exactly 5 years.', 'will have been working', ['will work', 'is working', 'has worked'], 'Nhấn mạnh khoảng thời gian kéo dài tính đến mốc tương lai: will have been + V-ing.', ["will work không nhấn mạnh thời gian đã kéo dài tính đến mốc.", "is working là hiện tại tiếp diễn.", "has worked là hiện tại hoàn thành."]),
+    mc('By the time you wake up, we ___ the city.', 'will have left', ['will leave', 'leave', 'would leave'], 'Việc xong trước mốc tương lai: will have + V3.', ["will leave không nhấn mạnh việc đã xong trước mốc.", "leave là hiện tại đơn.", "would leave là câu giả định."]),
+    mc('When you get home, I ___ for three hours.', 'will have been studying', ['will study', 'am studying', 'have studied'], 'Nhấn mạnh quá trình kéo dài đến mốc tương lai: will have been + V-ing.', ["will study không nhấn mạnh quá trình đã kéo dài đến mốc.", "am studying là hiện tại tiếp diễn.", "have studied là hiện tại hoàn thành."]),
+  ],
+  'b2-past-modals': [
+    mc('You ___ told me earlier! Now it is too late.', 'should have', ['should', 'must have', 'can have'], 'Đáng lẽ nên làm nhưng đã không làm: should have + V3.', ["should chỉ hiện tại hoặc tương lai, không nói về việc đã qua.", "must have là suy đoán chắc chắn, không phải lời trách.", "can have không dùng như vậy."]),
+    mc('The streets are wet. It ___ rained last night.', 'must have', ['should have', "needn't have", "can't have"], 'Suy đoán chắc chắn về quá khứ: must have + V3.', ["should have chỉ việc đáng lẽ nên làm, không phải suy đoán.", "needn't have chỉ việc đã làm nhưng không cần.", "can't have nghĩa là chắc chắn không xảy ra."]),
+    mc('She ___ taken the exam. She was in hospital.', "can't have", ["mustn't have", "shouldn't have", "needn't have"], 'Chắc chắn không xảy ra trong quá khứ: can\'t have + V3.', ["mustn't have không dùng để suy đoán.", "shouldn't have nghĩa là không nên làm.", "needn't have nghĩa là không cần phải làm."]),
+    mc('We ___ brought an umbrella. It did not rain.', "needn't have", ["mustn't have", "can't have", "shouldn't"], "needn't have + V3: đã làm nhưng hóa ra không cần thiết.", ["mustn't have không dùng ở nghĩa này.", "can't have nghĩa là chắc chắn không xảy ra.", "shouldn't thiếu have, mà việc đã xảy ra trong quá khứ."]),
+    mc('I do not know where he is. He ___ gone home.', 'might have', ['must', 'should', 'needs have'], 'Không chắc chắn về quá khứ: might have + V3.', ["must thiếu have; đề nói về quá khứ.", "should thiếu have và mang nghĩa nên làm.", "needs have sai cấu trúc."]),
+    mc('You ___ so rude to her.', "shouldn't have been", ["shouldn't be", "mustn't have been", "needn't have been"], "Chê trách việc đã làm: shouldn't have + V3.", ["shouldn't be nói về hiện tại, mà đề nói về việc đã xảy ra.", "mustn't have been không dùng để chê trách.", "needn't have been nghĩa là không cần phải."]),
+  ],
+  'b2-linking-words': [
+    mc('___ it was raining, we went out.', 'Although', ['Despite', 'However', 'Because'], 'Although + mệnh đề (S + V): mặc dù.', ["Despite cần danh từ hoặc V-ing, không đi với mệnh đề.", "However đứng đầu câu mới, không nối mệnh đề trong cùng câu.", "Because chỉ nguyên nhân, nghĩa không hợp."]),
+    mc('___ the rain, we played football.', 'Despite', ['Although', 'However', 'Because'], 'Despite + danh từ/cụm danh từ.', ["Although cần mệnh đề (S + V), mà the rain là cụm danh từ.", "However đứng đầu câu mới, không đi với danh từ.", "Because chỉ nguyên nhân, nghĩa không hợp."]),
+    mc('He studied hard. ___, he failed the exam.', 'However', ['Although', 'Despite', 'Because of'], 'However đứng đầu câu mới, nối hai câu có ý đối lập.', ["Although nối hai mệnh đề trong cùng câu, mà đây là hai câu tách.", "Despite cần danh từ hoặc V-ing.", "Because of chỉ nguyên nhân, nghĩa không hợp."]),
+    mc('I took a map ___ I would not get lost.', 'so that', ['because', 'although', 'despite'], 'so that + mệnh đề: chỉ mục đích.', ["because chỉ nguyên nhân, không chỉ mục đích.", "although chỉ sự nhượng bộ.", "despite chỉ sự nhượng bộ và cần danh từ."]),
+    mc('She was late ___ the traffic.', 'because of', ['because', 'although', 'so that'], 'because of + danh từ; because + mệnh đề.', ["because cần mệnh đề; the traffic là cụm danh từ.", "although chỉ sự nhượng bộ.", "so that chỉ mục đích."]),
+    mc('___ being tired, he kept working.', 'In spite of', ['Although', 'However', 'Because'], 'In spite of + V-ing/danh từ.', ["Although cần mệnh đề có chủ ngữ.", "However đứng đầu câu mới.", "Because chỉ nguyên nhân, nghĩa không hợp."]),
+  ],
+  'b2-question-tags': [
+    mc('You are a student, ___?', "aren't you", ['are you', "don't you", "isn't you"], 'Câu khẳng định thì đuôi phủ định, cùng trợ động từ: are → aren\'t you.', ["Câu khẳng định cần đuôi phủ định, are you là khẳng định.", "don't không khớp với are.", "isn't không đi với you."]),
+    mc("She doesn't like coffee, ___?", 'does she', ["doesn't she", 'is she', 'do she'], 'Câu phủ định thì đuôi khẳng định: does she.', ["Câu phủ định cần đuôi khẳng định; doesn't she là phủ định.", "is không khớp với doesn't.", "do không đi với she."]),
+    mc('They went home, ___?', "didn't they", ['did they', "weren't they", "don't they"], 'Quá khứ đơn: đuôi dùng didn\'t.', ["Câu khẳng định cần đuôi phủ định; did they là khẳng định.", "weren't không khớp với went.", "don't là hiện tại, mà câu ở quá khứ."]),
+    mc("Let's go out, ___?", 'shall we', ['will we', "don't we", 'do we'], "Let's có đuôi là shall we.", ["Let's có đuôi shall we, không dùng will we.", "don't we không dùng với Let's.", "do we không dùng với Let's."]),
+    mc('I am late, ___?', "aren't I", ["amn't I", 'am I', "don't I"], "Trường hợp đặc biệt: I am → aren't I.", ["amn't I không được dùng trong tiếng Anh chuẩn.", "am I là khẳng định, cùng loại với câu gốc.", "don't I không khớp với am."]),
+    mc('Open the door, ___?', 'will you', ['do you', "don't you", 'shall we'], 'Câu mệnh lệnh thường có đuôi will you?.', ["do you không dùng cho câu mệnh lệnh.", "don't you không dùng cho câu mệnh lệnh.", "shall we dùng cho Let's, không dùng cho mệnh lệnh."]),
+  ],
+  'b2-phrasal-verbs': [
+    mc('Please ___ your shoes when you enter.', 'take off', ['take on', 'take up', 'take in'], 'take off = cởi (giày, áo).', ["take on nghĩa là đảm nhận.", "take up nghĩa là bắt đầu một thói quen hoặc sở thích.", "take in nghĩa là hấp thụ hoặc lừa dối."]),
+    mc('I am looking ___ my keys.', 'for', ['after', 'up', 'at'], 'look for = tìm kiếm.', ["look after nghĩa là chăm sóc.", "look up nghĩa là tra cứu.", "look at nghĩa là nhìn vào."]),
+    mc('She ___ smoking last year.', 'gave up', ['gave in', 'gave out', 'gave away'], 'give up = từ bỏ.', ["give in nghĩa là nhượng bộ.", "give out nghĩa là phân phát.", "give away nghĩa là cho đi."]),
+    mc('The meeting was ___ because of the storm.', 'called off', ['called on', 'called up', 'called for'], 'call off = hủy bỏ.', ["call on nghĩa là ghé thăm hoặc kêu gọi.", "call up nghĩa là gọi điện.", "call for nghĩa là đòi hỏi."]),
+    mc('We ran ___ milk, so I went to the shop.', 'out of', ['into', 'away', 'over'], 'run out of = hết.', ["run into nghĩa là tình cờ gặp.", "run away nghĩa là bỏ chạy.", "run over nghĩa là cán qua."]),
+    mc('Can you ___ the TV? It is too loud.', 'turn down', ['turn up', 'turn on', 'turn into'], 'turn down = vặn nhỏ.', ["turn up nghĩa là vặn to lên.", "turn on nghĩa là bật.", "turn into nghĩa là biến thành."]),
+  ],
+};

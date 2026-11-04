@@ -1,0 +1,86 @@
+import type { GrammarQuestion } from '../types.ts';
+import { mc } from './util.ts';
+
+/** Bài tập ngữ pháp cấp A1. Khóa là id của điểm ngữ pháp trong ../a1.ts. */
+export const A1_EXERCISES: Record<string, GrammarQuestion[]> = {
+  'a1-be': [
+    mc('My sister ___ a nurse.', 'is', ['am', 'are', 'be'], 'My sister = she (số ít, ngôi thứ ba) nên dùng is.', ["am chỉ đi với I.", "are đi với you/we/they và danh từ số nhiều, không đi với my sister.", "be là nguyên mẫu, chưa chia nên không dùng như vậy."]),
+    mc('They ___ at the cinema now.', 'are', ['is', 'am', 'be'], 'They đi với are.', ["is chỉ đi với he/she/it.", "am chỉ đi với I.", "be là nguyên mẫu, cần chia thành are."]),
+    mc('___ you from Japan?', 'Are', ['Is', 'Am', 'Do'], 'Câu hỏi với to be: đưa be lên trước chủ ngữ. You đi với are.', ["Is đi với he/she/it, không đi với you.", "Am chỉ đi với I.", "Do là trợ động từ; câu này dùng to be nên không dùng Do."]),
+    mc('Chọn câu đúng:', 'She is tall.', ['She tall.', 'She are tall.', 'She am tall.'], 'Tiếng Anh luôn cần to be trước tính từ; she đi với is.', ["Thiếu động từ to be trước tính từ tall.", "are không đi với she.", "am chỉ đi với I."]),
+    mc('I ___ not hungry.', 'am', ['is', 'are', 'does'], 'I luôn đi với am.', ["is đi với he/she/it, không đi với I.", "are đi với you/we/they, không đi với I.", "does là trợ động từ; to be phủ định chỉ cần am not."]),
+    mc('My parents ___ doctors.', 'are', ['is', 'am', 'be'], 'My parents = they (số nhiều) nên dùng are.', ["is đi với số ít, mà parents là số nhiều.", "am chỉ đi với I.", "be là nguyên mẫu, cần chia thành are."]),
+  ],
+  'a1-pronouns': [
+    mc('This is Linda. ___ is my friend.', 'She', ['Her', 'He', 'Its'], 'Đứng trước động từ is nên cần đại từ chủ ngữ: She.', ["Her không làm chủ ngữ của is.", "He chỉ nam giới, mà Linda là nữ.", "Its dùng cho vật, không dùng cho người."]),
+    mc('I like Tom. I often play football with ___.', 'him', ['he', 'his', 'her'], 'Sau giới từ with cần đại từ tân ngữ: him.', ["he là đại từ chủ ngữ, sau giới từ with cần đại từ tân ngữ.", "his là tính từ sở hữu, phải có danh từ theo sau.", "her chỉ nữ, mà Tom là nam."]),
+    mc('___ name is Anna. (tên của cô ấy)', 'Her', ['She', 'Him', 'Their'], 'Trước danh từ name cần tính từ sở hữu: her.', ["She là đại từ chủ ngữ; trước danh từ name cần tính từ sở hữu.", "Him là đại từ tân ngữ chỉ nam.", "Their nghĩa là của họ, không phải của cô ấy."]),
+    mc('We love our teacher. She helps ___ a lot.', 'us', ['we', 'our', 'ours'], 'Sau động từ helps cần đại từ tân ngữ: us.', ["we là chủ ngữ; sau động từ helps cần tân ngữ.", "our là tính từ sở hữu, phải có danh từ theo sau.", "ours là đại từ sở hữu, không làm tân ngữ của helps."]),
+    mc('The cat is hungry. ___ bowl is empty.', 'Its', ["It's", 'It', 'Their'], "its = của nó (tính từ sở hữu); it's = it is.", ["It's là it is, ghép vào câu thành 'it is bowl' vô nghĩa.", "It không đứng trước danh từ để chỉ sở hữu.", "Their chỉ số nhiều, mà con mèo là số ít."]),
+    mc('Can you call ___? I am waiting.', 'me', ['I', 'my', 'mine'], 'Sau động từ call cần đại từ tân ngữ: me.', ["I là chủ ngữ; sau động từ call cần tân ngữ.", "my là tính từ sở hữu, phải có danh từ theo sau.", "mine là đại từ sở hữu, không làm tân ngữ của call."]),
+  ],
+  'a1-articles': [
+    mc('She is ___ engineer.', 'an', ['a', 'the', '(không dùng mạo từ)'], 'engineer bắt đầu bằng âm nguyên âm /e/ nên dùng an.', ["engineer bắt đầu bằng âm nguyên âm /e/ nên không dùng a.", "Không nói về một kỹ sư đã xác định nên không dùng the.", "Danh từ đếm được số ít chỉ nghề nghiệp cần có mạo từ."]),
+    mc('I have ___ umbrella.', 'an', ['a', 'the', 'some'], 'umbrella bắt đầu bằng âm nguyên âm /ʌ/ nên dùng an.', ["umbrella bắt đầu bằng âm nguyên âm nên không dùng a.", "Không nói về cái ô đã xác định nên không dùng the.", "some không đi với danh từ đếm được số ít."]),
+    mc('Look at ___ moon! It is so bright.', 'the', ['a', 'an', '(không dùng mạo từ)'], 'Mặt trăng là vật duy nhất nên dùng the.', ["Mặt trăng là vật duy nhất nên dùng the, không dùng a.", "an cũng là mạo từ không xác định, không hợp với vật duy nhất.", "moon là danh từ đếm được số ít, không bỏ mạo từ được."]),
+    mc('I waited for him for ___ hour.', 'an', ['a', 'the', '(không dùng mạo từ)'], 'hour có âm đầu là nguyên âm /aʊ/ (h câm) nên dùng an.', ["hour có h câm, đọc /aʊ/ nên dùng an chứ không dùng a.", "Không nói về một giờ đã xác định nên không dùng the.", "hour là danh từ đếm được số ít, không bỏ mạo từ được."]),
+    mc('I like ___ music. (nói chung chung)', '(không dùng mạo từ)', ['the', 'a', 'an'], 'Nói chung về danh từ không đếm được thì không dùng mạo từ.', ["the music chỉ một bản nhạc cụ thể; ở đây nói chung về âm nhạc.", "music không đếm được nên không đi với a.", "music không đếm được nên không đi với an."]),
+    mc('I bought a shirt and a hat. ___ shirt is blue.', 'The', ['A', 'An', '(không dùng mạo từ)'], 'Cái áo đã được nhắc ở câu trước nên dùng the.', ["A dùng khi nhắc lần đầu; cái áo này đã được nhắc rồi.", "An dùng trước nguyên âm và cho vật chưa xác định.", "shirt là danh từ đếm được số ít, không bỏ mạo từ được."]),
+  ],
+  'a1-plural-demonstratives': [
+    mc('There are three ___ in the room.', 'children', ['childs', 'childrens', 'childes'], 'child có số nhiều bất quy tắc là children.', ["child là danh từ bất quy tắc, không thêm s.", "children đã là số nhiều, không thêm s nữa.", "Không có dạng childes trong tiếng Anh."]),
+    mc('I have two ___.', 'boxes', ['boxs', 'boxies', 'boxen'], 'Danh từ tận cùng bằng x thêm es: boxes.', ["Danh từ tận cùng x phải thêm es.", "Không đổi x thành ies; ies chỉ dùng cho phụ âm + y.", "boxen không phải số nhiều của box."]),
+    mc('(Vật ở ngay cạnh bạn, số ít) ___ is my phone.', 'This', ['That', 'These', 'Those'], 'this dùng cho vật ở gần, số ít.', ["That dùng cho vật ở xa.", "These là số nhiều, mà đề nói một vật.", "Those là số nhiều và dùng cho vật ở xa."]),
+    mc('(Mấy quyển sách ở xa) ___ books are interesting.', 'Those', ['That', 'This', 'These'], 'those dùng cho vật ở xa, số nhiều.', ["That là số ít, mà books là số nhiều.", "This là số ít và dùng cho vật ở gần.", "These dùng cho vật ở gần, mà sách ở xa."]),
+    mc('She has two ___.', 'babies', ['babys', 'babyes', 'babis'], 'Danh từ tận cùng phụ âm + y đổi y thành i rồi thêm es: babies.', ["Phụ âm + y phải đổi y thành i rồi thêm es.", "Phải bỏ y để đổi thành ies, không giữ y rồi thêm es.", "Sai chính tả: phải là ies, thiếu chữ e."]),
+    mc('___ shoes here are new. (giày ở gần)', 'These', ['This', 'That', 'Those'], 'shoes là số nhiều, ở gần nên dùng these.', ["This là số ít, mà shoes là số nhiều.", "That là số ít và dùng cho vật ở xa.", "Those dùng cho vật ở xa, mà đề nói giày ở gần."]),
+  ],
+  'a1-present-simple': [
+    mc('He ___ to school by bus.', 'goes', ['go', 'going', 'is go'], 'Ngôi thứ ba số ít thêm es sau go: goes.', ["Ngôi thứ ba số ít phải thêm es: goes.", "going cần to be đi kèm (is going), không phải hiện tại đơn.", "is go sai cấu trúc: không dùng to be trước động từ thường."]),
+    mc("They don't ___ coffee.", 'drink', ['drinks', 'drinking', 'to drink'], "Sau don't dùng động từ nguyên mẫu.", ["Sau don't phải dùng động từ nguyên mẫu, không thêm s.", "Sau don't không dùng V-ing.", "Sau don't không dùng to."]),
+    mc('___ she work in a bank?', 'Does', ['Do', 'Is', 'Are'], 'Câu hỏi với she dùng Does + động từ nguyên mẫu.', ["Với she phải dùng Does, không dùng Do.", "Is cần tính từ hoặc V-ing, không đi với work nguyên mẫu.", "Are đi với you/we/they và không đi với work nguyên mẫu."]),
+    mc('My mother ___ TV in the evening.', 'watches', ['watchs', 'watch', 'watching'], 'Động từ tận cùng ch thêm es: watches.', ["Động từ tận cùng ch phải thêm es, không phải s.", "My mother là ngôi thứ ba số ít nên động từ phải thêm es.", "watching cần có to be (is watching) mới đúng."]),
+    mc('Water ___ at 100 degrees.', 'boils', ['boil', 'boiling', 'is boil'], 'Sự thật hiển nhiên dùng hiện tại đơn; water là số ít nên boils.', ["water là số ít, động từ phải thêm s.", "boiling thiếu to be.", "is boil sai cấu trúc."]),
+    mc('She ___ like spicy food.', "doesn't", ["don't", "isn't", 'not'], "Chủ ngữ she dùng doesn't + động từ nguyên mẫu.", ["don't đi với I/you/we/they, không đi với she.", "isn't là to be, không đi với like.", "not không đứng một mình; cần doesn't."]),
+  ],
+  'a1-question-words': [
+    mc('___ is your birthday? – It is in May.', 'When', ['Where', 'Who', 'Why'], 'Hỏi thời gian dùng When.', ["Where hỏi nơi chốn, không hỏi thời gian.", "Who hỏi về người.", "Why hỏi lý do."]),
+    mc('___ do you live? – In Hanoi.', 'Where', ['When', 'Who', 'How'], 'Hỏi nơi chốn dùng Where.', ["When hỏi thời gian.", "Who hỏi về người.", "How hỏi cách thức."]),
+    mc('___ is that man? – He is my uncle.', 'Who', ['What', 'Where', 'Why'], 'Hỏi về người dùng Who.', ["What hỏi sự vật, mà câu trả lời nói về người.", "Where hỏi nơi chốn.", "Why hỏi lý do."]),
+    mc('___ are you late? – Because of the traffic.', 'Why', ['How', 'When', 'Who'], 'Hỏi lý do dùng Why.', ["How hỏi cách thức, không hỏi lý do.", "When hỏi thời gian.", "Who hỏi về người."]),
+    mc('___ do you go to school? – By bike.', 'How', ['Where', 'Why', 'Who'], 'Hỏi cách thức, phương tiện dùng How.', ["Where hỏi nơi chốn, mà câu trả lời nói về phương tiện.", "Why hỏi lý do.", "Who hỏi về người."]),
+    mc('___ old are you? – I am twelve.', 'How', ['What', 'When', 'Who'], 'Hỏi tuổi dùng How old.', ["What old không phải cách hỏi tuổi; phải dùng How old.", "When hỏi thời gian.", "Who hỏi về người."]),
+  ],
+  'a1-there-is': [
+    mc('There ___ a book on the table.', 'is', ['are', 'has', 'have'], 'a book là số ít nên dùng There is.', ["are dùng với số nhiều, mà a book là số ít.", "has không dùng trong cấu trúc There is/are.", "have không dùng trong cấu trúc There is/are."]),
+    mc('There ___ two cats in the garden.', 'are', ['is', 'have', 'has'], 'two cats là số nhiều nên dùng There are.', ["is dùng với số ít, mà two cats là số nhiều.", "have không dùng trong cấu trúc There is/are.", "has không dùng trong cấu trúc There is/are."]),
+    mc("There ___ any milk in the fridge.", "isn't", ["aren't", "doesn't", "haven't"], 'milk là danh từ không đếm được nên dùng isn\'t.', ["aren't dùng với số nhiều, mà milk không đếm được.", "doesn't không dùng trong cấu trúc There is/are.", "haven't không dùng trong cấu trúc There is/are."]),
+    mc('___ there a bank near here?', 'Is', ['Are', 'Do', 'Does'], 'Câu hỏi: đưa Is lên trước there; a bank là số ít.', ["Are dùng với số nhiều, mà a bank là số ít.", "Do không dùng trong cấu trúc There is/are.", "Does không dùng trong cấu trúc There is/are."]),
+    mc('There ___ some water in the bottle.', 'is', ['are', 'have', 'be'], 'water không đếm được nên dùng There is.', ["are dùng với số nhiều, mà water không đếm được.", "have không dùng trong cấu trúc There is/are.", "be là nguyên mẫu, phải chia thành is."]),
+    mc('There ___ no people in the park.', 'are', ['is', 'have', 'has'], 'people là số nhiều nên dùng There are.', ["is dùng với số ít hoặc không đếm được, mà people là số nhiều.", "have không dùng trong cấu trúc There is/are.", "has không dùng trong cấu trúc There is/are."]),
+  ],
+  'a1-present-continuous': [
+    mc('Look! The baby ___.', 'is sleeping', ['sleeps', 'sleeping', 'are sleeping'], 'Hành động đang xảy ra (Look!) dùng am/is/are + V-ing.', ["sleeps là hiện tại đơn, không diễn tả hành động đang xảy ra.", "sleeping thiếu to be.", "are không đi với the baby (số ít)."]),
+    mc('They ___ football now.', 'are playing', ['play', 'is playing', 'playing'], 'now là dấu hiệu hiện tại tiếp diễn; They đi với are.', ["play là hiện tại đơn, không hợp với now.", "is đi với số ít, mà They là số nhiều.", "playing thiếu to be."]),
+    mc('I ___ not watching TV.', 'am', ['is', 'are', 'do'], 'I đi với am.', ["is không đi với I.", "are không đi với I.", "do không đi với V-ing; phải dùng to be."]),
+    mc('She is ___ a letter.', 'writing', ['write', 'writeing', 'writting'], 'Động từ tận cùng e bỏ e rồi thêm ing: writing.', ["Sau is cần V-ing, không dùng nguyên mẫu.", "Động từ tận cùng e phải bỏ e trước khi thêm ing.", "write chỉ bỏ e thêm ing, không gấp đôi phụ âm."]),
+    mc('___ you doing your homework?', 'Are', ['Do', 'Is', 'Does'], 'Câu hỏi hiện tại tiếp diễn: Are + you + V-ing.', ["Do dùng cho hiện tại đơn, không đi với doing.", "Is đi với số ít, không đi với you.", "Does dùng cho hiện tại đơn, không đi với doing."]),
+    mc("Where's Tom? – He ___ in the kitchen.", 'is cooking', ['cooks', 'cook', 'are cooking'], 'Hành động đang diễn ra ngay lúc nói.', ["cooks là hiện tại đơn, không diễn tả hành động đang diễn ra.", "cook là nguyên mẫu, thiếu to be.", "are không đi với He."]),
+  ],
+  'a1-can': [
+    mc('She ___ swim very well.', 'can', ['cans', 'can to', 'is can'], 'can không thêm s và theo sau là động từ nguyên mẫu không to.', ["can không thêm s.", "can không đi với to.", "can không đi với is."]),
+    mc('I ___ speak French.', "can't", ["can't to", "don't can", 'am not can'], "Phủ định của can là can't + động từ nguyên mẫu.", ["Sau can't không dùng to.", "can không cần trợ động từ don't.", "can không đi với am not."]),
+    mc('___ you play the guitar?', 'Can', ['Do', 'Does', 'Are'], 'Câu hỏi: đưa Can lên trước chủ ngữ.', ["Câu hỏi khả năng đưa Can lên trước, không dùng Do.", "Does không dùng với can.", "Are không dùng để hỏi khả năng với động từ nguyên mẫu."]),
+    mc('He can ___ a car.', 'drive', ['drives', 'driving', 'to drive'], 'Sau can dùng động từ nguyên mẫu không to.', ["Sau can động từ không thêm s.", "Sau can không dùng V-ing.", "Sau can không dùng to."]),
+    mc('Chọn câu đúng:', "My brother can't cook.", ["My brother cans't cook.", "My brother doesn't can cook.", "My brother can't cooks."], "can không cần trợ động từ và động từ sau can không chia.", ["can không thêm s trước n't.", "can không dùng với doesn't.", "Sau can't động từ không thêm s."]),
+    mc('Birds ___ fly, but fish can\'t.', 'can', ['cans', 'are', 'do'], 'Khả năng: can + động từ nguyên mẫu.', ["can không thêm s.", "are không dùng để chỉ khả năng với động từ nguyên mẫu.", "do không diễn tả khả năng."]),
+  ],
+  'a1-prepositions-in-on-at': [
+    mc('My class starts ___ 7 o\'clock.', 'at', ['in', 'on', 'by'], 'at dùng với giờ cụ thể.', ["in dùng với tháng, năm, buổi; không dùng với giờ cụ thể.", "on dùng với thứ và ngày.", "by nghĩa là 'trước', không hợp."]),
+    mc('I was born ___ May.', 'in', ['on', 'at', 'to'], 'in dùng với tháng, năm, mùa.', ["on dùng với ngày cụ thể; tháng dùng in.", "at dùng với giờ giấc.", "to không dùng với tháng."]),
+    mc('See you ___ Monday!', 'on', ['in', 'at', 'to'], 'on dùng với thứ và ngày.', ["in dùng với tháng, năm.", "at dùng với giờ cụ thể.", "to không đi với thứ trong tuần."]),
+    mc('She lives ___ Ho Chi Minh City.', 'in', ['at', 'on', 'to'], 'in dùng với thành phố, quốc gia.', ["at dùng cho điểm nhỏ cụ thể; thành phố dùng in.", "on dùng cho bề mặt.", "to chỉ hướng di chuyển."]),
+    mc('The book is ___ the table.', 'on', ['in', 'at', 'to'], 'on dùng cho vật nằm trên bề mặt.', ["in dùng cho vật nằm bên trong.", "at dùng cho địa điểm cụ thể.", "to chỉ hướng di chuyển."]),
+    mc('We have dinner ___ the evening.', 'in', ['at', 'on', 'by'], 'in the morning / afternoon / evening.', ["at dùng với giờ giấc; buổi trong ngày dùng in.", "on dùng với ngày cụ thể.", "by không dùng để chỉ buổi trong ngày."]),
+  ],
+};
